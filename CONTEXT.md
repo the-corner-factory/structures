@@ -7,8 +7,10 @@ and commands live in [AGENTS.md](AGENTS.md); user-facing setup is in [README.md]
 
 Structures is an open-source knowledge library from The Corner for exploring and sharing project
 organization standards. Its VS Code-style explorer pairs a recursive JSON tree with Markdown
-explanations. Users can search, select entries through shareable URLs, load custom JSON from a raw
-Gist or another CORS-enabled endpoint, download settings, and print the expanded tree.
+explanations. Users can search, select entries through shareable URLs, load one website-wide settings
+profile from a GitHub Gist or another CORS-enabled endpoint, download settings, and print the expanded
+tree. The navigation's single profile control applies across all six sections; omitted sections
+retain built-in content.
 
 The site also explains issue labels, priorities, statuses, naming conventions, branching strategies,
 and agent concepts. Issue cards and boards are educational examples, not a persisted issue tracker.
@@ -22,23 +24,26 @@ root shadcn registry. It is source copied into consumer projects, not a hosted s
 
 ## Code map
 
-| Location                                   | Responsibility                                                                           |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| `src/router.tsx`                           | Router creation, per-router QueryClient, query provider, error/not-found defaults.       |
-| `src/routes/`                              | TanStack file routes, route parameters, search validation, auth layouts, auth API.       |
-| `src/components/`                          | Website shell, explorer integration, boards, standards pages, branch diagrams.           |
-| `src/components/structures/`               | Portable explorer, shared tree/data helpers, Markdown renderer, scoped CSS.              |
-| `src/lib/structures.ts`                    | Folder/issue catalog types, library/topic lists, URL resolution, fetch boundaries.       |
-| `src/lib/branches.ts`                      | Branch graph types, parsing, preset list, and fetching.                                  |
-| `src/lib/agentic.ts`                       | Agent concept cards, reference links, and Markdown templates.                            |
-| `src/lib/material-icons.ts`                | Material icon manifest and filename/folder icon lookup.                                  |
-| `src/lib/auth/`, `src/lib/db/`, `src/env/` | Optional accounts, PostgreSQL access, and validated environment variables.               |
-| `src/styles.css`                           | Website layout, colors, dark theme, responsive behavior, and print styles.               |
-| `public/assets/`                           | Built-in JSON catalogs and their Markdown content.                                       |
-| `packages/gitgraph-*`                      | Vendored Gitgraph workspace packages with TypeScript source and tracked compiled output. |
-| `registry.json`, `docs/registry.md`        | Registry distribution manifest and consumer contract.                                    |
-| `scripts/`                                 | Static prerendering, registry validation/consumer checks, and graph debugging.           |
-| `.github/workflows/`                       | Release-tag verification/deployment and registry consumer CI.                            |
+| Location                                    | Responsibility                                                                           |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `src/router.tsx`                            | Router creation, per-router QueryClient, query provider, error/not-found defaults.       |
+| `src/routes/`                               | TanStack file routes, route parameters, search validation, auth layouts, auth API.       |
+| `src/components/`                           | Website shell, explorer integration, boards, standards pages, branch diagrams.           |
+| `src/components/structures/`                | Portable explorer, shared tree/data helpers, Markdown renderer, scoped CSS.              |
+| `src/lib/structures.ts`                     | Folder/issue catalog types, library/topic lists, URL resolution, fetch boundaries.       |
+| `src/lib/site-settings.ts`                  | Website profile types, complete-document validation, and Gist/raw URL fetching.          |
+| `src/components/site-settings-provider.tsx` | Shared browser-only profile query, context, and loading/error boundary.                  |
+| `src/lib/use-structure-settings.ts`         | Website profile/catalog selection and inline or fetched Markdown resolution.             |
+| `src/lib/branches.ts`                       | Branch graph types, parsing, preset list, and fetching.                                  |
+| `src/lib/agentic.ts`                        | Agent concept cards, reference links, and Markdown templates.                            |
+| `src/lib/material-icons.ts`                 | Material icon manifest and filename/folder icon lookup.                                  |
+| `src/lib/auth/`, `src/lib/db/`, `src/env/`  | Optional accounts, PostgreSQL access, and validated environment variables.               |
+| `src/styles.css`                            | Website layout, colors, dark theme, responsive behavior, and print styles.               |
+| `public/assets/`                            | Built-in JSON catalogs and their Markdown content.                                       |
+| `packages/gitgraph-*`                       | Vendored Gitgraph workspace packages with TypeScript source and tracked compiled output. |
+| `registry.json`, `docs/registry.md`         | Registry distribution manifest and consumer contract.                                    |
+| `scripts/`                                  | Static prerendering, registry validation/consumer checks, and graph debugging.           |
+| `.github/workflows/`                        | Release-tag verification/deployment and registry consumer CI.                            |
 
 ## Runtime and navigation
 
@@ -53,8 +58,22 @@ the catalog in `pnpm-workspace.yaml`.
 and branch-prefixed hostnames for linked Git worktrees. `PORTLESS=0 pnpm dev` uses port 3000 directly.
 
 `src/routes/__root.tsx` owns the HTML document, metadata, CSS, theme provider, and application shell.
-`AppShell` renders navigation from `TOPICS`, theme controls, and presentation mode. Theme choice is
-stored under `structures-theme` in local storage; an early script applies it before hydration.
+`AppShell` renders navigation from `TOPICS`, the website settings control, theme controls, and
+presentation mode. `SiteSettingsProvider` wraps the shell; its boundary keeps content behind loading
+or retry feedback until the complete profile validates. An optional profile `logo` replaces the
+navigation image after validation, using an HTTP(S) URL and accessible alternative text. Its `url`
+is the light-mode image and fallback; optional `darkUrl` supplies a dark-mode image. CSS follows
+the root `.dark` class and hides the inactive image from display and accessibility. Custom logos
+retain their colors in both themes; omitting the override or resetting restores The Corner.
+Theme choice is stored under
+`structures-theme` in local storage; an early script applies it before hydration.
+
+The root validates `settings=<URL>` and retains it across internal navigation through TanStack
+Router's `retainSearchParams` middleware. The URL is authoritative; input drafts remain local and
+profiles are not persisted in local storage. Load/Reset create history entries, preserve applicable
+page configuration, and return explorer library/document routes to the topic root to clear stale
+selections. Reset removes both `settings` and legacy `source`. Loading the same URL refreshes it.
+Root settings take precedence over `source`, including when a profile omits the current section.
 
 Shareable page configuration belongs in validated TanStack Router search state. The Agentic page
 uses `view=map|cards` and `template=<id>` (a building block, `prompt`, `agents-md`, or `context-md`),
@@ -67,25 +86,26 @@ Folder and issue explorers store their search filter in `q`, for example
 `/folders/tanstack-react?q=components`. The input reads directly from the URL, so direct links,
 reloads, and Back/Forward restore the filtered tree. Typing replaces the current history entry
 without resetting scroll or the heading anchor. Selecting a file or folder preserves `q` and
-the custom `source`; changing the library or loading another source also retains the filter.
+the global `settings` or legacy `source`; changing the library or loading another profile also
+retains the filter.
 
 Each page supplies a content-specific title and description through route `head` metadata.
 `src/lib/seo.ts` keeps search and social titles/descriptions aligned and resolves explorer library,
 document, and branch-preset metadata from route parameters and the selected source. This metadata
 is server-rendered and included in the static pages without fetching custom sources on the server.
 
-| URL                                               | Main behavior                                                  |
-| ------------------------------------------------- | -------------------------------------------------------------- |
-| `/`                                               | Topic chooser and custom structure input.                      |
-| `/folders`                                        | Library chooser alongside the default `user` structure.        |
-| `/folders/$library`, `/folders/$library/$element` | Folder explorer and selected documentation.                    |
-| `/issues`                                         | Sample issue cards with contextual label/status documentation. |
-| `/issues/$library`, `/issues/$library/$element`   | Issue taxonomy explorer and documentation.                     |
-| `/issues/labels`, `/status`                       | Label gallery and Kanban status board.                         |
-| `/issues/priorities`, `/naming`                   | Priority and naming reference pages.                           |
-| `/branches`                                       | Branch preset chooser, or a graph when `?source=` is supplied. |
-| `/agentic`                                        | Agent concepts and downloadable example templates.             |
-| `/login`, `/signup`, `/account`, `/api/auth/*`    | Optional account UI and Better Auth boundary.                  |
+| URL                                               | Main behavior                                                   |
+| ------------------------------------------------- | --------------------------------------------------------------- |
+| `/`                                               | Topic chooser; profile input is in the shared navigation.       |
+| `/folders`                                        | Library chooser alongside the default `user` structure.         |
+| `/folders/$library`, `/folders/$library/$element` | Folder explorer and selected documentation.                     |
+| `/issues`                                         | Sample issue cards with contextual label/status documentation.  |
+| `/issues/$library`, `/issues/$library/$element`   | Issue taxonomy explorer and documentation.                      |
+| `/issues/labels`, `/status`                       | Label gallery and Kanban status board.                          |
+| `/issues/priorities`, `/naming`                   | Priority and naming reference pages.                            |
+| `/branches`                                       | Profile graph, built-in `?flow=<preset>`, or legacy `?source=`. |
+| `/agentic`                                        | Agent concepts and downloadable example templates.              |
+| `/login`, `/signup`, `/account`, `/api/auth/*`    | Optional account UI and Better Auth boundary.                   |
 
 The `_auth` and `_guest` route directories are pathless layouts. Explorer document route filenames
 use `$library_.$element.tsx`; the underscore keeps the document route out of the library layout's
@@ -93,17 +113,27 @@ nesting. `src/routeTree.gen.ts` is generated from the route files.
 
 ## Catalog and documentation flow
 
+`SiteSettingsProvider` makes one TanStack Query request keyed by `["site-settings", url]` after
+hydration. `fetchSiteSettings` accepts a raw HTTP(S) JSON URL or resolves an ordinary Gist page via
+GitHub's API to `files["settings.json"].raw_url`. Both requests share the abort signal, omit
+credentials, and report load errors. `parseSiteSettings` validates the whole version-1 document
+before exposing content; it reuses the shared tree and branch validators. Switching URLs isolates
+query results, and the header/boundary expose loading, reset, and retry controls.
+
 1. Folder/issue explorer routes pass `kind`, optional `library`/`element`, and validated `source`
    search state into the website's `StructureExplorer`.
-2. Source resolution prefers the custom source, then `/assets/<library>/`, then the default
+2. `useStructureSettings` uses a supplied profile section directly. Otherwise it selects the legacy
+   source only when no global profile is active, then `/assets/<library>/`, then the default
    `/assets/user/` for folders or `/assets/software/` for issues.
-3. After hydration, TanStack Query fetches settings with key `["structure-settings", source]`.
-   `fetchSettings` validates the wrapper and calls the shared tree parser before rendering.
+3. Built-in and legacy catalogs load after hydration with key `["structure-settings", source]`.
+   `fetchSettings` validates the wrapper and calls the shared tree parser before rendering. Profile
+   sections reuse the provider data without a second catalog request.
 4. Search filters the tree while retaining ancestors of matching descendants. The website tree
    adapts the shared accessible tree with Material icons or issue colors.
-5. Selecting a node navigates to its stable ID, preserving the custom source query parameter.
-   `MarkdownViewer` is lazy-loaded, then fetches documentation with key
-   `["structure-markdown", source, element]` after hydration.
+5. Selecting a node navigates to its stable ID, preserving settings/source and the filter.
+   `MarkdownViewer` is lazy-loaded. Profile documentation resolves inline by lowercased ID; missing
+   content shows an unavailable state. Catalog documentation fetches after hydration with key
+   `["structure-markdown", source, element]`.
 
 The QueryClient defaults to five-minute freshness and disables refetching on window focus.
 Explorer content is fetched in the browser, so static HTML does not contain all of the catalog's
@@ -113,9 +143,20 @@ Folder/issue settings contain `libraryName`, optional `manifestConfig`, and `str
 has a `name`, `type` (`container`, `folder`, or `file`), optional stable `id`, colors, and children.
 `parseStructures` enforces globally unique case-insensitive IDs, valid single path segments, and
 no nonempty children on files. Documentation uses the lowercased ID, falling back to the name.
-For a source ending in `.json`, Markdown is resolved from that document's directory; local catalog
+For a legacy source ending in `.json`, Markdown is resolved from that document's directory; local catalog
 directories resolve to `settings.json` and `md/<id>.md`. Absolute HTTP(S) settings sources are used
 as given.
+
+Website profiles add optional inline `documentation` maps and priority-node `description`/`example`
+strings without changing the registry's node API. `issues.examples` references canonical label and
+status IDs, normalized case-insensitively by the parser. Issue cards, labels, priorities, and Status
+all use that issue tree; Status columns are its `Kanban` children. A supplied issue section replaces
+the whole built-in profile, including an empty examples list when omitted. Missing documentation
+never falls back to built-in Markdown. Naming fields retain omitted values, but supplied arrays
+replace lists, including empty arrays. Agentic content overrides merge by existing template ID;
+preview and download share the resolved Markdown while IDs, icons, relationships, and map geometry
+stay fixed. See [docs/site-settings.md](docs/site-settings.md) and
+[public/settings.example.json](public/settings.example.json) for the contract and full example.
 
 Selectable folder catalogs are Angular, Go, and TanStack Start / React. `user` supplies the default
 folder example; `software` supplies issue content. Disabled framework choices are placeholders.
@@ -125,9 +166,12 @@ they do not describe this repository's literal source layout.
 Branch presets have a separate schema: `libraryName`, optional description, `branches`, and
 directed `edges`. Parsing checks IDs, kinds, optional fields, and edge references. Five built-in
 presets live in `git-flow`, `github-flow`, `gitlab-flow`, `trunk-based`, and `trunk-based-release`.
-`BranchFlowPage` fetches the chosen source and renders `BranchGraph`, which turns the model into
+`BranchFlowPage` uses a supplied profile graph or fetches the chosen preset/legacy source and renders
+`BranchGraph`, which turns the model into
 illustrative Gitgraph commits and merges. Descriptions appear on hover/focus. The separate
 `branch-flow.tsx` contains an SVG layout implementation; the current page uses `branch-graph.tsx`.
+Built-in selections use validated `flow` values from `BRANCH_FLOWS`; invalid values show the chooser.
+The chooser stays available when a website profile omits `branches`.
 
 ## Reusable explorer contract
 

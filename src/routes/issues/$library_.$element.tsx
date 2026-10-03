@@ -6,7 +6,12 @@ import { explorerHead } from "#/lib/seo.ts";
 
 export const Route = createFileRoute("/issues/$library_/$element")({
   validateSearch: validateExplorerSearch,
-  head: ({ params, match }) => explorerHead("issues", { ...params, source: match.search.source }),
+  head: ({ params, match }) =>
+    explorerHead("issues", {
+      ...params,
+      source: match.search.source,
+      settings: match.search.settings,
+    }),
   component: IssueDocument,
 });
 

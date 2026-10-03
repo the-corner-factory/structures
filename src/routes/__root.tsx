@@ -1,13 +1,22 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+  createRootRouteWithContext,
+  HeadContent,
+  Scripts,
+  retainSearchParams,
+} from "@tanstack/react-router";
 
 import { AppShell } from "#/components/app-shell.tsx";
+import { SiteSettingsProvider } from "#/components/site-settings-provider.tsx";
 import { ThemeProvider } from "#/components/theme-provider.tsx";
+import { validateSiteSearch } from "#/lib/router-search.ts";
 import { pageHead } from "#/lib/seo.ts";
 
 import appCss from "#/styles.css?url";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  validateSearch: validateSiteSearch,
+  search: { middlewares: [retainSearchParams(["settings"])] },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -35,7 +44,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ThemeProvider>
-          <AppShell>{children}</AppShell>
+          <SiteSettingsProvider>
+            <AppShell>{children}</AppShell>
+          </SiteSettingsProvider>
         </ThemeProvider>
         <Scripts />
       </body>

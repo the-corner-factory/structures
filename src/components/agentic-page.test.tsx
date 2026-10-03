@@ -10,11 +10,73 @@ import {
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vite-plus/test";
 
+import { useSiteSettings } from "#/components/site-settings-provider.tsx";
 import { AGENTIC_TEMPLATES, validateAgenticSearch } from "#/lib/agentic.ts";
 import { Route } from "#/routes/agentic.tsx";
 
+vi.mock("#/components/site-settings-provider.tsx", () => ({ useSiteSettings: vi.fn() }));
+
 beforeEach(() => {
   vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+  vi.mocked(useSiteSettings).mockReturnValue({ isPending: false, error: null, refetch: vi.fn() });
+});
+
+it("uses one resolved template for custom map labels, cards, references, previews, and downloads", async () => {
+  const readme = "# Team runtime\n\nRun the project checks before handing off.";
+  vi.mocked(useSiteSettings).mockReturnValue({
+    url: "https://example.com/settings.json",
+    settings: {
+      version: 1,
+      agentic: {
+        harness: {
+          name: "Team runtime",
+          description: "Executes our team workflow.",
+          distinction: "The runtime enforces our project permissions.",
+          source: "https://example.com/runtime",
+          sourceLabel: "Team runtime reference",
+          readme,
+        },
+        instructions: { name: "Working guidance" },
+        "agents-md": { name: "TEAM.md", readme: "# Team guidance" },
+      },
+    },
+    isPending: false,
+    error: null,
+    refetch: vi.fn(),
+  });
+  const { container, router } = await renderPage();
+  const map = screen.getByRole("group", { name: "Agent system building blocks" });
+  expect(within(map).getByRole("button", { name: "Team runtime", pressed: true })).toBeTruthy();
+  expect(within(map).getByText("Executes our team workflow.")).toBeTruthy();
+  expect(screen.getByRole("list", { name: "Team runtime connections" }).textContent).toContain(
+    "Team runtime runs Agent",
+  );
+  expect(container.querySelectorAll('.agentic-map-connection[data-active="true"]')).toHaveLength(5);
+  const reference = screen.getByRole("link", { name: "Team runtime reference" });
+  expect(reference.getAttribute("href")).toBe("https://example.com/runtime");
+  const download = screen.getByRole("link", { name: "Download Team runtime template" });
+  expect(decodeURIComponent(download.getAttribute("href")!)).toBe(
+    `data:text/markdown;charset=utf-8,${readme}`,
+  );
+  const preview = screen.getByRole("region", { name: "Team runtime / README.md" });
+  expect(within(preview).getByRole("heading", { name: "Team runtime", level: 1 })).toBeTruthy();
+
+  await click(screen.getByRole("radio", { name: "Cards & templates" }));
+  expect(screen.getByRole("button", { name: "Team runtime", pressed: true })).toBeTruthy();
+  await click(screen.getByRole("button", { name: "TEAM.md" }));
+  expect(router.state.location.search.template).toBe("agents-md");
+  expect(screen.getByRole("region", { name: "Working guidance / TEAM.md" })).toBeTruthy();
+  expect(
+    screen
+      .getByRole("button", { name: "Working guidance" })
+      .closest(".agentic-card")
+      ?.getAttribute("data-selected"),
+  ).toBe("true");
+  await click(screen.getByRole("radio", { name: "System map" }));
+  expect(screen.getByRole("button", { name: "Working guidance", pressed: true })).toBeTruthy();
+  expect(
+    screen.getByRole("link", { name: "Download TEAM.md template" }).getAttribute("download"),
+  ).toBe("TEAM.md");
 });
 afterEach(() => {
   cleanup();

@@ -11,13 +11,14 @@ import type { LucideIcon } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 
 import { PageTitle } from "#/components/page-title.tsx";
+import { useSiteSettings } from "#/components/site-settings-provider.tsx";
 import { AnchorHeading } from "#/components/structures/anchor-heading.tsx";
 
 const PREFIXES: Array<{
   prefix: string;
   description: string;
   example: string;
-  tone: string;
+  tone?: string;
 }> = [
   {
     prefix: "feat",
@@ -82,17 +83,21 @@ const PREFIXES: Array<{
 ];
 
 export function NamingStandard() {
+  const { settings } = useSiteSettings();
+  const naming = settings?.naming;
   return (
     <section className="naming-page">
       <PageTitle
         eyebrow="Git commit naming"
-        title="Conventional commits"
+        title={naming?.title ?? "Conventional commits"}
         intro={
-          <p>
-            A lightweight convention over how to write commit, branch and issue titles. Every title
-            starts with a <Code>type</Code>, an optional <Code>scope</Code>, and a short
-            description.
-          </p>
+          naming?.intro ?? (
+            <p>
+              A lightweight convention over how to write commit, branch and issue titles. Every
+              title starts with a <Code>type</Code>, an optional <Code>scope</Code>, and a short
+              description.
+            </p>
+          )
         }
         action={
           <a
@@ -119,13 +124,13 @@ export function NamingStandard() {
         />
       </div>
 
-      <CommitExample />
+      <CommitExample example={naming?.example} />
 
       <AnchorHeading level={2} className="naming-section-title">
         Commit types
       </AnchorHeading>
       <div className="naming-type-grid">
-        {PREFIXES.map((entry) => (
+        {(naming?.types ?? PREFIXES).map((entry) => (
           <TypeCard key={entry.prefix} entry={entry} />
         ))}
       </div>
@@ -133,24 +138,34 @@ export function NamingStandard() {
       <AnchorHeading level={2} className="naming-section-title">
         Rules
       </AnchorHeading>
-      <SectionCard icon={Heading1Icon} title="Write an imperative, concise summary">
-        <p>
-          Use the imperative mood (“add”, “fix”, “remove”) as in a command. Keep the description on
-          one line and under about 50 characters when you can.
-        </p>
-      </SectionCard>
-      <SectionCard icon={ListOrderedIcon} title="Break type and scope with a colon">
-        <p>
-          Format every title as <Code>type(scope): description</Code>. The <Code>type</Code> and{" "}
-          <Code>scope</Code> must be lowercase; the scope is optional.
-        </p>
-      </SectionCard>
-      <SectionCard icon={BookOpenIcon} title="Connect commits to the issue">
-        <p>
-          Reference an issue with <Code>#123</Code> or <Code>fixes #123</Code> when applicable so
-          the issue is linked to the change that implements it.
-        </p>
-      </SectionCard>
+      {naming?.rules ? (
+        naming.rules.map((rule) => (
+          <SectionCard key={rule.title} icon={BookOpenIcon} title={rule.title}>
+            <p>{rule.description}</p>
+          </SectionCard>
+        ))
+      ) : (
+        <>
+          <SectionCard icon={Heading1Icon} title="Write an imperative, concise summary">
+            <p>
+              Use the imperative mood (“add”, “fix”, “remove”) as in a command. Keep the description
+              on one line and under about 50 characters when you can.
+            </p>
+          </SectionCard>
+          <SectionCard icon={ListOrderedIcon} title="Break type and scope with a colon">
+            <p>
+              Format every title as <Code>type(scope): description</Code>. The <Code>type</Code> and{" "}
+              <Code>scope</Code> must be lowercase; the scope is optional.
+            </p>
+          </SectionCard>
+          <SectionCard icon={BookOpenIcon} title="Connect commits to the issue">
+            <p>
+              Reference an issue with <Code>#123</Code> or <Code>fixes #123</Code> when applicable
+              so the issue is linked to the change that implements it.
+            </p>
+          </SectionCard>
+        </>
+      )}
 
       <div className="naming-links-row">
         <Link to="/issues" className="naming-cta">
@@ -182,15 +197,20 @@ function AnatomyLabel({
   );
 }
 
-function CommitExample() {
+function CommitExample({ example }: { example?: { title: string; description: string } }) {
   return (
     <div className="commit-example">
       <span className="commit-example-check">
         <CheckIcon aria-hidden="true" />
       </span>
       <div>
-        <code className="commit-example-line">fix(auth): refresh session before token expires</code>
-        <p>Bumps the session expiry handler so tokens refresh while there is still time.</p>
+        <code className="commit-example-line">
+          {example?.title ?? "fix(auth): refresh session before token expires"}
+        </code>
+        <p>
+          {example?.description ??
+            "Bumps the session expiry handler so tokens refresh while there is still time."}
+        </p>
       </div>
     </div>
   );
@@ -200,7 +220,7 @@ function TypeCard({ entry }: { entry: (typeof PREFIXES)[number] }) {
   return (
     <article className="naming-type-card">
       <div className="naming-type-heading">
-        <code className="naming-type-prefix" style={{ color: entry.tone }}>
+        <code className="naming-type-prefix" style={{ color: entry.tone ?? "var(--accent)" }}>
           {entry.prefix}
         </code>
         <span>{entry.description}</span>

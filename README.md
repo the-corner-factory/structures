@@ -13,7 +13,8 @@ Drizzle boundaries for the future account and sharing experience.
 - Explore Angular, Go, TanStack Start / React, and software issue-management structures.
 - Search nested structures and read contextual Markdown without loading the Markdown renderer up
   front.
-- Load a custom `settings.json` from a raw GitHub Gist or another CORS-enabled URL.
+- Load one website-wide `settings.json` from a GitHub Gist or another CORS-enabled URL in the
+  navigation, covering all six sections.
 - Download the active structure as JSON.
 - Copy a permanent link to any built-in or custom structure, including the selected explanation.
 - Print a polished, fully expanded folder tree for PDF export or sharing.
@@ -68,9 +69,22 @@ Register folder libraries in `EXPLORER_FRAMEWORKS` in `src/lib/structures.ts` an
 in `scripts/prerender-static.mjs` for static deployment. Keep `libraryName` equal to the asset
 directory name so selected entries retain the correct library in their URLs.
 
-Custom sources follow the same format. If the source is a JSON URL, Markdown is resolved relative
-to that JSON file. Entry IDs default to names; add distinct stable `id` values wherever filenames
-repeat. Display names can change without breaking links when IDs remain the same.
+Entry IDs default to names; add distinct stable `id` values wherever filenames repeat. Display names
+can change without breaking links when IDs remain the same. Legacy `?source=` links still use this
+catalog format and resolve Markdown relative to the source JSON file.
+
+## Website settings
+
+Use the navigation's **Website settings URL** field to load one profile across Folders, Issues,
+Naming, Status, Branches, and Agentic. Paste an ordinary GitHub Gist link containing `settings.json`
+or a raw HTTP(S) JSON URL, then choose **Load**. **Reset** restores built-in content. Omitted sections
+retain their defaults, and the selected profile follows navigation through the shareable
+`?settings=<URL>` parameter without an account or local-storage persistence.
+
+Start with [settings.example.json](public/settings.example.json), save it to your Gist as
+`settings.json`, and follow the [website settings guide](docs/site-settings.md). The profile uses
+`version: 1`, inline Markdown, and one issue taxonomy shared by issue cards, priorities, labels, and
+Status. It is separate from the portable explorer's API and the legacy catalog format.
 
 ## Accounts (prepared, disabled)
 

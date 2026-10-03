@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { createContext, use, useEffect, useState } from "react";
 
+import { SiteSettingsControl } from "#/components/site-settings-control.tsx";
+import { SiteSettingsBoundary, useSiteSettings } from "#/components/site-settings-provider.tsx";
 import { useTheme } from "#/components/theme-provider.tsx";
 import { TOPICS } from "#/lib/structures.ts";
 import { useScrollToHash } from "#/lib/use-scroll-to-hash.ts";
@@ -20,6 +22,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [presentationMode, setPresentationMode] = useState(false);
   const [presentationFrameHidden, setPresentationFrameHidden] = useState(false);
   const { theme, setTheme } = useTheme();
+  const { settings } = useSiteSettings();
+  const logo = settings?.logo;
   useScrollToHash();
 
   const exitPresentationMode = () => {
@@ -54,7 +58,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               aria-describedby="site-version"
               className="brand-link"
             >
-              <img src="/the_corner-logo.webp" alt="The Corner" />
+              <img
+                src={logo?.url ?? "/the_corner-logo.webp"}
+                alt={logo ? (logo.alt ?? "Project logo") : "The Corner"}
+                className={
+                  logo ? (logo.darkUrl ? "light-brand-logo" : undefined) : "default-brand-logo"
+                }
+                referrerPolicy="no-referrer"
+              />
+              {logo?.darkUrl && (
+                <img
+                  src={logo.darkUrl}
+                  alt={logo.alt ?? "Project logo"}
+                  className="dark-brand-logo"
+                  referrerPolicy="no-referrer"
+                />
+              )}
               <span id="site-version" className="brand-version">
                 v{__APP_VERSION__}
               </span>
@@ -85,6 +104,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </nav>
           </div>
 
+          <SiteSettingsControl />
           <div className="topbar-actions">
             <button
               type="button"
@@ -119,7 +139,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </a>
           </div>
         </header>
-        {children}
+        <div className="app-content">
+          <SiteSettingsBoundary>{children}</SiteSettingsBoundary>
+        </div>
         {presentationMode && (
           <div className="presentation-controls" aria-label="Presentation controls">
             <button

@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { IssueCards } from "#/components/issue-cards.tsx";
+import { validateExplorerSearch } from "#/lib/router-search.ts";
 import { pageHead } from "#/lib/seo.ts";
 
 export const Route = createFileRoute("/issues/")({
+  validateSearch: validateExplorerSearch,
   head: () =>
     pageHead(
       "Software Issue Examples & Organization",

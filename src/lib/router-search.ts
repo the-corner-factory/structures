@@ -1,3 +1,14 @@
+import { normalizeSettingsUrl } from "./site-settings.ts";
+
+export function validateSiteSearch(search: Record<string, unknown>): { settings?: string } {
+  if (typeof search.settings !== "string" || !search.settings.trim()) return {};
+  try {
+    return { settings: normalizeSettingsUrl(search.settings) };
+  } catch {
+    return {};
+  }
+}
+
 interface ExplorerSearch {
   source?: string;
   q?: string;

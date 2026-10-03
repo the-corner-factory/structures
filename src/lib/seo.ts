@@ -17,14 +17,21 @@ export function pageHead(title: string, description: string) {
 
 export function explorerHead(
   kind: ExplorerKind,
-  { library, element, source }: { library?: string; element?: string; source?: string },
+  {
+    library,
+    element,
+    source,
+    settings,
+  }: { library?: string; element?: string; source?: string; settings?: string },
 ) {
   // A source override determines the displayed catalog, even when the URL names another library.
-  const catalog = source
-    ? /^\/assets\/([^/]+)\/settings\.json$/.exec(settingsDocumentUrl(source))?.[1]
-    : (library ?? (kind === "issues" ? "software" : undefined));
+  const catalog = settings
+    ? undefined
+    : source
+      ? /^\/assets\/([^/]+)\/settings\.json$/.exec(settingsDocumentUrl(source))?.[1]
+      : (library ?? (kind === "issues" ? "software" : undefined));
 
-  if (!catalog && !source) {
+  if (!catalog && !source && !settings) {
     return pageHead(
       "Project Folder Structures",
       "Explore Angular, Go, and TanStack Start / React folder structures. Browse documented files and directories or load your own project structure.",
@@ -54,7 +61,8 @@ export function explorerHead(
   );
 }
 
-export function branchesHead(source?: string) {
+export function branchesHead(source?: string, settings?: string) {
+  if (settings) source = settings;
   if (!source) {
     return pageHead(
       "Git Branching Strategies",

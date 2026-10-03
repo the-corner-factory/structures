@@ -4,14 +4,21 @@ import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { PageTitle } from "#/components/page-title.tsx";
+import { useSiteSettings } from "#/components/site-settings-provider.tsx";
 import { AnchorHeading } from "#/components/structures/anchor-heading.tsx";
+import { flattenStructures } from "#/components/structures/structure-data.ts";
+import type { SiteStructureNode } from "#/lib/site-settings.ts";
+import { nodeId } from "#/lib/structures.ts";
 
-const PRIORITIES: Array<{
+interface PriorityEntry {
+  id?: string;
   level: string;
-  description: string;
-  example: string;
-  tone: string;
-}> = [
+  description?: string;
+  example?: string;
+  tone?: string;
+}
+
+const PRIORITIES: PriorityEntry[] = [
   {
     level: "P0",
     description:
@@ -50,6 +57,22 @@ const PRIORITIES: Array<{
 ];
 
 export function PrioritiesStandard() {
+  const { settings, isPending, error, refetch } = useSiteSettings();
+  const custom = settings?.issues;
+  const group = custom?.structures
+    .find((node) => node.name.trim().toLowerCase() === "labels")
+    ?.children?.find((node) => node.name.trim().toLowerCase() === "priority");
+  const priorities: PriorityEntry[] = custom
+    ? (flattenStructures(group?.children ?? []) as SiteStructureNode[])
+        .filter((node) => !node.children?.length)
+        .map((node) => ({
+          id: nodeId(node),
+          level: node.name,
+          description: node.description,
+          example: node.example,
+          tone: node.color,
+        }))
+    : PRIORITIES;
   return (
     <section className="naming-page">
       <PageTitle
@@ -67,9 +90,22 @@ export function PrioritiesStandard() {
         Priority levels
       </AnchorHeading>
       <div className="naming-type-grid">
-        {PRIORITIES.map((entry) => (
-          <PriorityCard key={entry.level} entry={entry} />
-        ))}
+        {isPending && <p className="sidebar-message">Loading priorities…</p>}
+        {error && (
+          <div className="sidebar-message error-message" role="alert">
+            <strong>Could not load priorities</strong>
+            <span>{error.message}</span>
+            <button type="button" onClick={() => refetch()}>
+              Try again
+            </button>
+          </div>
+        )}
+        {!isPending &&
+          !error &&
+          priorities.map((entry) => <PriorityCard key={entry.id ?? entry.level} entry={entry} />)}
+        {!isPending && !error && priorities.length === 0 && (
+          <p className="sidebar-message">No priority levels are configured.</p>
+        )}
       </div>
 
       <AnchorHeading level={2} className="naming-section-title">
@@ -77,8 +113,10 @@ export function PrioritiesStandard() {
       </AnchorHeading>
       <SectionCard icon={TrendingUpIcon} title="Fix the most blocking work first">
         <p>
-          Work that blocks a release or affects many users takes priority over work that can wait. A
-          P0 should be picked up before a P2, even if the P2 looks more interesting.
+          Work that blocks a release or affects many users takes priority over work that can wait.
+          {custom
+            ? " Pick up higher-priority work before less urgent tasks."
+            : " A P0 should be picked up before a P2, even if the P2 looks more interesting."}
         </p>
       </SectionCard>
       <SectionCard icon={GaugeIcon} title="Tie priority to user impact">
@@ -103,18 +141,20 @@ export function PrioritiesStandard() {
   );
 }
 
-function PriorityCard({ entry }: { entry: (typeof PRIORITIES)[number] }) {
+function PriorityCard({ entry }: { entry: PriorityEntry }) {
   return (
     <article className="naming-type-card">
       <div className="naming-type-heading">
         <code className="naming-type-prefix" style={{ color: entry.tone }}>
           {entry.level}
         </code>
-        <span>{entry.description}</span>
+        {entry.description && <span>{entry.description}</span>}
       </div>
-      <p className="naming-type-example">
-        <code>{entry.example}</code>
-      </p>
+      {entry.example && (
+        <p className="naming-type-example">
+          <code>{entry.example}</code>
+        </p>
+      )}
     </article>
   );
 }

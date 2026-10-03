@@ -66,4 +66,13 @@ describe("page metadata", () => {
       "Custom Git Branching Strategy | Structures",
     );
   });
+
+  it("describes global profiles without exposing their URL or stale catalog metadata", () => {
+    const settings = "https://example.com/team/settings.json";
+    const folder = explorerHead("folders", { library: "angular", source: "/assets/go/", settings });
+    expect(folder.meta[0].title).toBe("Custom Folder Structure | Structures");
+    const branch = branchesHead(branchSource("git-flow"), settings);
+    expect(branch.meta[0].title).toBe("Custom Git Branching Strategy | Structures");
+    expect(JSON.stringify([folder, branch])).not.toContain(settings);
+  });
 });

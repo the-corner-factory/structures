@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import {
   CheckIcon,
@@ -12,19 +11,19 @@ import {
   Share2Icon,
   XIcon,
 } from "lucide-react";
-import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 
 import { LibraryChooser } from "#/components/library-chooser.tsx";
+import { useSiteSettings } from "#/components/site-settings-provider.tsx";
 import { StructureTree } from "#/components/structure-tree.tsx";
+import type { SiteSettings } from "#/lib/site-settings.ts";
 import {
   EXPLORER_FRAMEWORKS,
-  defaultSource,
-  fetchSettings,
   filterStructures,
-  librarySource,
   type ExplorerKind,
   type FolderSettings,
 } from "#/lib/structures.ts";
+import { useStructureSettings } from "#/lib/use-structure-settings.ts";
 
 const MarkdownViewer = lazy(() => import("#/components/markdown-viewer.tsx"));
 
@@ -43,14 +42,14 @@ export function StructureExplorer({
 }: StructureExplorerProps) {
   const navigate = useNavigate();
   const { q: query = "" } = useSearch({ strict: false });
-  const hydrated = useHydrated();
-  const source = sourceOverride ?? (library ? librarySource(library) : defaultSource(kind));
+  const site = useSiteSettings();
+  const settingsQuery = useStructureSettings(kind, { sourceOverride, library });
+  const { source, custom, settings } = settingsQuery;
+  const legacySource = site.url ? undefined : sourceOverride;
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [minimized, setMinimized] = useState(false);
   const [actionMessage, setActionMessage] = useState("");
   const actionMessageTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const [sourceDraft, setSourceDraft] = useState({ source, value: source });
-  const sourceInput = sourceDraft.source === source ? sourceDraft.value : source;
 
   useEffect(
     () => () => {
@@ -59,13 +58,6 @@ export function StructureExplorer({
     [],
   );
 
-  const settingsQuery = useQuery({
-    queryKey: ["structure-settings", source],
-    queryFn: ({ signal }) => fetchSettings(source, signal),
-    enabled: hydrated,
-  });
-
-  const settings = settingsQuery.data;
   const visibleItems = settings ? filterStructures(settings.structures, query) : [];
   const routeLibrary = settings?.libraryName || library || kind;
   const libraryLabel =
@@ -74,7 +66,7 @@ export function StructureExplorer({
       .find((entry) => entry.library === routeLibrary)?.name ?? settings?.libraryName;
 
   const selectElement = (selected: string) => {
-    const search = { source: sourceOverride, q: query || undefined };
+    const search = { source: legacySource, q: query || undefined };
     if (kind === "folders") {
       navigate({
         to: "/folders/$library/$element",
@@ -92,31 +84,12 @@ export function StructureExplorer({
     }
   };
 
-  const applySource = () => {
-    const nextSource = sourceInput.trim();
-    if (nextSource) loadCustomSource(nextSource);
-  };
-
   const selectLibrary = (selectedLibrary: string) => {
     const search = { q: query || undefined };
     if (kind === "folders") {
       navigate({ to: "/folders/$library", params: { library: selectedLibrary }, search });
     } else {
       navigate({ to: "/issues/$library", params: { library: selectedLibrary }, search });
-    }
-  };
-
-  const loadCustomSource = (nextSource: string) => {
-    const search = { source: nextSource, q: query || undefined };
-    if (kind === "folders") {
-      navigate({ to: "/folders", search, resetScroll: false });
-    } else {
-      navigate({
-        to: "/issues/$library",
-        params: { library: routeLibrary },
-        search,
-        resetScroll: false,
-      });
     }
   };
 
@@ -204,27 +177,22 @@ export function StructureExplorer({
               <div className="settings-title-row">
                 <div>
                   <h2>Explorer settings</h2>
-                  <p>JSON or raw Gist URL</p>
+                  <p>
+                    {site.settings
+                      ? "Download your website settings."
+                      : "Download this section’s structure."}
+                  </p>
                 </div>
                 <button
                   type="button"
                   className="icon-button subtle"
-                  aria-label="Download structure settings"
+                  aria-label={
+                    site.settings ? "Download website settings" : "Download structure settings"
+                  }
                   disabled={!settings}
-                  onClick={() => settings && downloadSettings(settings)}
+                  onClick={() => settings && downloadSettings(site.settings ?? settings)}
                 >
                   <DownloadIcon />
-                </button>
-              </div>
-              <div className="source-control">
-                <input
-                  value={sourceInput}
-                  aria-label="Structure settings URL"
-                  onChange={(event) => setSourceDraft({ source, value: event.target.value })}
-                  onKeyDown={(event) => event.key === "Enter" && applySource()}
-                />
-                <button type="button" onClick={applySource}>
-                  Load
                 </button>
               </div>
             </section>
@@ -236,7 +204,7 @@ export function StructureExplorer({
           {settingsQuery.isError && (
             <div className="sidebar-message error-message">
               <strong>Could not load structure</strong>
-              <span>{settingsQuery.error.message}</span>
+              <span>{settingsQuery.error?.message}</span>
               <button type="button" onClick={() => settingsQuery.refetch()}>
                 Try again
               </button>
@@ -273,15 +241,19 @@ export function StructureExplorer({
       </button>
 
       <main className="explorer-main">
-        {!library && !sourceOverride && (
-          <LibraryChooser kind={kind} onSelect={selectLibrary} onSource={loadCustomSource} />
+        {!library && !legacySource && !custom && (
+          <LibraryChooser kind={kind} onSelect={selectLibrary} />
         )}
-        {!element && (library || sourceOverride) && (
+        {!element && (library || legacySource || custom) && (
           <EmptyDocument libraryName={libraryLabel} loading={settingsQuery.isPending} />
         )}
         {element && (
           <Suspense fallback={<DocumentLoading />}>
-            <MarkdownViewer source={source} element={element} />
+            <MarkdownViewer
+              source={source}
+              element={element}
+              documentation={custom ? (custom.documentation ?? {}) : undefined}
+            />
           </Suspense>
         )}
       </main>
@@ -319,27 +291,18 @@ function DocumentLoading() {
   );
 }
 
-function downloadSettings(settings: FolderSettings) {
+function downloadSettings(settings: FolderSettings | SiteSettings) {
   const url = URL.createObjectURL(
     new Blob([JSON.stringify(settings, null, 2)], { type: "application/json" }),
   );
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `${settings.libraryName || "structure"}-settings.json`;
+  anchor.download =
+    "version" in settings
+      ? "settings.json"
+      : `${settings.libraryName || "structure"}-settings.json`;
   anchor.click();
   URL.revokeObjectURL(url);
-}
-
-function useHydrated() {
-  return useSyncExternalStore(
-    noopSubscribe,
-    () => true,
-    () => false,
-  );
-}
-
-function noopSubscribe() {
-  return () => {};
 }
 
 async function copyText(value: string) {

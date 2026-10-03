@@ -179,20 +179,13 @@ it("keeps the folder filter when choosing a library", async () => {
   expect(page.router.state.location.search).toEqual({ q: "component" });
 });
 
-it.each(["folders", "issues"] as const)(
-  "keeps the %s filter when applying a custom source",
-  async (kind) => {
-    const page = await renderExplorer(kind, `/${kind}/test?q=component`);
-    await click(screen.getByRole("button", { name: "Open explorer settings" }));
-    fireEvent.change(screen.getByRole("textbox", { name: "Structure settings URL" }), {
-      target: { value: customSource },
-    });
-    await click(screen.getByRole("button", { name: "Load" }));
-    expect(page.router.state.location.search).toEqual({ source: customSource, q: "component" });
-    expect(screen.getByRole<HTMLInputElement>("searchbox").value).toBe("component");
-    expect(screen.queryByRole("treeitem", { name: "README.md" })).toBeNull();
-  },
-);
+it("keeps section downloads without a separate source input", async () => {
+  await renderExplorer("folders", "/folders/test?q=component");
+  await click(screen.getByRole("button", { name: "Open explorer settings" }));
+  expect(screen.getByRole("button", { name: "Download structure settings" })).toBeTruthy();
+  expect(screen.queryByRole("textbox", { name: "Structure settings URL" })).toBeNull();
+  expect(screen.getByRole<HTMLInputElement>("searchbox").value).toBe("component");
+});
 
 it("copies a share link that restores the filtered explorer", async () => {
   const writeText = vi.fn().mockResolvedValue(undefined);

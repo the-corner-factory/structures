@@ -1,21 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ListOrderedIcon, SquareKanbanIcon, TagsIcon } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useState } from "react";
 
+import { useSiteSettings } from "#/components/site-settings-provider.tsx";
 import { StructureMarkdown } from "#/components/structures/structure-markdown.tsx";
-import {
-  defaultSource,
-  fetchMarkdown,
-  fetchSettings,
-  nodeId,
-  type BoardVariant,
-  type FolderStructure,
-} from "#/lib/structures.ts";
+import { nodeId, type BoardVariant, type FolderStructure } from "#/lib/structures.ts";
+import { useStructureMarkdown, useStructureSettings } from "#/lib/use-structure-settings.ts";
 
 interface BoardConfig {
-  route: string;
   group: string;
   subgroup?: string;
   kind: "kanban" | "gallery";
@@ -28,7 +21,6 @@ interface BoardConfig {
 
 const BOARD_CONFIG: Record<BoardVariant, BoardConfig> = {
   kanban: {
-    route: "/status",
     group: "kanban",
     kind: "kanban",
     heading: "Kanban board",
@@ -38,7 +30,6 @@ const BOARD_CONFIG: Record<BoardVariant, BoardConfig> = {
     icon: SquareKanbanIcon,
   },
   labels: {
-    route: "/issues/labels",
     group: "types",
     kind: "gallery",
     heading: "Labels",
@@ -48,7 +39,6 @@ const BOARD_CONFIG: Record<BoardVariant, BoardConfig> = {
     icon: TagsIcon,
   },
   priorities: {
-    route: "/issues/priorities",
     group: "labels",
     subgroup: "priority",
     kind: "gallery",
@@ -68,20 +58,11 @@ export function StructureBoard({
   sourceOverride?: string;
 }) {
   const navigate = useNavigate();
-  const hydrated = useHydrated();
+  const site = useSiteSettings();
   const config = BOARD_CONFIG[variant];
-  const source = sourceOverride ?? defaultSource("issues");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const [sourceDraft, setSourceDraft] = useState({ source, value: source });
-  const sourceInput = sourceDraft.source === source ? sourceDraft.value : source;
-
-  const settingsQuery = useQuery({
-    queryKey: ["structure-settings", source],
-    queryFn: ({ signal }) => fetchSettings(source, signal),
-    enabled: hydrated,
-  });
-
-  const settings = settingsQuery.data;
+  const settingsQuery = useStructureSettings("issues", { sourceOverride });
+  const { source, custom, settings } = settingsQuery;
   const group = useMemo(() => {
     const root = settings?.structures.find(
       (item) => item.name.trim().toLowerCase() === config.group,
@@ -92,28 +73,25 @@ export function StructureBoard({
   const items = group?.children ?? [];
   const gallerySections: FolderStructure[] =
     config.kind === "gallery"
-      ? variant === "priorities"
+      ? variant === "priorities" || items.some((item) => !item.children?.length)
         ? [{ name: config.heading, type: "folder", children: items }]
         : items
       : [];
 
-  const descriptionQuery = useQuery({
-    queryKey: ["structure-markdown", source, hoveredId],
-    queryFn: ({ signal }) => fetchMarkdown(source, hoveredId!, signal),
-    enabled: hydrated && Boolean(hoveredId),
-  });
-
-  const applySource = () => {
-    const nextSource = sourceInput.trim();
-    if (!nextSource) return;
-    navigate({ to: config.route, search: { source: nextSource } });
-  };
+  const descriptionQuery = useStructureMarkdown(
+    source,
+    hoveredId,
+    custom ? (custom.documentation ?? {}) : undefined,
+  );
 
   const openDocumentation = (element: string) => {
     navigate({
       to: "/issues/$library/$element",
-      params: { library: "software", element },
-      search: sourceOverride ? { source: sourceOverride } : {},
+      params: { library: settings?.libraryName || "software", element },
+      search: (previous) => ({
+        ...previous,
+        source: !site.url ? sourceOverride : undefined,
+      }),
     });
   };
 
@@ -162,17 +140,6 @@ export function StructureBoard({
               <p>{config.hint}</p>
             </div>
           </div>
-          <div className="source-control">
-            <input
-              value={sourceInput}
-              aria-label="Structure settings URL"
-              onChange={(event) => setSourceDraft({ source, value: event.target.value })}
-              onKeyDown={(event) => event.key === "Enter" && applySource()}
-            />
-            <button type="button" onClick={applySource}>
-              Load
-            </button>
-          </div>
         </header>
         <div className="board-doc-scroll" aria-live="polite">
           {!hoveredId && <div className="sidebar-message">{config.hint}.</div>}
@@ -180,13 +147,13 @@ export function StructureBoard({
           {hoveredId && descriptionQuery.isError && (
             <div className="sidebar-message">
               <strong>No description found</strong>
-              <span>{descriptionQuery.error.message}</span>
+              <span>{descriptionQuery.error?.message}</span>
               <button type="button" onClick={() => descriptionQuery.refetch()}>
                 Try again
               </button>
             </div>
           )}
-          {hoveredId && descriptionQuery.data && (
+          {hoveredId && descriptionQuery.data !== undefined && (
             <StructureMarkdown className="board-doc">{descriptionQuery.data}</StructureMarkdown>
           )}
         </div>
@@ -197,7 +164,7 @@ export function StructureBoard({
         {settingsQuery.isError && (
           <div className="sidebar-message error-message">
             <strong>Could not load structure</strong>
-            <span>{settingsQuery.error.message}</span>
+            <span>{settingsQuery.error?.message}</span>
             <button type="button" onClick={() => settingsQuery.refetch()}>
               Try again
             </button>
@@ -315,16 +282,4 @@ function DocSkeleton() {
       ))}
     </div>
   );
-}
-
-function useHydrated() {
-  return useSyncExternalStore(
-    noopSubscribe,
-    () => true,
-    () => false,
-  );
-}
-
-function noopSubscribe() {
-  return () => {};
 }

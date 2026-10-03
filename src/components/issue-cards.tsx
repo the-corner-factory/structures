@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   CheckCircleIcon,
@@ -7,13 +6,17 @@ import {
   MessageSquareIcon,
   TagsIcon,
 } from "lucide-react";
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 
 import { PageTitle } from "#/components/page-title.tsx";
+import { useSiteSettings } from "#/components/site-settings-provider.tsx";
+import { flattenStructures } from "#/components/structures/structure-data.ts";
 import { StructureMarkdown } from "#/components/structures/structure-markdown.tsx";
-import { defaultSource, fetchMarkdown } from "#/lib/structures.ts";
+import { defaultSource, nodeId } from "#/lib/structures.ts";
+import { useStructureMarkdown } from "#/lib/use-structure-settings.ts";
 
 interface IssueLabel {
+  id: string;
   name: string;
   color?: string;
   bgColor?: string;
@@ -28,9 +31,11 @@ interface IssueCardData {
   comments: number;
   labels: IssueLabel[];
   kanban?: string;
+  statusId?: string;
 }
 
 const LABEL_BY = (name: string, color: string, bgColor: string): IssueLabel => ({
+  id: name,
   name,
   color,
   bgColor,
@@ -133,27 +138,33 @@ const sampleIssues: IssueCardData[] = [
 
 export function IssueCards() {
   const navigate = useNavigate();
-  const hydrated = useHydrated();
-  const [customSource, setCustomSource] = useState("");
+  const site = useSiteSettings();
   const [hoveredLabel, setHoveredLabel] = useState<string | null>(null);
-
-  const source = defaultSource("issues");
-
-  const descriptionQuery = useQuery({
-    queryKey: ["issue-label-markdown", source, hoveredLabel],
-    queryFn: ({ signal }) => fetchMarkdown(source, labelElementId(hoveredLabel!), signal),
-    enabled: hydrated && Boolean(hoveredLabel),
-  });
-
-  const applyCustomSource = () => {
-    const source = customSource.trim();
-    if (!source) return;
-    navigate({ to: "/issues/$library", params: { library: "software" }, search: { source } });
-  };
+  const custom = site.settings?.issues;
+  const source = custom ? site.url! : defaultSource("issues");
+  const nodes = new Map(
+    flattenStructures(custom?.structures ?? []).map((node) => [nodeId(node), node]),
+  );
+  const priorityGroup = custom?.structures
+    .find((node) => node.name.trim().toLowerCase() === "labels")
+    ?.children?.find((node) => node.name.trim().toLowerCase() === "priority");
+  const priorityIds = new Set(flattenStructures(priorityGroup?.children ?? []).map(nodeId));
+  const issues: IssueCardData[] = custom
+    ? (custom.examples ?? []).map((issue) => ({
+        ...issue,
+        labels: issue.labels.map((id) => ({ ...nodes.get(id)!, id })),
+        kanban: issue.status ? nodes.get(issue.status)?.name : undefined,
+        statusId: issue.status,
+      }))
+    : sampleIssues;
+  const descriptionQuery = useStructureMarkdown(
+    source,
+    hoveredLabel && (custom ? hoveredLabel : labelElementId(hoveredLabel)),
+    custom ? (custom.documentation ?? {}) : undefined,
+  );
 
   const openSubPage = (label: string) => {
-    // Priority labels (P0–P4) live on the priorities page; everything else on the labels page.
-    const isPriority = /^P\d+$/i.test(label);
+    const isPriority = custom ? priorityIds.has(label) : /^P\d+$/i.test(label);
     navigate({ to: isPriority ? "/issues/priorities" : "/issues/labels" });
   };
 
@@ -168,19 +179,6 @@ export function IssueCards() {
               <p>Hover a label to read what it means</p>
             </div>
           </div>
-          <div className="source-control">
-            <input
-              type="url"
-              value={customSource}
-              aria-label="Structure settings URL"
-              placeholder="https://gist.githubusercontent.com/…/settings.json"
-              onChange={(event) => setCustomSource(event.target.value)}
-              onKeyDown={(event) => event.key === "Enter" && applyCustomSource()}
-            />
-            <button type="button" onClick={applyCustomSource}>
-              Load
-            </button>
-          </div>
         </header>
         <div className="board-doc-scroll" aria-live="polite">
           {!hoveredLabel && <div className="sidebar-message">Hover a label to read its logic.</div>}
@@ -188,13 +186,13 @@ export function IssueCards() {
           {hoveredLabel && descriptionQuery.isError && (
             <div className="sidebar-message">
               <strong>No description found</strong>
-              <span>{descriptionQuery.error.message}</span>
+              <span>{descriptionQuery.error?.message}</span>
               <button type="button" onClick={() => descriptionQuery.refetch()}>
                 Try again
               </button>
             </div>
           )}
-          {hoveredLabel && descriptionQuery.data && (
+          {hoveredLabel && descriptionQuery.data !== undefined && (
             <StructureMarkdown className="board-doc">{descriptionQuery.data}</StructureMarkdown>
           )}
         </div>
@@ -222,16 +220,31 @@ export function IssueCards() {
             }
           />
 
+          {site.isPending && <div className="sidebar-message">Loading issues…</div>}
+          {site.error && (
+            <div className="sidebar-message error-message" role="alert">
+              <strong>Could not load issues</strong>
+              <span>{site.error.message}</span>
+              <button type="button" onClick={site.refetch}>
+                Try again
+              </button>
+            </div>
+          )}
+          {!site.isPending && !site.error && issues.length === 0 && (
+            <p className="sidebar-message">No example issues are configured.</p>
+          )}
           <div className="issue-card-list">
-            {sampleIssues.map((issue) => (
-              <IssueCard
-                key={issue.number}
-                issue={issue}
-                activeLabel={hoveredLabel}
-                onHoverLabel={setHoveredLabel}
-                onOpenLabel={openSubPage}
-              />
-            ))}
+            {!site.isPending &&
+              !site.error &&
+              issues.map((issue) => (
+                <IssueCard
+                  key={issue.number}
+                  issue={issue}
+                  activeLabel={hoveredLabel}
+                  onHoverLabel={setHoveredLabel}
+                  onOpenLabel={openSubPage}
+                />
+              ))}
           </div>
 
           <footer className="issue-sub-footer">
@@ -242,7 +255,10 @@ export function IssueCards() {
             <div className="issue-sub-links">
               <Link to="/issues/priorities" className="issue-sub-link">
                 <strong>Priorities</strong>
-                <span>The P0–P4 scale that decides how quickly an issue should be tackled.</span>
+                <span>
+                  {custom ? "The priority scale" : "The P0–P4 scale"} that decides how quickly an
+                  issue should be tackled.
+                </span>
               </Link>
               <Link to="/issues/labels" className="issue-sub-link">
                 <strong>Labels</strong>
@@ -285,15 +301,15 @@ function IssueCard({
         <div className="issue-card-labels">
           {issue.labels.map((label) => (
             <button
-              key={label.name}
+              key={label.id}
               type="button"
               className="issue-label"
-              data-active={label.name === activeLabel || undefined}
-              onPointerEnter={() => onHoverLabel(label.name)}
-              onFocus={() => onHoverLabel(label.name)}
+              data-active={label.id === activeLabel || undefined}
+              onPointerEnter={() => onHoverLabel(label.id)}
+              onFocus={() => onHoverLabel(label.id)}
               onPointerLeave={() => onHoverLabel(null)}
               onBlur={() => onHoverLabel(null)}
-              onClick={() => onOpenLabel(label.name)}
+              onClick={() => onOpenLabel(label.id)}
               style={{
                 color: label.color,
                 backgroundColor: label.bgColor,
@@ -306,17 +322,19 @@ function IssueCard({
         </div>
 
         <div className="issue-card-meta">
-          <button
-            type="button"
-            className="issue-card-kanban"
-            data-active={issue.kanban === activeLabel || undefined}
-            onPointerEnter={() => onHoverLabel(issue.kanban!)}
-            onFocus={() => onHoverLabel(issue.kanban!)}
-            onPointerLeave={() => onHoverLabel(null)}
-            onBlur={() => onHoverLabel(null)}
-          >
-            {issue.kanban}
-          </button>
+          {issue.kanban && (
+            <button
+              type="button"
+              className="issue-card-kanban"
+              data-active={(issue.statusId ?? issue.kanban) === activeLabel || undefined}
+              onPointerEnter={() => onHoverLabel(issue.statusId ?? issue.kanban!)}
+              onFocus={() => onHoverLabel(issue.statusId ?? issue.kanban!)}
+              onPointerLeave={() => onHoverLabel(null)}
+              onBlur={() => onHoverLabel(null)}
+            >
+              {issue.kanban}
+            </button>
+          )}
           <span>
             #{issue.number} opened {formatDays(issue.openedDaysAgo)} by {issue.author}
           </span>
@@ -346,16 +364,4 @@ function DocSkeleton() {
       ))}
     </div>
   );
-}
-
-function useHydrated() {
-  return useSyncExternalStore(
-    noopSubscribe,
-    () => true,
-    () => false,
-  );
-}
-
-function noopSubscribe() {
-  return () => {};
 }

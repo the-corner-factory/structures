@@ -2,21 +2,88 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { afterEach, expect, it, vi } from "vite-plus/test";
+import { afterEach, beforeEach, expect, it, vi } from "vite-plus/test";
 
 import githubFlow from "../../public/assets/github-flow/settings.json";
 import gitlabFlow from "../../public/assets/gitlab-flow/settings.json";
 import { parseBranchFlow } from "../lib/branches.ts";
 import { BranchFlowPage } from "./branch-flow-page.tsx";
+import { useSiteSettings } from "./site-settings-provider.tsx";
 
-vi.mock("@tanstack/react-router", () => ({ useNavigate: () => vi.fn() }));
+const navigate = vi.hoisted(() => vi.fn());
+vi.mock("@tanstack/react-router", () => ({ useNavigate: () => navigate }));
+vi.mock("./site-settings-provider.tsx", () => ({ useSiteSettings: vi.fn() }));
 // Match the app's React deduplication for the vendored renderer.
 vi.mock("../../packages/gitgraph-react/node_modules/react", () => import("react"));
+
+beforeEach(() => {
+  vi.mocked(useSiteSettings).mockReturnValue({ isPending: false, error: null, refetch: vi.fn() });
+  navigate.mockClear();
+});
 
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
   Reflect.deleteProperty(SVGElement.prototype, "getBBox");
+});
+
+it("renders the global branch flow without fetching or offering another strategy", async () => {
+  const fetch = vi.spyOn(globalThis, "fetch");
+  Object.defineProperty(SVGElement.prototype, "getBBox", {
+    configurable: true,
+    value: () => ({ x: 0, y: 0, width: 200, height: 500 }),
+  });
+  const flow = { ...parseBranchFlow(githubFlow), libraryName: "Team branching" };
+  vi.mocked(useSiteSettings).mockReturnValue({
+    url: "https://example.com/settings.json",
+    settings: { version: 1, branches: flow },
+    isPending: false,
+    error: null,
+    refetch: vi.fn(),
+  });
+  const client = new QueryClient();
+  render(
+    <QueryClientProvider client={client}>
+      <BranchFlowPage sourceOverride="legacy" flow="git-flow" />
+    </QueryClientProvider>,
+  );
+  expect(await screen.findByRole("heading", { name: "Team branching" })).toBeTruthy();
+  expect(await screen.findByRole("img", { name: "main branch" })).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "Change strategy" })).toBeNull();
+  expect(screen.queryByText("Loading strategy…")).toBeNull();
+  expect(fetch).not.toHaveBeenCalled();
+  client.clear();
+});
+
+it("ignores legacy sources with global settings and selects built-in presets through flow", () => {
+  const fetch = vi.spyOn(globalThis, "fetch");
+  const url = "https://example.com/settings.json";
+  vi.mocked(useSiteSettings).mockReturnValue({
+    url,
+    settings: { version: 1 },
+    isPending: false,
+    error: null,
+    refetch: vi.fn(),
+  });
+  const client = new QueryClient();
+  render(
+    <QueryClientProvider client={client}>
+      <BranchFlowPage sourceOverride="legacy" />
+    </QueryClientProvider>,
+  );
+  expect(screen.getByRole("heading", { name: "Explore a branching strategy" })).toBeTruthy();
+  expect(screen.queryByRole("textbox")).toBeNull();
+  expect(fetch).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole("button", { name: "GitHub Flow" }));
+  const options = navigate.mock.calls[0][0];
+  expect(options.to).toBe("/branches");
+  expect(options.resetScroll).toBe(false);
+  expect(options.search({ settings: url, source: "legacy" })).toEqual({
+    settings: url,
+    source: undefined,
+    flow: "github-flow",
+  });
+  client.clear();
 });
 
 it("shows strategy-specific descriptions for branch paths, dots, labels, and keyboard focus", async () => {

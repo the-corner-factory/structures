@@ -12,6 +12,7 @@ import { useState } from "react";
 
 import { AgenticMap } from "#/components/agentic-map.tsx";
 import { PageTitle } from "#/components/page-title.tsx";
+import { useSiteSettings } from "#/components/site-settings-provider.tsx";
 import { StructureMarkdown } from "#/components/structures/structure-markdown.tsx";
 import {
   AGENT_PROMPT,
@@ -27,7 +28,14 @@ const route = getRouteApi("/agentic");
 export function AgenticPage() {
   const { view = "map", template } = route.useSearch();
   const navigate = route.useNavigate();
-  const selected = AGENTIC_TEMPLATES.find((item) => item.id === template) ?? AGENTIC_ELEMENTS[0];
+  const { settings } = useSiteSettings();
+  const templates = AGENTIC_TEMPLATES.map((item) => ({ ...item, ...settings?.agentic?.[item.id] }));
+  const elements = templates.filter((item) => AGENTIC_ELEMENTS.some(({ id }) => id === item.id));
+  const instructionFiles = templates.filter((item) =>
+    INSTRUCTION_FILES.some(({ id }) => id === item.id),
+  );
+  const prompt = templates.find((item) => item.id === AGENT_PROMPT.id)!;
+  const selected = templates.find((item) => item.id === template) ?? elements[0];
   const updateSearch = (next: AgenticSearch) =>
     navigate({
       search: (previous) => ({ ...previous, ...next }),
@@ -45,11 +53,16 @@ export function AgenticPage() {
   const relationship = AGENTIC_RELATIONSHIPS[explored ?? ""];
   const embedded = relationship?.includes ?? [];
   const conditional = relationship?.conditional ?? [];
-  const isInstructionFile = INSTRUCTION_FILES.some((file) => file.id === selected.id);
+  const isInstructionFile = instructionFiles.some((file) => file.id === selected.id);
+  const selectedGroupId = isInstructionFile
+    ? "instructions"
+    : selected.id === prompt.id
+      ? "agents"
+      : null;
   const selectedGroup = isInstructionFile
-    ? "Instructions"
-    : selected.id === AGENT_PROMPT.id
-      ? "Agents"
+    ? elements.find((item) => item.id === "instructions")!.name
+    : selected.id === prompt.id
+      ? elements.find((item) => item.id === "agents")!.name
       : null;
 
   return (
@@ -102,14 +115,14 @@ export function AgenticPage() {
           </fieldset>
         </div>
         {view === "map" ? (
-          <AgenticMap selected={selected} onSelect={setSelected} />
+          <AgenticMap selected={selected} onSelect={setSelected} templates={templates} />
         ) : (
           <>
             <p className="agentic-card-legend">
               Yellow: contents or configuration. Dashed: host extension or custom delivery.
             </p>
             <div className="agentic-grid">
-              {AGENTIC_ELEMENTS.map((element) => {
+              {elements.map((element) => {
                 const Icon = element.icon;
                 const active = selected.id === element.id;
                 const instructions = element.id === "instructions";
@@ -117,7 +130,7 @@ export function AgenticPage() {
                   <div
                     key={element.id}
                     className="agentic-card"
-                    data-selected={active || element.name === selectedGroup}
+                    data-selected={active || element.id === selectedGroupId}
                     data-embedded={
                       embedded.includes(element.id) || conditional.includes(element.id)
                     }
@@ -151,12 +164,12 @@ export function AgenticPage() {
                       <button
                         type="button"
                         className="agentic-file-badge agentic-prompt-badge"
-                        title={AGENT_PROMPT.description}
-                        aria-pressed={selected.id === AGENT_PROMPT.id}
+                        title={prompt.description}
+                        aria-pressed={selected.id === prompt.id}
                         aria-controls="agentic-readme"
-                        onClick={() => setSelected(AGENT_PROMPT)}
+                        onClick={() => setSelected(prompt)}
                       >
-                        {AGENT_PROMPT.name}
+                        {prompt.name}
                       </button>
                     )}
                     {instructions && (
@@ -165,7 +178,7 @@ export function AgenticPage() {
                         role="group"
                         aria-label="Instruction files"
                       >
-                        {INSTRUCTION_FILES.map((file) => (
+                        {instructionFiles.map((file) => (
                           <button
                             key={file.id}
                             type="button"
@@ -193,9 +206,7 @@ export function AgenticPage() {
             <p className="agentic-relationships" role="status" aria-atomic="true">
               {relationship ? (
                 <>
-                  <strong>
-                    {AGENTIC_ELEMENTS.find((element) => element.id === explored)?.name}:{" "}
-                  </strong>
+                  <strong>{elements.find((element) => element.id === explored)?.name}: </strong>
                   {relationship.description}
                 </>
               ) : (

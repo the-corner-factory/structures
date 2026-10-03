@@ -84,17 +84,27 @@ input:focus-visible {
 }
 
 .app-shell {
-  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  min-height: 0;
   background: var(--background);
 }
 
+.app-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
 .topbar {
+  flex: 0 0 auto;
   position: relative;
   z-index: 20;
-  display: flex;
-  min-height: var(--topbar-height);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 420px) auto;
+  min-height: 65px;
   align-items: center;
-  justify-content: space-between;
   gap: 24px;
   border-bottom: 1px solid var(--border);
   background: color-mix(in srgb, var(--background) 94%, transparent);
@@ -116,6 +126,7 @@ input:focus-visible {
 
 .brand-link {
   position: relative;
+  flex-shrink: 0;
 }
 
 .brand-version {
@@ -132,11 +143,22 @@ input:focus-visible {
 .brand-link img {
   display: block;
   width: auto;
+  max-width: 160px;
   height: 40px;
+  object-fit: contain;
 }
 
-.dark .brand-link img {
+.dark .brand-link .default-brand-logo {
   filter: invert(1);
+}
+
+.brand-link .dark-brand-logo,
+.dark .brand-link .light-brand-logo {
+  display: none;
+}
+
+.dark .brand-link .dark-brand-logo {
+  display: block;
 }
 
 .primary-nav {
@@ -183,6 +205,62 @@ input:focus-visible {
 
 .topbar-actions {
   gap: 7px;
+  border-inline-start: 1px solid var(--border);
+  padding-inline-start: 16px;
+}
+
+.site-settings-control {
+  position: relative;
+  min-width: 0;
+  width: 100%;
+}
+
+.site-settings-control .source-control {
+  margin: 0;
+  align-items: stretch;
+}
+
+.site-settings-control input {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 6px 9px;
+  font-size: 12px;
+}
+
+.site-settings-control .settings-reset {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+}
+
+.site-settings-feedback {
+  position: absolute;
+  top: 100%;
+  inset-inline-start: 0;
+  display: block;
+  padding-top: 1px;
+  font-size: 10px;
+  line-height: 12px;
+  color: var(--muted);
+}
+
+@media (max-width: 1200px) {
+  .topbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 16px;
+  }
+  .site-settings-control {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .topbar-actions {
+    border-inline-start: 0;
+    padding-inline-start: 0;
+  }
+  .site-settings-feedback {
+    position: static;
+  }
 }
 
 .icon-button {
@@ -221,7 +299,7 @@ input:focus-visible {
   position: relative;
   display: grid;
   grid-template-columns: 320px 1fr;
-  height: calc(100svh - var(--topbar-height));
+  height: 100%;
   min-height: 0;
   transition: grid-template-columns 180ms ease;
 }
@@ -537,6 +615,7 @@ input:focus-visible {
 
 .chooser-intro {
   max-width: 710px;
+  margin-bottom: 32px;
 }
 
 .eyebrow {
@@ -698,7 +777,7 @@ input:focus-visible {
 }
 
 .topics-page {
-  height: calc(100svh - var(--topbar-height));
+  height: 100%;
   overflow-y: auto;
 }
 
@@ -785,7 +864,7 @@ input:focus-visible {
 .board-layout {
   display: grid;
   grid-template-columns: 320px 1fr;
-  height: calc(100svh - var(--topbar-height));
+  height: 100%;
   min-height: 0;
 }
 
@@ -1331,7 +1410,7 @@ input:focus-visible {
 
 .auth-page,
 .account-page {
-  min-height: calc(100svh - var(--topbar-height));
+  min-height: 100%;
   overflow: auto;
   padding: 60px 24px;
 }
@@ -1547,6 +1626,13 @@ input:focus-visible {
 }
 
 @media (max-width: 520px) {
+  .app-shell {
+    height: auto;
+    min-height: 100svh;
+  }
+  .app-content {
+    overflow: visible;
+  }
   body {
     overflow: auto;
   }
@@ -1556,7 +1642,7 @@ input:focus-visible {
   .explorer-layout {
     display: block;
     height: auto;
-    min-height: calc(100svh - var(--topbar-height));
+    min-height: 100%;
   }
   .explorer-sidebar {
     height: 43svh;
@@ -1569,7 +1655,7 @@ input:focus-visible {
   .board-layout {
     display: block;
     height: auto;
-    min-height: calc(100svh - var(--topbar-height));
+    min-height: 100%;
   }
   .board-sidebar {
     height: 43svh;
@@ -2107,7 +2193,7 @@ input:focus-visible {
   width: min(100%, 1040px);
   margin: 0 auto;
   padding: clamp(42px, 7vw, 86px) clamp(24px, 6vw, 78px) 70px;
-  height: calc(100svh - var(--topbar-height));
+  height: 100%;
   overflow-y: auto;
 }
 
@@ -2551,6 +2637,13 @@ input:focus-visible {
   color: var(--node-color);
 }
 
+.agentic-map-node-title strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .agentic-map-node-title .agentic-map-check {
   width: 15px;
   height: 15px;
@@ -2558,6 +2651,10 @@ input:focus-visible {
 }
 
 .agentic-map-node-summary {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.5;
@@ -3223,10 +3320,19 @@ input:focus-visible {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
     height: auto;
-    min-height: calc(100svh - var(--topbar-height));
+    min-height: 100%;
   }
 
   .branch-main {
     padding: 16px;
+  }
+}
+
+@media print {
+  .app-shell,
+  .app-content {
+    display: block;
+    height: auto;
+    overflow: visible;
   }
 }

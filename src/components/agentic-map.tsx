@@ -1,9 +1,9 @@
 import { ArrowDownIcon, ArrowRightIcon, CheckIcon } from "lucide-react";
 import { useId, type CSSProperties } from "react";
 
-import { AGENT_PROMPT, AGENTIC_ELEMENTS, INSTRUCTION_FILES } from "#/lib/agentic.ts";
+import { AGENTIC_TEMPLATES } from "#/lib/agentic.ts";
 
-const nodes = [
+const mapNodes = [
   { id: "plugins", label: "Plugins", summary: "Distribute compatible components", tone: "purple" },
   { id: "harness", label: "Harness", summary: "Loop, context, tools & permissions", tone: "blue" },
   {
@@ -28,10 +28,7 @@ const nodes = [
     summary: "Supply project facts & code",
     tone: "amber",
   },
-].map((node) => ({
-  ...node,
-  element: [...AGENTIC_ELEMENTS, ...INSTRUCTION_FILES].find((item) => item.id === node.id)!,
-}));
+];
 
 // Fixed coordinates keep this nine-block teaching diagram aligned with its HTML buttons.
 const connections = [
@@ -92,11 +89,23 @@ const connections = [
 export function AgenticMap({
   selected,
   onSelect,
+  templates = AGENTIC_TEMPLATES,
 }: {
-  selected: (typeof AGENTIC_ELEMENTS)[number];
-  onSelect: (element: (typeof AGENTIC_ELEMENTS)[number]) => void;
+  selected: (typeof AGENTIC_TEMPLATES)[number];
+  onSelect: (element: (typeof AGENTIC_TEMPLATES)[number]) => void;
+  templates?: typeof AGENTIC_TEMPLATES;
 }) {
   const markerId = useId();
+  const nodes = mapNodes.map((node) => {
+    const element = templates.find((item) => item.id === node.id)!;
+    const original = AGENTIC_TEMPLATES.find((item) => item.id === node.id)!;
+    return {
+      ...node,
+      element,
+      label: element.name === original.name ? node.label : element.name,
+      summary: element.description === original.description ? node.summary : element.description,
+    };
+  });
   const selectedId =
     selected.id === "prompt"
       ? "agents"
@@ -152,11 +161,11 @@ export function AgenticMap({
           const active = selectedId === node.id;
           const template =
             node.id === "agents"
-              ? AGENT_PROMPT
+              ? templates.find((item) => item.id === "prompt")
               : node.id === "instructions"
-                ? INSTRUCTION_FILES[0]
+                ? templates.find((item) => item.id === "agents-md")
                 : node.id === "context-md"
-                  ? INSTRUCTION_FILES[1]
+                  ? templates.find((item) => item.id === "context-md")
                   : null;
           return (
             <div
@@ -221,13 +230,15 @@ export function AgenticMap({
           <p className="eyebrow">In this system</p>
           <h3 id="agentic-map-detail-title">{current.label}</h3>
           <p>
-            {selectedId === "context-md"
+            {selectedId === "context-md" &&
+            current.element.distinction ===
+              AGENTIC_TEMPLATES.find((item) => item.id === "context-md")!.distinction
               ? "Specifications, architecture notes, and source code inform the agent after it reads them. CONTEXT.md is one way to record that knowledge."
               : current.element.distinction}
           </p>
           <div className="agentic-map-template-links">
             <a href="#agentic-readme">
-              Read {selectedId === "context-md" ? "CONTEXT.md example" : "template"}{" "}
+              Read {selectedId === "context-md" ? `${current.element.name} example` : "template"}{" "}
               <ArrowDownIcon aria-hidden="true" />
             </a>
           </div>
