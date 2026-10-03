@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here.
 
+## [1.4.0](https://github.com/the-corner-inc/structures/compare/v1.3.1...v1.4.0) (2026-10-03)
+
+### Features
+
+* **core:** persisting search ([72ce178](https://github.com/the-corner-inc/structures/commit/72ce178bba087ee288136832788a6bd554e1db6e))
+* settings ([fc0464d](https://github.com/the-corner-inc/structures/commit/fc0464d37946503144e5b5f656cf7534badf5363))
+
 ## [1.3.1](https://github.com/the-corner-inc/structures/compare/v1.3.0...v1.3.1) (2026-10-02)
 
 ### Build System
