@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented here.
 
+## [1.5.0](https://github.com/the-corner-inc/structures/compare/v1.4.0...v1.5.0) (2026-10-06)
+
+### Features
+
+* **agentic:** artifacts explanation ([dfab674](https://github.com/the-corner-inc/structures/commit/dfab6741396ca048f37431b8ac80778f4441f702))
+* **agentic:** enhance agentic map files styling and scrollbar behavior ([e841af0](https://github.com/the-corner-inc/structures/commit/e841af0b59f392c4822eab650e96c0bc6bb91cce))
+
+### Documentation
+
+* **agentic:** design & product.md ([eb535b9](https://github.com/the-corner-inc/structures/commit/eb535b90bdf29d7806f435f6f4bea06c4d759705))
+
 ## [1.4.0](https://github.com/the-corner-inc/structures/compare/v1.3.1...v1.4.0) (2026-10-03)
 
 ### Features
