@@ -2583,10 +2583,26 @@ input:focus-visible {
 }
 
 .agentic-map-files {
+  position: relative;
+  z-index: 1;
   display: flex;
-  justify-content: flex-end;
-  flex-wrap: wrap;
+  justify-content: safe flex-end;
   gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.agentic-map-files::-webkit-scrollbar {
+  display: none;
+}
+
+.agentic-map-files .agentic-file-badge {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.agentic-map-files .agentic-file-badge:focus-visible {
+  outline-offset: -2px;
 }
 
 @media (min-width: 901px) {
