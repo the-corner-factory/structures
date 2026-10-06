@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-10-05T14:43:20.941Z",
+        "reason": "Agent: Inter is the committed body and Markdown typeface at HEAD:src/styles.css lines 53 and 1283; the requested Agentic content addition preserves the existing visual system."
+      }
+    ]
+  }
+}

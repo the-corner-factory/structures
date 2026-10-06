@@ -2503,7 +2503,7 @@ input:focus-visible {
 
 .agentic-map {
   position: relative;
-  aspect-ratio: 1000 / 620;
+  aspect-ratio: 1000 / 680;
   background-image: radial-gradient(var(--border-subtle) 1px, transparent 1px);
   background-size: 20px 20px;
 }
@@ -2551,7 +2551,7 @@ input:focus-visible {
   top: var(--node-top);
   display: flex;
   width: 24%;
-  height: calc(100% * 100 / 620);
+  height: calc(100% * 100 / 680);
   flex-direction: column;
   justify-content: center;
   gap: 6px;
@@ -2582,8 +2582,18 @@ input:focus-visible {
   border-radius: inherit;
 }
 
-.agentic-map-node > .agentic-file-badge {
-  align-self: flex-end;
+.agentic-map-files {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+@media (min-width: 901px) {
+  .agentic-map-node:has(.agentic-map-files) {
+    height: auto;
+    min-height: calc(100% * 100 / 680);
+  }
 }
 
 .agentic-map-node[data-tone="purple"] {

@@ -1,7 +1,7 @@
 import { ArrowDownIcon, ArrowRightIcon, CheckIcon } from "lucide-react";
 import { useId, type CSSProperties } from "react";
 
-import { AGENTIC_TEMPLATES } from "#/lib/agentic.ts";
+import { AGENTIC_TEMPLATES, INSTRUCTION_FILES } from "#/lib/agentic.ts";
 
 const mapNodes = [
   { id: "plugins", label: "Plugins", summary: "Distribute compatible components", tone: "purple" },
@@ -107,18 +107,15 @@ export function AgenticMap({
     };
   });
   const selectedId =
-    selected.id === "prompt"
-      ? "agents"
-      : selected.id === "agents-md"
-        ? "instructions"
-        : selected.id;
+    INSTRUCTION_FILES.find((file) => file.id === selected.id)?.mapNodeId ??
+    (selected.id === "prompt" ? "agents" : selected.id);
   const current = nodes.find((node) => node.id === selectedId)!;
   const related = connections.filter(({ from, to }) => from === selectedId || to === selectedId);
 
   return (
     <div className="agentic-system">
       <div className="agentic-map" role="group" aria-label="Agent system building blocks">
-        <svg className="agentic-map-lines" viewBox="0 0 1000 620" aria-hidden="true">
+        <svg className="agentic-map-lines" viewBox="0 0 1000 680" aria-hidden="true">
           <defs>
             {["muted", "accent"].map((tone) => (
               <marker
@@ -159,14 +156,14 @@ export function AgenticMap({
         {nodes.map((node, index) => {
           const Icon = node.element.icon;
           const active = selectedId === node.id;
-          const template =
+          const nodeTemplates =
             node.id === "agents"
-              ? templates.find((item) => item.id === "prompt")
-              : node.id === "instructions"
-                ? templates.find((item) => item.id === "agents-md")
-                : node.id === "context-md"
-                  ? templates.find((item) => item.id === "context-md")
-                  : null;
+              ? templates.filter((item) => item.id === "prompt")
+              : templates.filter((item) =>
+                  INSTRUCTION_FILES.some(
+                    (file) => file.id === item.id && file.mapNodeId === node.id,
+                  ),
+                );
           return (
             <div
               key={node.id}
@@ -177,7 +174,7 @@ export function AgenticMap({
               style={
                 {
                   "--node-left": `${3 + (index % 3) * 35}%`,
-                  "--node-top": `${((36 + Math.floor(index / 3) * 230) / 620) * 100}%`,
+                  "--node-top": `${((36 + Math.floor(index / 3) * 230) / 680) * 100}%`,
                 } as CSSProperties
               }
             >
@@ -196,17 +193,22 @@ export function AgenticMap({
                 </span>
                 <span className="agentic-map-node-summary">{node.summary}</span>
               </button>
-              {template && (
-                <button
-                  type="button"
-                  className="agentic-file-badge"
-                  title={template.description}
-                  aria-pressed={selected.id === template.id}
-                  aria-controls="agentic-readme"
-                  onClick={() => onSelect(template)}
-                >
-                  {template.name}
-                </button>
+              {nodeTemplates.length > 0 && (
+                <div className="agentic-map-files">
+                  {nodeTemplates.map((template) => (
+                    <button
+                      key={template.id}
+                      type="button"
+                      className="agentic-file-badge"
+                      title={template.description}
+                      aria-pressed={selected.id === template.id}
+                      aria-controls="agentic-readme"
+                      onClick={() => onSelect(template)}
+                    >
+                      {template.name}
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
           );
@@ -230,15 +232,17 @@ export function AgenticMap({
           <p className="eyebrow">In this system</p>
           <h3 id="agentic-map-detail-title">{current.label}</h3>
           <p>
-            {selectedId === "context-md" &&
+            {selected.id === "context-md" &&
             current.element.distinction ===
               AGENTIC_TEMPLATES.find((item) => item.id === "context-md")!.distinction
-              ? "Specifications, architecture notes, and source code inform the agent after it reads them. CONTEXT.md is one way to record that knowledge."
-              : current.element.distinction}
+              ? "Specifications, architecture notes, and source code inform the agent after it reads them. CONTEXT.md records project knowledge, DESIGN.md describes the visual system, and PRODUCT.md explains product goals and user needs."
+              : selectedId === "context-md"
+                ? selected.distinction
+                : current.element.distinction}
           </p>
           <div className="agentic-map-template-links">
             <a href="#agentic-readme">
-              Read {selectedId === "context-md" ? `${current.element.name} example` : "template"}{" "}
+              Read {selectedId === "context-md" ? `${selected.name} example` : "template"}{" "}
               <ArrowDownIcon aria-hidden="true" />
             </a>
           </div>

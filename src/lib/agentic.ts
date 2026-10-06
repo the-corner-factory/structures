@@ -414,6 +414,7 @@ State the task, include relevant context, and describe the expected result. Add 
 export const INSTRUCTION_FILES = [
   {
     id: "agents-md",
+    mapNodeId: "instructions",
     name: "AGENTS.md",
     kind: "Project instructions",
     icon: FileTextIcon,
@@ -454,6 +455,7 @@ Read CONTEXT.md for current architecture and decisions. Treat its progress notes
   },
   {
     id: "context-md",
+    mapNodeId: "context-md",
     name: "CONTEXT.md",
     kind: "Project knowledge",
     icon: NotebookTextIcon,
@@ -493,6 +495,101 @@ A documentation website for exploring project organization standards.
 - Known limitations: [remaining issues or assumptions].
 
 Keep these notes current and link to the source files behind each decision. Load this file explicitly or reference it from the project's agent instructions.
+`,
+  },
+  {
+    id: "design-md",
+    mapNodeId: "context-md",
+    name: "DESIGN.md",
+    kind: "Design context",
+    icon: NotebookTextIcon,
+    description:
+      "Describe the visual system: colors, typography, spacing, components, and interaction states.",
+    distinction:
+      "Here, DESIGN.md gives agents the visual language and UI rules to follow when building screens. PRODUCT.md supplies product goals; CONTEXT.md records architecture. Reference or load DESIGN.md before UI work; discovery depends on the host.",
+    source:
+      "https://github.com/google-labs-code/stitch-skills/blob/main/plugins/stitch-utilities/skills/design-md/SKILL.md",
+    sourceLabel: "Google Stitch's DESIGN.md guidance",
+    readme: `# DESIGN.md
+
+## Visual theme
+
+A documentation library with a quiet interface that keeps examples easy to scan and read. This is an illustrative design brief; adapt it to your project's existing visual system.
+
+## Colors and roles
+
+| Role | Example value | Usage |
+| --- | --- | --- |
+| Background | #FFFFFF | Reading surface |
+| Text | #1F2328 | Headings and body copy |
+| Accent | #0969DA | Links and selected controls |
+
+## Typography
+
+- Use the project's existing sans-serif font for navigation and prose.
+- Use a monospace font for code and filenames.
+- Keep long text readable with clear heading levels and comfortable line spacing.
+
+## Components and states
+
+- Reuse existing buttons, cards, inputs, and Markdown styles.
+- Make selected, hover, focus, loading, and error states clear.
+- Preserve keyboard access, visible focus, and accessible contrast in both themes.
+
+## Layout
+
+Use the existing spacing scale. Keep related controls together, allow filename badges to wrap, and stack columns on narrow screens.
+
+## References and maintenance
+
+Link to the project's token definitions, stylesheet, and representative components. Keep this brief aligned with them, and load it explicitly or reference it from AGENTS.md before UI changes.
+`,
+  },
+  {
+    id: "product-md",
+    mapNodeId: "context-md",
+    name: "PRODUCT.md",
+    kind: "Product context",
+    icon: FileTextIcon,
+    description:
+      "Explain the product's purpose, target users, key features, scope, and success criteria.",
+    distinction:
+      "PRODUCT.md gives agents the product vision and user needs behind implementation decisions. Keep it focused on what the product does and why; link to DESIGN.md for UI rules and CONTEXT.md for architecture. Reference or load it explicitly; the filename alone does not guarantee inclusion.",
+    source: "https://code.visualstudio.com/docs/agents/guides/context-engineering-guide",
+    sourceLabel: "VS Code's product context guidance",
+    readme: `# PRODUCT.md
+
+## Purpose
+
+Help developers understand and share project organization standards through browsable examples.
+
+## Users and needs
+
+- Developers looking for an appropriate project structure.
+- Teams sharing conventions during onboarding and code review.
+- Maintainers keeping examples and explanations accurate.
+
+## Key features
+
+- Browse folder structures and read the documentation for each entry.
+- Explore issue conventions, branch strategies, and agent concepts.
+- Share links to selected examples and download reusable templates.
+
+## Scope
+
+Provide educational examples and reference material. Running agents and managing live issues are outside this product's scope.
+
+## Success criteria
+
+- A visitor can find an example and understand when to use it.
+- Shared links restore the selected example.
+- Public content works without an account and is accessible with a keyboard.
+
+## Open questions
+
+Which user needs and examples should the next release address? Record confirmed decisions here and track feature-specific acceptance criteria in the corresponding issue or specification.
+
+Keep this overview concise and current. Load it explicitly or reference it from AGENTS.md so the agent can use it when planning features.
 `,
   },
 ];

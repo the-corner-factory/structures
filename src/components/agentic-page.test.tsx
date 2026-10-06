@@ -250,6 +250,8 @@ it("selects each building block and updates its README and Markdown download", a
     ["Tools", "Search project docs tool", "tools-README.md"],
     ["AGENTS.md", "AGENTS.md", "AGENTS.md"],
     ["CONTEXT.md", "CONTEXT.md", "CONTEXT.md"],
+    ["DESIGN.md", "DESIGN.md", "DESIGN.md"],
+    ["PRODUCT.md", "PRODUCT.md", "PRODUCT.md"],
   ] as const;
 
   expect(screen.getByRole("button", { name: "Harness", pressed: true })).toBeTruthy();
@@ -309,7 +311,7 @@ it("groups instruction files as badges and can return to the Instructions descri
 
   expect(container.querySelectorAll(".agentic-card")).toHaveLength(8);
   expect(container.querySelector("button button")).toBeNull();
-  for (const name of ["AGENTS.md", "CONTEXT.md"]) {
+  for (const name of ["AGENTS.md", "CONTEXT.md", "DESIGN.md", "PRODUCT.md"]) {
     const badge = within(files).getByRole("button", { name });
     await click(badge);
 
@@ -327,7 +329,7 @@ it("traces the sketch's directed connections and opens their existing templates"
   const { container } = await renderPage();
   expect(screen.getByRole("radio", { name: "System map", checked: true })).toBeTruthy();
   const map = screen.getByRole("group", { name: "Agent system building blocks" });
-  expect(within(map).getAllByRole("button")).toHaveLength(12);
+  expect(within(map).getAllByRole("button")).toHaveLength(14);
   expect(screen.getByRole("list", { name: "Harness connections" }).textContent).toContain(
     "Harness executes authorized calls to Tools",
   );
@@ -367,6 +369,8 @@ it("defaults to the system map and preserves templates when switching views", as
     ["Prompt", "Agent"],
     ["AGENTS.md", "Instructions"],
     ["CONTEXT.md", "Specs & context"],
+    ["DESIGN.md", "Specs & context"],
+    ["PRODUCT.md", "Specs & context"],
   ]) {
     await click(screen.getByRole("button", { name }));
     await click(screen.getByRole("radio", { name: "Cards & templates" }));
@@ -391,6 +395,8 @@ it("opens Prompt and Markdown files directly from their graph blocks", async () 
     ["Prompt", "Agent", "Agents / Prompt"],
     ["AGENTS.md", "Instructions", "Instructions / AGENTS.md"],
     ["CONTEXT.md", "Specs & context", "Instructions / CONTEXT.md"],
+    ["DESIGN.md", "Specs & context", "Instructions / DESIGN.md"],
+    ["PRODUCT.md", "Specs & context", "Instructions / PRODUCT.md"],
   ]) {
     const block = within(map)
       .getByRole("button", { name: parent })
@@ -404,6 +410,12 @@ it("opens Prompt and Markdown files directly from their graph blocks", async () 
     expect(badge.getAttribute("aria-controls")).toBe(readme.id);
     expect(within(readme).getByRole("heading", { level: 1, name })).toBeTruthy();
     expect(within(readme).getByRole("link", { name: `Download ${name} template` })).toBeTruthy();
+    if (parent === "Specs & context") {
+      expect(
+        screen.getByRole("list", { name: "Specs & context connections" }).textContent,
+      ).toContain("Specs & context inform Agent when read");
+      expect(screen.getByRole("link", { name: `Read ${name} example` })).toBeTruthy();
+    }
 
     await click(within(block).getByRole("button", { name: parent }));
     expect(screen.getByRole("list", { name: `${parent} connections` })).toBeTruthy();

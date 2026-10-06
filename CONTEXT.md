@@ -76,7 +76,8 @@ selections. Reset removes both `settings` and legacy `source`. Loading the same 
 Root settings take precedence over `source`, including when a profile omits the current section.
 
 Shareable page configuration belongs in validated TanStack Router search state. The Agentic page
-uses `view=map|cards` and `template=<id>` (a building block, `prompt`, `agents-md`, or `context-md`),
+uses `view=map|cards` and `template=<id>` (a building block, `prompt`, `agents-md`, `context-md`,
+`design-md`, or `product-md`),
 for example `/agentic?view=cards&template=agents-md`. Missing or invalid values show the system map
 and Harness. Controls update the URL without resetting scroll; reloads and Back/Forward restore
 the view and template together. The defaults are omitted when controls update the URL. Hover and

@@ -160,6 +160,8 @@ describe("site settings validation", () => {
           source: "https://example.com/#workspace",
         },
         "agents-md": { readme: "# AGENTS.md\nRun pnpm test." },
+        "design-md": { readme: "# DESIGN.md\nUse the team's design tokens." },
+        "product-md": { readme: "# PRODUCT.md\nDescribe the team's users and goals." },
       },
     };
     expect(parseSiteSettings(settings)).toEqual(settings);
