@@ -1,7 +1,7 @@
 import { ArrowDownIcon, ArrowRightIcon, CheckIcon } from "lucide-react";
 import { useId, type CSSProperties } from "react";
 
-import { AGENTIC_TEMPLATES, INSTRUCTION_FILES } from "#/lib/agentic.ts";
+import { AGENT_EXAMPLES, AGENTIC_TEMPLATES, INSTRUCTION_FILES } from "#/lib/agentic.ts";
 
 const mapNodes = [
   { id: "plugins", label: "Plugins", summary: "Distribute compatible components", tone: "purple" },
@@ -108,7 +108,7 @@ export function AgenticMap({
   });
   const selectedId =
     INSTRUCTION_FILES.find((file) => file.id === selected.id)?.mapNodeId ??
-    (selected.id === "prompt" ? "agents" : selected.id);
+    (AGENT_EXAMPLES.some((example) => example.id === selected.id) ? "agents" : selected.id);
   const current = nodes.find((node) => node.id === selectedId)!;
   const related = connections.filter(({ from, to }) => from === selectedId || to === selectedId);
 
@@ -158,7 +158,7 @@ export function AgenticMap({
           const active = selectedId === node.id;
           const nodeTemplates =
             node.id === "agents"
-              ? templates.filter((item) => item.id === "prompt")
+              ? templates.filter((item) => AGENT_EXAMPLES.some(({ id }) => id === item.id))
               : templates.filter((item) =>
                   INSTRUCTION_FILES.some(
                     (file) => file.id === item.id && file.mapNodeId === node.id,

@@ -242,6 +242,7 @@ it("selects each building block and updates its README and Markdown download", a
     ["Harness", "Project workspace harness", "harness-README.md"],
     ["Agents", "Code review agent", "agents-README.md"],
     ["Prompt", "Prompt", "prompt-README.md"],
+    ["Artifacts", "Artifacts", "artifacts-README.md"],
     ["Plugins", "Team development plugin", "plugins-README.md"],
     ["MCP Servers", "Project knowledge MCP server", "mcp-servers-README.md"],
     ["Skills", "Review changes skill", "skills-README.md"],
@@ -262,8 +263,8 @@ it("selects each building block and updates its README and Markdown download", a
     expect(screen.getAllByRole("button", { pressed: true })).toEqual([card]);
     const readme = screen.getByRole("region", {
       name:
-        name === "Prompt"
-          ? "Agents / Prompt"
+        name === "Prompt" || name === "Artifacts"
+          ? `Agents / ${name}`
           : name.endsWith(".md")
             ? `Instructions / ${name}`
             : `${name} / README.md`,
@@ -329,7 +330,7 @@ it("traces the sketch's directed connections and opens their existing templates"
   const { container } = await renderPage();
   expect(screen.getByRole("radio", { name: "System map", checked: true })).toBeTruthy();
   const map = screen.getByRole("group", { name: "Agent system building blocks" });
-  expect(within(map).getAllByRole("button")).toHaveLength(14);
+  expect(within(map).getAllByRole("button")).toHaveLength(15);
   expect(screen.getByRole("list", { name: "Harness connections" }).textContent).toContain(
     "Harness executes authorized calls to Tools",
   );
@@ -367,6 +368,7 @@ it("defaults to the system map and preserves templates when switching views", as
 
   for (const [name, parent] of [
     ["Prompt", "Agent"],
+    ["Artifacts", "Agent"],
     ["AGENTS.md", "Instructions"],
     ["CONTEXT.md", "Specs & context"],
     ["DESIGN.md", "Specs & context"],
@@ -386,13 +388,14 @@ it("defaults to the system map and preserves templates when switching views", as
   }
 });
 
-it("opens Prompt and Markdown files directly from their graph blocks", async () => {
+it("opens agent examples and Markdown files directly from their graph blocks", async () => {
   const { container } = await renderPage();
   const map = screen.getByRole("group", { name: "Agent system building blocks" });
   expect(container.querySelector("button button")).toBeNull();
 
   for (const [name, parent, region] of [
     ["Prompt", "Agent", "Agents / Prompt"],
+    ["Artifacts", "Agent", "Agents / Artifacts"],
     ["AGENTS.md", "Instructions", "Instructions / AGENTS.md"],
     ["CONTEXT.md", "Specs & context", "Instructions / CONTEXT.md"],
     ["DESIGN.md", "Specs & context", "Instructions / DESIGN.md"],

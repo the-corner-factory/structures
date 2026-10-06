@@ -15,7 +15,7 @@ import { PageTitle } from "#/components/page-title.tsx";
 import { useSiteSettings } from "#/components/site-settings-provider.tsx";
 import { StructureMarkdown } from "#/components/structures/structure-markdown.tsx";
 import {
-  AGENT_PROMPT,
+  AGENT_EXAMPLES,
   AGENTIC_ELEMENTS,
   AGENTIC_RELATIONSHIPS,
   AGENTIC_TEMPLATES,
@@ -34,7 +34,7 @@ export function AgenticPage() {
   const instructionFiles = templates.filter((item) =>
     INSTRUCTION_FILES.some(({ id }) => id === item.id),
   );
-  const prompt = templates.find((item) => item.id === AGENT_PROMPT.id)!;
+  const agentExamples = templates.filter((item) => AGENT_EXAMPLES.some(({ id }) => id === item.id));
   const selected = templates.find((item) => item.id === template) ?? elements[0];
   const updateSearch = (next: AgenticSearch) =>
     navigate({
@@ -54,14 +54,11 @@ export function AgenticPage() {
   const embedded = relationship?.includes ?? [];
   const conditional = relationship?.conditional ?? [];
   const isInstructionFile = instructionFiles.some((file) => file.id === selected.id);
-  const selectedGroupId = isInstructionFile
-    ? "instructions"
-    : selected.id === prompt.id
-      ? "agents"
-      : null;
+  const isAgentExample = agentExamples.some((example) => example.id === selected.id);
+  const selectedGroupId = isInstructionFile ? "instructions" : isAgentExample ? "agents" : null;
   const selectedGroup = isInstructionFile
     ? elements.find((item) => item.id === "instructions")!.name
-    : selected.id === prompt.id
+    : isAgentExample
       ? elements.find((item) => item.id === "agents")!.name
       : null;
 
@@ -160,18 +157,20 @@ export function AgenticPage() {
                         {element.description}
                       </span>
                     </button>
-                    {element.id === "agents" && (
-                      <button
-                        type="button"
-                        className="agentic-file-badge agentic-prompt-badge"
-                        title={prompt.description}
-                        aria-pressed={selected.id === prompt.id}
-                        aria-controls="agentic-readme"
-                        onClick={() => setSelected(prompt)}
-                      >
-                        {prompt.name}
-                      </button>
-                    )}
+                    {element.id === "agents" &&
+                      agentExamples.map((example) => (
+                        <button
+                          key={example.id}
+                          type="button"
+                          className="agentic-file-badge agentic-prompt-badge"
+                          title={example.description}
+                          aria-pressed={selected.id === example.id}
+                          aria-controls="agentic-readme"
+                          onClick={() => setSelected(example)}
+                        >
+                          {example.name}
+                        </button>
+                      ))}
                     {instructions && (
                       <div
                         className="agentic-instruction-files"

@@ -411,6 +411,44 @@ State the task, include relevant context, and describe the expected result. Add 
 `,
 };
 
+export const AGENT_EXAMPLES = [
+  AGENT_PROMPT,
+  {
+    id: "artifacts",
+    name: "Artifacts",
+    kind: "Output",
+    icon: FileTextIcon,
+    description: "Self-contained outputs you can edit, reuse, and share beyond the conversation.",
+    distinction:
+      "An artifact is a deliverable created during the work. A prompt requests it; the agent produces it using the host's capabilities. Claude displays artifacts beside the conversation for further editing and reuse.",
+    source:
+      "https://support.claude.com/en/articles/17153992-what-are-artifacts-and-how-do-i-use-them",
+    sourceLabel: "Claude's guide to artifacts",
+    readme: `# Artifacts
+
+An artifact is a self-contained result of AI-assisted work, such as a document, diagram, design, presentation, dashboard, or small interactive tool.
+
+## When to use one
+
+Ask for an artifact when the result needs to stand on its own and you expect to revisit, revise, or share it.
+
+## In Claude
+
+Artifacts open beside the conversation. Describe the changes you want, then share or export the result using the available controls. Supported templates also allow direct editing.
+
+## Example request
+
+\`\`\`text
+Create an onboarding checklist artifact for this project.
+Include setup steps, verification commands, and links to the relevant docs.
+Keep it understandable without the chat history.
+\`\`\`
+
+Review the result, ask for revisions, and reuse it when it is ready. Artifact features and formats depend on the host.
+`,
+  },
+];
+
 export const INSTRUCTION_FILES = [
   {
     id: "agents-md",
@@ -594,7 +632,7 @@ Keep this overview concise and current. Load it explicitly or reference it from 
   },
 ];
 
-export const AGENTIC_TEMPLATES = [...AGENTIC_ELEMENTS, AGENT_PROMPT, ...INSTRUCTION_FILES];
+export const AGENTIC_TEMPLATES = [...AGENTIC_ELEMENTS, ...AGENT_EXAMPLES, ...INSTRUCTION_FILES];
 
 export interface AgenticSearch {
   view?: "map" | "cards";
