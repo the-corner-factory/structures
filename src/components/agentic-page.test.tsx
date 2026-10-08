@@ -115,6 +115,9 @@ it.each(AGENTIC_TEMPLATES)("restores $id from a direct link in either view", asy
       }),
     ).toBeTruthy();
     const download = screen.getByRole("link", { name: `Download ${template.name} template` });
+    if (template.name.endsWith(".md")) {
+      expect(download.getAttribute("download")).toBe(template.name);
+    }
     expect(decodeURIComponent(download.getAttribute("href")!)).toContain(template.readme);
     page.unmount();
   }
@@ -250,7 +253,7 @@ it("selects each building block and updates its README and Markdown download", a
     ["Hooks", "Post-edit validation hook", "hooks-README.md"],
     ["Tools", "Search project docs tool", "tools-README.md"],
     ["AGENTS.md", "AGENTS.md", "AGENTS.md"],
-    ["CONTEXT.md", "CONTEXT.md", "CONTEXT.md"],
+    ["GLOSSARY.md", "GLOSSARY.md", "GLOSSARY.md"],
     ["DESIGN.md", "DESIGN.md", "DESIGN.md"],
     ["PRODUCT.md", "PRODUCT.md", "PRODUCT.md"],
   ] as const;
@@ -312,7 +315,7 @@ it("groups instruction files as badges and can return to the Instructions descri
 
   expect(container.querySelectorAll(".agentic-card")).toHaveLength(8);
   expect(container.querySelector("button button")).toBeNull();
-  for (const name of ["AGENTS.md", "CONTEXT.md", "DESIGN.md", "PRODUCT.md"]) {
+  for (const name of ["AGENTS.md", "GLOSSARY.md", "DESIGN.md", "PRODUCT.md"]) {
     const badge = within(files).getByRole("button", { name });
     await click(badge);
 
@@ -344,7 +347,7 @@ it("traces the sketch's directed connections and opens their existing templates"
     ["Tools", "Harness executes authorized calls to Tools", "Tools / README.md", 3],
     ["Instructions", "Instructions orient Agent", "Instructions / README.md", 1],
     ["Skills", "Skills guide Agent", "Skills / README.md", 1],
-    ["Specs & context", "Specs & context inform Agent when read", "Instructions / CONTEXT.md", 1],
+    ["Specs & context", "Specs & context inform Agent when read", "Instructions / GLOSSARY.md", 1],
   ] as const;
 
   for (const [name, relationship, template, count] of examples) {
@@ -358,7 +361,7 @@ it("traces the sketch's directed connections and opens their existing templates"
     );
     expect(screen.getByRole("region", { name: template })).toBeTruthy();
   }
-  expect(screen.getByRole("link", { name: "Download CONTEXT.md template" })).toBeTruthy();
+  expect(screen.getByRole("link", { name: "Download GLOSSARY.md template" })).toBeTruthy();
 });
 
 it("defaults to the system map and preserves templates when switching views", async () => {
@@ -370,7 +373,7 @@ it("defaults to the system map and preserves templates when switching views", as
     ["Prompt", "Agent"],
     ["Artifacts", "Agent"],
     ["AGENTS.md", "Instructions"],
-    ["CONTEXT.md", "Specs & context"],
+    ["GLOSSARY.md", "Specs & context"],
     ["DESIGN.md", "Specs & context"],
     ["PRODUCT.md", "Specs & context"],
   ]) {
@@ -397,7 +400,7 @@ it("opens agent examples and Markdown files directly from their graph blocks", a
     ["Prompt", "Agent", "Agents / Prompt"],
     ["Artifacts", "Agent", "Agents / Artifacts"],
     ["AGENTS.md", "Instructions", "Instructions / AGENTS.md"],
-    ["CONTEXT.md", "Specs & context", "Instructions / CONTEXT.md"],
+    ["GLOSSARY.md", "Specs & context", "Instructions / GLOSSARY.md"],
     ["DESIGN.md", "Specs & context", "Instructions / DESIGN.md"],
     ["PRODUCT.md", "Specs & context", "Instructions / PRODUCT.md"],
   ]) {
@@ -422,6 +425,6 @@ it("opens agent examples and Markdown files directly from their graph blocks", a
 
     await click(within(block).getByRole("button", { name: parent }));
     expect(screen.getByRole("list", { name: `${parent} connections` })).toBeTruthy();
-    if (name !== "CONTEXT.md") expect(badge.getAttribute("aria-pressed")).toBe("false");
+    if (name !== "GLOSSARY.md") expect(badge.getAttribute("aria-pressed")).toBe("false");
   }
 });

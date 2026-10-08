@@ -83,6 +83,7 @@ and Harness. Controls update the URL without resetting scroll; reloads and Back/
 the view and template together. The defaults are omitted when controls update the URL. Hover and
 focus stay local. Heading links and copied heading URLs preserve the current query parameters.
 Prompt and Artifacts appear under Agent in both views, explaining its input and reusable output.
+The `GLOSSARY.md` example defines project terminology; its stable template/profile ID is `context-md`.
 
 Folder and issue explorers store their search filter in `q`, for example
 `/folders/tanstack-react?q=components`. The input reads directly from the URL, so direct links,

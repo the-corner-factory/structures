@@ -235,7 +235,7 @@ export function AgenticMap({
             {selected.id === "context-md" &&
             current.element.distinction ===
               AGENTIC_TEMPLATES.find((item) => item.id === "context-md")!.distinction
-              ? "Specifications, architecture notes, and source code inform the agent after it reads them. CONTEXT.md records project knowledge, DESIGN.md describes the visual system, and PRODUCT.md explains product goals and user needs."
+              ? "Specifications, architecture notes, and source code inform the agent after it reads them. GLOSSARY.md defines shared terminology, DESIGN.md describes the visual system, and PRODUCT.md explains product goals and user needs."
               : selectedId === "context-md"
                 ? selected.distinction
                 : current.element.distinction}

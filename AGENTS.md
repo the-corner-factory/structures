@@ -1,7 +1,7 @@
 # Working on Structures
 
 Structures is a React application for browsing project organization standards, plus a reusable
-shadcn registry explorer. Read [CONTEXT.md](CONTEXT.md) for the architecture and data flows,
+shadcn registry explorer. Read [GLOSSARY.md](GLOSSARY.md) for the architecture and data flows,
 [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidance, and
 [docs/registry.md](docs/registry.md) before changing distributed explorer files.
 
@@ -127,4 +127,4 @@ The `test:e2e` script exists, but there is currently no app Playwright configura
   creates the GitHub Release from the matching changelog section. The registry uses the same tag;
   the root package is private and is not published to npm.
 - Preserve unrelated working-tree changes and avoid committing build/cache output. Update
-  these instructions and `CONTEXT.md` when the documented architecture or workflow changes.
+  these instructions and `GLOSSARY.md` when the documented architecture or workflow changes.

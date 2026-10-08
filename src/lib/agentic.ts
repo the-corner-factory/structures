@@ -486,53 +486,44 @@ A TypeScript web application. Keep changes focused and follow patterns in neighb
 
 Run relevant checks and summarize the changes. State any checks that could not run.
 
-## Project context
+## Project terminology
 
-Read CONTEXT.md for current architecture and decisions. Treat its progress notes as background; verify them against the code.
+Read GLOSSARY.md for the project's shared terms and their meanings.
 `,
   },
   {
+    // Keep this ID stable for shared links and website profile overrides.
     id: "context-md",
     mapNodeId: "context-md",
-    name: "CONTEXT.md",
-    kind: "Project knowledge",
+    name: "GLOSSARY.md",
+    kind: "Project terminology",
     icon: NotebookTextIcon,
-    description:
-      "Record architecture, decisions, and current state so work can resume with context.",
+    description: "Define shared project terms so people and agents use the same language.",
     distinction:
-      "Here, CONTEXT.md holds project facts and handoff notes, while AGENTS.md holds working guidance. CONTEXT.md is a project convention: explicitly reference or load it.",
-    source: "https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents",
-    sourceLabel: "Using artifacts to carry context between sessions",
-    readme: `# CONTEXT.md
+      "GLOSSARY.md defines project terminology, while AGENTS.md holds working guidance. Keep implementation decisions and progress notes in their own documents. Explicitly reference or load the glossary.",
+    source: "https://github.com/mattpocock/skills/issues/207",
+    sourceLabel: "Why GLOSSARY.md describes shared terminology",
+    readme: `# GLOSSARY.md
 
-## Project overview
+Shared terms for a documentation website that explores project organization standards.
 
-A documentation website for exploring project organization standards.
+## Catalog
 
-## Architecture
+A named collection of entries that describe a project's organization conventions.
 
-- Routes define the public pages.
-- Shared components render navigation and Markdown.
-- Local content supplies the examples shown in the interface.
+## Entry
 
-## Decisions
+A folder, file, or issue convention in a catalog, with a stable identity and optional documentation.
 
-- Reuse the existing Markdown renderer for all example documents.
-- Keep public documentation available without an account.
+## Explorer
 
-## Current state
+The interface for browsing a catalog and reading the selected entry's documentation.
 
-- Completed: initial page layout and navigation.
-- Next: review the example content with the team.
-- Open question: which examples should be added next?
+## Website profile
 
-## Handoff
+A settings document that customizes the site's content and conventions.
 
-- Last verified: [date and commit].
-- Checks run: [commands and results].
-- Known limitations: [remaining issues or assumptions].
-
-Keep these notes current and link to the source files behind each decision. Load this file explicitly or reference it from the project's agent instructions.
+Keep definitions concise and consistent with the language used by the team. Load this file explicitly or reference it from AGENTS.md.
 `,
   },
   {
@@ -544,7 +535,7 @@ Keep these notes current and link to the source files behind each decision. Load
     description:
       "Describe the visual system: colors, typography, spacing, components, and interaction states.",
     distinction:
-      "Here, DESIGN.md gives agents the visual language and UI rules to follow when building screens. PRODUCT.md supplies product goals; CONTEXT.md records architecture. Reference or load DESIGN.md before UI work; discovery depends on the host.",
+      "Here, DESIGN.md gives agents the visual language and UI rules to follow when building screens. PRODUCT.md supplies product goals; GLOSSARY.md defines project terms. Reference or load DESIGN.md before UI work; discovery depends on the host.",
     source:
       "https://github.com/google-labs-code/stitch-skills/blob/main/plugins/stitch-utilities/skills/design-md/SKILL.md",
     sourceLabel: "Google Stitch's DESIGN.md guidance",
@@ -592,7 +583,7 @@ Link to the project's token definitions, stylesheet, and representative componen
     description:
       "Explain the product's purpose, target users, key features, scope, and success criteria.",
     distinction:
-      "PRODUCT.md gives agents the product vision and user needs behind implementation decisions. Keep it focused on what the product does and why; link to DESIGN.md for UI rules and CONTEXT.md for architecture. Reference or load it explicitly; the filename alone does not guarantee inclusion.",
+      "PRODUCT.md gives agents the product vision and user needs behind implementation decisions. Keep it focused on what the product does and why; link to DESIGN.md for UI rules and GLOSSARY.md for shared terminology. Reference or load it explicitly; the filename alone does not guarantee inclusion.",
     source: "https://code.visualstudio.com/docs/agents/guides/context-engineering-guide",
     sourceLabel: "VS Code's product context guidance",
     readme: `# PRODUCT.md

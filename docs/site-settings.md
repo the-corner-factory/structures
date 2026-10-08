@@ -161,6 +161,7 @@ references to branch IDs. Duplicate edges, self-edges, and unknown branch refere
 `agentic` maps existing IDs to content overrides. Supported IDs are `harness`, `plugins`, `agents`,
 `mcp-servers`, `skills`, `instructions`, `tools`, `hooks`, `prompt`, `artifacts`, `agents-md`, `context-md`,
 `design-md`, and `product-md`.
+The `context-md` ID selects `GLOSSARY.md` and is retained for existing links and profiles.
 
 Each override may contain string fields `name`, `kind`, `description`, `distinction`, `source`,
 `sourceLabel`, and `readme`. `source` must be an HTTP(S) reference URL without credentials; anchor
