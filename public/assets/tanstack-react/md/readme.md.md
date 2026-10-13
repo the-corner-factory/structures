@@ -23,6 +23,8 @@ The framework requires its router and root route alongside the build configurati
 
 ```text
 ├── README.md
+├── .agents/
+│   └── skills/
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml

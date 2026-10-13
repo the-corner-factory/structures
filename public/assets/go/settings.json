@@ -4,6 +4,11 @@
     "activeIconPack": "nest"
   },
   "structures": [
+    {
+      "name": ".agents",
+      "type": "folder",
+      "children": [{ "name": "skills", "type": "folder" }]
+    },
     { "name": "api", "type": "folder" },
     { "name": "assets", "type": "folder" },
     { "name": "build", "type": "folder" },

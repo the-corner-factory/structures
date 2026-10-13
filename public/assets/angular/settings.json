@@ -5,6 +5,16 @@
   },
   "structures": [
     {
+      "name": ".agents",
+      "type": "folder",
+      "children": [
+        {
+          "name": "skills",
+          "type": "folder"
+        }
+      ]
+    },
+    {
       "name": ".github",
       "type": "folder"
     },
