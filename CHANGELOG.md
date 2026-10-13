@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here.
 
+## [1.7.0](https://github.com/the-corner-inc/structures/compare/v1.6.0...v1.7.0) (2026-10-13)
+
+### Features
+
+* **agentic:** detailed view and scoped templates ([a2e6393](https://github.com/the-corner-inc/structures/commit/a2e6393aa3890e97735739df764378cde181683b))
+
 ## [1.6.0](https://github.com/the-corner-inc/structures/compare/v1.5.0...v1.6.0) (2026-10-13)
 
 ### Features
