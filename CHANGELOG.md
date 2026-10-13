@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented here.
 
+## [1.6.0](https://github.com/the-corner-inc/structures/compare/v1.5.0...v1.6.0) (2026-10-13)
+
+### Features
+
+* **codex:** add project structures skill ([35a45b9](https://github.com/the-corner-inc/structures/commit/35a45b9b8c210a5492e20f21353d898337e09442))
+
+### Bug Fixes
+
+* **plugin:** run documentation checks through symlinked paths ([54f482f](https://github.com/the-corner-inc/structures/commit/54f482fe135f10f55106e342648fbb930025706f))
+
+### Documentation
+
+* **folders:** add .agents and skills to all framework catalogs ([154f3c3](https://github.com/the-corner-inc/structures/commit/154f3c37a57b326a848506c71be6c34bdc30b8fb))
+
 ## [1.5.0](https://github.com/the-corner-inc/structures/compare/v1.4.0...v1.5.0) (2026-10-06)
 
 ### Features
