@@ -2,7 +2,7 @@
 name: project-structures
 description: Analyze a project's architecture and generate a Structures website settings.json with inline documentation and a Markdown overview, optionally publishing both as a GitHub Gist. Use for documenting project organization or creating a Structures profile from a codebase.
 license: MIT
-compatibility: Requires file access and Node.js to run the bundled checker. Publishing requires an authenticated GitHub Gist tool or GitHub CLI.
+compatibility: Requires file access and Node.js 24.15+ (24.x) or 26+ to run the bundled checker. Publishing requires an authenticated GitHub Gist tool or GitHub CLI.
 ---
 
 # Project structures

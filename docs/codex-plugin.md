@@ -47,8 +47,7 @@ To install from a particular branch or tag, append `--ref <branch-or-tag>` to th
 For local testing, use this repository's absolute path instead of the Git URL and omit `--sparse`.
 The marketplace is the repository catalog; `structures` is the plugin; `project-structures` is its
 skill. Git URL installation requires these files on the selected remote ref, not just locally.
-Restart the desktop
-app if the new marketplace does not appear immediately.
+Restart the desktop app if the new marketplace does not appear immediately.
 Test in a new chat with the installed plugin:
 
 ```text
@@ -68,7 +67,7 @@ URL** control. Omitted profile sections retain built-in examples, which the over
 ## Other harnesses
 
 The reusable workflow is the [Agent Skills](https://agentskills.io/specification) directory
-`skills/project-structures/`. It uses file access, a Node.js checker with no third-party dependencies,
+`skills/project-structures/`. It uses file access, a Node.js 24.15+ (24.x) or 26+ checker with no third-party dependencies,
 and optionally an authenticated Gist tool or `gh`. It has no Codex tool names or application imports.
 
 - **Agent Plugins hosts:** distribute the whole `.agents/plugins/structures/` directory. The host

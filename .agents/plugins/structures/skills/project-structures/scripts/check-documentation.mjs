@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { pathToFileURL } from "node:url";
 
 // This checks export coverage; the website's parseSiteSettings owns full profile validation.
 export function checkDocumentation(profile) {
@@ -69,7 +68,7 @@ export function checkDocumentation(profile) {
   return ids.size;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (import.meta.main) {
   assert.ok(process.argv[2], "Usage: node check-documentation.mjs <settings.json>");
   const count = checkDocumentation(JSON.parse(readFileSync(process.argv[2], "utf8")));
   console.log(`Checked ${count} folder nodes with complete inline documentation.`);

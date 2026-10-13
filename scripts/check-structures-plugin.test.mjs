@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { cpSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { cpSync, mkdtempSync, readFileSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -91,16 +91,17 @@ test("the detached skill runs without the application or installed dependencies"
   cpSync(new URL("LICENSE", pluginRoot), join(directory, "LICENSE"));
   assert.ok(readFileSync(join(directory, "references/profile-format.md"), "utf8").length);
   const checker = join(directory, "scripts/check-documentation.mjs");
-  const result = spawnSync(
-    process.execPath,
-    [checker, join(directory, "assets/settings.example.json")],
-    {
-      cwd: directory,
-      encoding: "utf8",
-    },
-  );
-  assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /Checked 9 folder nodes/);
+  const linkedChecker = join(directory, "linked-checker.mjs");
+  symlinkSync(checker, linkedChecker);
+  for (const entrypoint of [checker, linkedChecker]) {
+    const result = spawnSync(
+      process.execPath,
+      [entrypoint, join(directory, "assets/settings.example.json")],
+      { cwd: directory, encoding: "utf8" },
+    );
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /Checked 9 folder nodes/);
+  }
   const missingInput = spawnSync(process.execPath, [checker], { cwd: directory, encoding: "utf8" });
   assert.equal(missingInput.status, 1);
   assert.match(missingInput.stderr, /Usage:/);

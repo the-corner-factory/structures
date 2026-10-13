@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "structures",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Analyze project architecture and generate documented Structures profiles for GitHub Gists.",
   "author": {
     "name": "The Corner",
@@ -14,22 +14,22 @@
   "extensions": {
     "com.openai": {
       "interface": {
-    "displayName": "Structures",
-    "shortDescription": "Turn project architecture into an interactive guide",
-    "longDescription": "Analyze a local project or related repositories, explain their architecture, and generate settings.json with inline documentation plus a Markdown overview. Publish the files as a GitHub Gist when requested, then load the profile in Structures.",
-    "developerName": "The Corner",
-    "category": "Developer Tools",
-    "capabilities": [
-      "Analyze project structure",
-      "Generate architecture documentation",
-      "Publish requested Gists"
-    ],
-    "websiteURL": "https://github.com/the-corner-inc/structures",
-    "supportURL": "https://github.com/the-corner-inc/structures/issues",
-    "defaultPrompt": [
-      "Analyze this project and generate a documented Structures profile ready for a GitHub Gist."
-    ],
-    "composerIcon": "./assets/icon.png",
+        "displayName": "Structures",
+        "shortDescription": "Turn project architecture into an interactive guide",
+        "longDescription": "Analyze a local project or related repositories, explain their architecture, and generate settings.json with inline documentation plus a Markdown overview. Publish the files as a GitHub Gist when requested, then load the profile in Structures.",
+        "developerName": "The Corner",
+        "category": "Developer Tools",
+        "capabilities": [
+          "Analyze project structure",
+          "Generate architecture documentation",
+          "Publish requested Gists"
+        ],
+        "websiteURL": "https://github.com/the-corner-inc/structures",
+        "supportURL": "https://github.com/the-corner-inc/structures/issues",
+        "defaultPrompt": [
+          "Analyze this project and generate a documented Structures profile ready for a GitHub Gist."
+        ],
+        "composerIcon": "./assets/icon.png",
         "logo": "./assets/icon.png"
       }
     }
