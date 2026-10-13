@@ -249,6 +249,12 @@ description: Review a code diff for bugs and missing validation. Use for code re
 ## Supporting material
 
 Add reference documents or scripts only when the workflow needs them. Link to them from SKILL.md so the agent knows when to load them.
+
+## Example skill collections
+
+- [Matt Pocock](https://github.com/mattpocock/skills)
+- [pstack](https://github.com/cursor/plugins/tree/main/pstack)
+- [Addy Osmani](https://github.com/addyosmani/agent-skills)
 `,
   },
   {
