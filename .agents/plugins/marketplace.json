@@ -1,0 +1,20 @@
+{
+  "name": "structures-marketplace",
+  "interface": {
+    "displayName": "Structures"
+  },
+  "plugins": [
+    {
+      "name": "structures",
+      "source": {
+        "source": "local",
+        "path": "./.agents/plugins/structures"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

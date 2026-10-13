@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
+import pluginExample from "../../.agents/plugins/structures/skills/project-structures/assets/settings.example.json";
 import exampleSettings from "../../public/settings.example.json";
 import { fetchSiteSettings, normalizeSettingsUrl, parseSiteSettings } from "./site-settings";
 
@@ -53,6 +54,10 @@ const issueSettings = {
 };
 
 describe("site settings validation", () => {
+  it("accepts the plugin's distributed profile without discarding fields", () => {
+    expect(parseSiteSettings(pluginExample)).toEqual(pluginExample);
+  });
+
   it("validates the published example with content for every section", () => {
     const settings = parseSiteSettings(exampleSettings);
     expect(settings).toEqual(exampleSettings);

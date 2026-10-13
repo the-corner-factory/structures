@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "folders": {
+    "libraryName": "Structures",
+    "structures": [
+      {
+        "id": "structures",
+        "name": "Structures",
+        "type": "container",
+        "children": [
+          {
+            "id": "structures-src",
+            "name": "src",
+            "type": "folder",
+            "children": [
+              { "id": "structures-src-routes", "name": "routes", "type": "folder" },
+              {
+                "id": "structures-src-components",
+                "name": "components",
+                "type": "folder",
+                "children": [
+                  {
+                    "id": "structures-src-components-structures",
+                    "name": "structures",
+                    "type": "folder"
+                  }
+                ]
+              },
+              {
+                "id": "structures-src-lib",
+                "name": "lib",
+                "type": "folder",
+                "children": [
+                  {
+                    "id": "structures-src-lib-site-settings",
+                    "name": "site-settings.ts",
+                    "type": "file"
+                  }
+                ]
+              }
+            ]
+          },
+          { "id": "structures-registry", "name": "registry.json", "type": "file" },
+          { "id": "structures-glossary", "name": "GLOSSARY.md", "type": "file" }
+        ]
+      }
+    ],
+    "documentation": {
+      "structures": "# Structures\n\nA React application for browsing project organization standards and distributing a reusable explorer. This example selects architectural boundaries; omitted files still exist.\n\nA website profile passes through `src/lib/site-settings.ts`, the site settings provider, and the website explorer integration. Portable explorer files have their own component contract.\n",
+      "structures-src": "# src\n\n`src/` contains application routes, components, and shared data behavior.\n",
+      "structures-src-routes": "# routes\n\n`src/routes/` contains TanStack file routes, validated search parameters, and page metadata. Keep route UI thin and delegate to components.\n",
+      "structures-src-components": "# components\n\n`src/components/` contains website UI, profile integration, and explorer composition. `structure-explorer.tsx` composes shared tree and Markdown components for the website; `structures/structure-explorer.tsx` exposes the portable component API.\n",
+      "structures-src-components-structures": "# Portable explorer\n\n`src/components/structures/` contains the distributed explorer, shared tree validation, Markdown renderer, and scoped styles. Internal imports are relative; distributed code remains independent of website providers and routing.\n",
+      "structures-src-lib": "# lib\n\n`src/lib/` owns shared data contracts, fetching, validation, and catalog configuration.\n",
+      "structures-src-lib-site-settings": "# site-settings.ts\n\n`src/lib/site-settings.ts` validates the complete website profile and resolves remote JSON, including Gists. Invalid profiles fail before any custom section is applied.\n",
+      "structures-registry": "# registry.json\n\n`registry.json` declares the reusable explorer's shipped files and dependencies. Review `docs/registry.md` before changing that distribution.\n",
+      "structures-glossary": "# GLOSSARY.md\n\n`GLOSSARY.md` records the checked-out architecture, data flows, and implementation limits. Contribution commands live in `AGENTS.md` and `CONTRIBUTING.md`.\n"
+    }
+  },
+  "naming": {
+    "title": "Structures naming",
+    "intro": "Repository guidance requires Conventional Commits. These examples illustrate their format.",
+    "types": [
+      {
+        "prefix": "feat",
+        "description": "Add behavior.",
+        "example": "feat(explorer): add a catalog"
+      },
+      {
+        "prefix": "fix",
+        "description": "Correct behavior.",
+        "example": "fix(settings): reject invalid profiles"
+      }
+    ],
+    "example": {
+      "title": "docs(architecture): explain profile loading",
+      "description": "An illustrative commit message, not a delivered change."
+    },
+    "rules": [{ "title": "Commit format", "description": "Use <type>(<scope>): <short summary>." }]
+  },
+  "agentic": {
+    "context-md": {
+      "name": "GLOSSARY.md",
+      "description": "The repository's architecture and data-flow reference.",
+      "readme": "# GLOSSARY.md\n\nRead the project glossary for architecture and data flows. Use AGENTS.md for working instructions.\n"
+    }
+  }
+}

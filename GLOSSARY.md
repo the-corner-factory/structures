@@ -24,26 +24,28 @@ root shadcn registry. It is source copied into consumer projects, not a hosted s
 
 ## Code map
 
-| Location                                    | Responsibility                                                                           |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `src/router.tsx`                            | Router creation, per-router QueryClient, query provider, error/not-found defaults.       |
-| `src/routes/`                               | TanStack file routes, route parameters, search validation, auth layouts, auth API.       |
-| `src/components/`                           | Website shell, explorer integration, boards, standards pages, branch diagrams.           |
-| `src/components/structures/`                | Portable explorer, shared tree/data helpers, Markdown renderer, scoped CSS.              |
-| `src/lib/structures.ts`                     | Folder/issue catalog types, library/topic lists, URL resolution, fetch boundaries.       |
-| `src/lib/site-settings.ts`                  | Website profile types, complete-document validation, and Gist/raw URL fetching.          |
-| `src/components/site-settings-provider.tsx` | Shared browser-only profile query, context, and loading/error boundary.                  |
-| `src/lib/use-structure-settings.ts`         | Website profile/catalog selection and inline or fetched Markdown resolution.             |
-| `src/lib/branches.ts`                       | Branch graph types, parsing, preset list, and fetching.                                  |
-| `src/lib/agentic.ts`                        | Agent concept cards, reference links, and Markdown templates.                            |
-| `src/lib/material-icons.ts`                 | Material icon manifest and filename/folder icon lookup.                                  |
-| `src/lib/auth/`, `src/lib/db/`, `src/env/`  | Optional accounts, PostgreSQL access, and validated environment variables.               |
-| `src/styles.css`                            | Website layout, colors, dark theme, responsive behavior, and print styles.               |
-| `public/assets/`                            | Built-in JSON catalogs and their Markdown content.                                       |
-| `packages/gitgraph-*`                       | Vendored Gitgraph workspace packages with TypeScript source and tracked compiled output. |
-| `registry.json`, `docs/registry.md`         | Registry distribution manifest and consumer contract.                                    |
-| `scripts/`                                  | Static prerendering, registry validation/consumer checks, and graph debugging.           |
-| `.github/workflows/`                        | Release-tag verification/deployment and registry consumer CI.                            |
+| Location                                    | Responsibility                                                                              |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `src/router.tsx`                            | Router creation, per-router QueryClient, query provider, error/not-found defaults.          |
+| `src/routes/`                               | TanStack file routes, route parameters, search validation, auth layouts, auth API.          |
+| `src/components/`                           | Website shell, explorer integration, boards, standards pages, branch diagrams.              |
+| `src/components/structures/`                | Portable explorer, shared tree/data helpers, Markdown renderer, scoped CSS.                 |
+| `src/lib/structures.ts`                     | Folder/issue catalog types, library/topic lists, URL resolution, fetch boundaries.          |
+| `src/lib/site-settings.ts`                  | Website profile types, complete-document validation, and Gist/raw URL fetching.             |
+| `src/components/site-settings-provider.tsx` | Shared browser-only profile query, context, and loading/error boundary.                     |
+| `src/lib/use-structure-settings.ts`         | Website profile/catalog selection and inline or fetched Markdown resolution.                |
+| `src/lib/branches.ts`                       | Branch graph types, parsing, preset list, and fetching.                                     |
+| `src/lib/agentic.ts`                        | Agent concept cards, reference links, and Markdown templates.                               |
+| `src/lib/material-icons.ts`                 | Material icon manifest and filename/folder icon lookup.                                     |
+| `src/lib/auth/`, `src/lib/db/`, `src/env/`  | Optional accounts, PostgreSQL access, and validated environment variables.                  |
+| `src/styles.css`                            | Website layout, colors, dark theme, responsive behavior, and print styles.                  |
+| `public/assets/`                            | Built-in JSON catalogs and their Markdown content.                                          |
+| `packages/gitgraph-*`                       | Vendored Gitgraph workspace packages with TypeScript source and tracked compiled output.    |
+| `registry.json`, `docs/registry.md`         | Registry distribution manifest and consumer contract.                                       |
+| `scripts/`                                  | Static prerendering, registry validation/consumer checks, and graph debugging.              |
+| `.agents/plugins/structures/`               | Portable Agent Plugins package and architecture skill, with Codex metadata in the manifest. |
+| `.agents/plugins/marketplace.json`          | Repository marketplace exposing the Structures plugin for installation.                     |
+| `.github/workflows/`                        | Release-tag verification/deployment, registry consumer CI, and plugin validation.           |
 
 ## Runtime and navigation
 
@@ -223,15 +225,16 @@ directory `index.html` files. It skips catalog entries named `index.html` to avo
 `public/.htaccess` preserves existing files/directories and supplies client-side route fallbacks,
 including explorer entries whose names contain file extensions.
 
-The main CI workflow runs lint, tests, build, and prerender on `v*` tags, then uploads
+The main CI workflow runs lint, tests, build, and prerender on `v*` tags, excluding `-rc` and `.rc`
+candidates, then uploads
 `.output/public` to FTP. It also calls the reusable registry consumer workflow, which runs directly
 on PRs. After deployment and all registry consumers succeed, a separate job publishes a GitHub
 Release with the matching changelog section via `scripts/release-notes.mjs`. Only that job receives
 `contents: write`; reruns skip existing releases. `commit-and-tag-version` updates the package
 version and changelog; that same stable version tag identifies the registry source and release.
 Account-enabled deployments must run the Node server instead of the static
-FTP artifact. See [CONTRIBUTING.md](CONTRIBUTING.md) and the
-[release skill](.agents/skills/release/SKILL.md) for the release procedure.
+FTP artifact. See [CONTRIBUTING.md](CONTRIBUTING.md) for the project's release procedure;
+agent-assisted releases use the personal `forge-skills:release` skill.
 
 ## Current caveats
 
