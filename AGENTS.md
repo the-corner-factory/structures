@@ -121,10 +121,15 @@ The `test:e2e` script exists, but there is currently no app Playwright configura
   not run these package builds.
 - Keep the React compatibility shim at `src/types/gitgraph-react.d.ts` in mind when changing
   the app's Gitgraph usage; the vendored React package has older React typings.
-- Use Conventional Commits. When a release is requested, follow the
-  [release skill](.agents/skills/release/SKILL.md) and `CONTRIBUTING.md`. Pushing a `v*` tag
+- Use Conventional Commits. When a release is requested, use the personal `forge-skills:release`
+  skill and follow `CONTRIBUTING.md`. Pushing a `v*` tag
+  (excluding `-rc` and `.rc` candidates)
   triggers the production FTP deployment and registry consumer checks; after both succeed, CI
   creates the GitHub Release from the matching changelog section. The registry uses the same tag;
   the root package is private and is not published to npm.
 - Preserve unrelated working-tree changes and avoid committing build/cache output. Update
   these instructions and `GLOSSARY.md` when the documented architecture or workflow changes.
+- The Codex plugin lives in `plugins/structures/`, exposed by `.agents/plugins/marketplace.json`.
+  Keep its bundled profile example compatible with `parseSiteSettings`. When changing the plugin,
+  run `node --test scripts/check-structures-plugin.test.mjs` and
+  `pnpm test src/lib/site-settings.test.ts`; see `docs/codex-plugin.md` for Git URL installation.

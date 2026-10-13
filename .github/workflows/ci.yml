@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "v*"
+      - "!v*-rc*"
+      - "!v*.rc*"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

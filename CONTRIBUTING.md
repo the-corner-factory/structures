@@ -61,6 +61,8 @@ git push --follow-tags origin main
 application reads that same package version at build time, so the explorer footer automatically
 matches every release.
 
+Before pushing a release, run `pnpm build`, `pnpm registry:check`, and `pnpm registry:test`.
+
 Pushing a stable `vX.Y.Z` tag starts the CI workflow. It verifies and deploys the website and runs
 the Vite, Next.js, and TanStack registry consumer matrix. Once both jobs succeed, it automatically
 creates the GitHub Release using the matching `CHANGELOG.md` section. The release job has
