@@ -1,9 +1,14 @@
 # Structures plugin
 
-The plugin in [`.agents/plugins/structures`](../.agents/plugins/structures/plugin.json) contains the
-`project-structures` skill. It analyzes the current project or requested related repositories and
-produces `settings.json` with inline Markdown plus a project overview. A requested Gist upload
-uses an available authenticated Gist tool or GitHub CLI; local generation needs neither.
+The plugin in [`.agents/plugins/structures`](../.agents/plugins/structures/plugin.json) contains two
+skills:
+
+- `project-structures` analyzes the current project or requested related repositories and produces
+  `settings.json` with inline Markdown plus a project overview. A requested Gist upload uses an
+  available authenticated Gist tool or GitHub CLI; local generation needs neither.
+- `commit` drafts a Conventional Commit message from current changes and repository commit rules,
+  including commitlint configuration. It previews the message in chat by default; `--push` creates
+  a local commit with hooks enabled. Remote pushes require a separate, explicit request.
 
 The plugin is independent of the React application and requires no MCP server or added package
 dependencies. The documentation checker uses Node.js standard libraries. Installing this plugin
@@ -18,16 +23,17 @@ The package follows [Agent Plugins](https://agent-plugins.org/plugin-authors/man
 └── structures/
     ├── plugin.json
     ├── skills/project-structures/SKILL.md
+    ├── skills/commit/SKILL.md
     ├── assets/icon.png
     └── LICENSE
 ```
 
 `plugin.json` holds the portable identity and version. Hosts discover skills in `skills/` by
 convention; the portable manifest has no `skills` field. Codex presentation metadata is isolated in
-`extensions.com.openai.interface`. The skill's references, example, optional `agents/openai.yaml`
-metadata, and checker live inside its directory. There are no MCP servers or hooks to configure.
+`extensions.com.openai.interface`. Each skill's resources and optional `agents/openai.yaml`
+metadata live inside its directory. There are no MCP servers or hooks to configure.
 
-Keep this single manifest and skill bundle as the source of truth. The old `.codex-plugin/plugin.json`
+Keep this single manifest and bundled skills as the source of truth. The old `.codex-plugin/plugin.json`
 compatibility manifest is unnecessary for clients that support this format. Marketplace discovery
 was checked with Codex CLI 0.160.0; older clients may need an update.
 
@@ -45,14 +51,32 @@ codex plugin add structures@structures-marketplace
 
 To install from a particular branch or tag, append `--ref <branch-or-tag>` to the marketplace command.
 For local testing, use this repository's absolute path instead of the Git URL and omit `--sparse`.
-The marketplace is the repository catalog; `structures` is the plugin; `project-structures` is its
-skill. Git URL installation requires these files on the selected remote ref, not just locally.
+The marketplace is the repository catalog; `structures` is the plugin; `project-structures` and
+`commit` are its skills. Git URL installation requires these files on the selected remote ref,
+not just locally.
 Restart the desktop app if the new marketplace does not appear immediately.
 Test in a new chat with the installed plugin:
 
 ```text
 Use $project-structures to analyze this project and generate a documented Structures profile.
 ```
+
+To preview a commit message in a copyable Markdown code block:
+
+```text
+Use $commit to generate a message for the current changes.
+```
+
+To create a local commit with the generated message:
+
+```text
+Use $commit --push to commit the current changes.
+```
+
+The commit skill uses staged changes when present, preserving partial staging. With nothing staged,
+it selects the current task's changes. It leaves unrelated work untouched and applies the
+repository's effective commit rules before committing. Despite its name, `--push` does not run
+`git push` or create a Git tag.
 
 For Gist publication, request it explicitly and choose visibility:
 
@@ -66,15 +90,17 @@ URL** control. Omitted profile sections retain built-in examples, which the over
 
 ## Other harnesses
 
-The reusable workflow is the [Agent Skills](https://agentskills.io/specification) directory
-`skills/project-structures/`. It uses file access, a Node.js 24.15+ (24.x) or 26+ checker with no third-party dependencies,
-and optionally an authenticated Gist tool or `gh`. It has no Codex tool names or application imports.
+The reusable workflows are the [Agent Skills](https://agentskills.io/specification) directories
+`skills/project-structures/` and `skills/commit/`. The architecture skill uses file access, a
+Node.js 24.15+ (24.x) or 26+ checker with no third-party dependencies, and optionally an authenticated
+Gist tool or `gh`. The commit skill uses Git and the target repository's installed validators.
+Neither skill depends on Codex tool names or application imports.
 
 - **Agent Plugins hosts:** distribute the whole `.agents/plugins/structures/` directory. The host
   must support the portable manifest and skills; installation and Git marketplace support depend
   on that host.
-- **Agent Skills hosts:** copy the entire `skills/project-structures/` directory into the host's
-  documented skill location, including `scripts/`, `references/`, and `assets/`. Include the
+- **Agent Skills hosts:** copy the desired skill directory from `skills/` into the host's
+  documented skill location, including any `scripts/`, `references/`, and `assets/`. Include the
   plugin's `LICENSE` in that copy. `agents/openai.yaml` is optional OpenAI UI metadata; the workflow
   does not depend on it. Invoke the skill using that harness's syntax.
 - **Other plugin formats:** add a small manifest or packaging adapter when supporting a specific
@@ -95,12 +121,13 @@ pnpm format:check
 ```
 
 The marketplace resolves `./.agents/plugins/structures` relative to the repository root. Keep the manifest,
-icons, MIT license, and self-contained skill together. Update the plugin version in its manifest
+icons, MIT license, and self-contained skills together. Update the plugin version in its manifest
 when distributing a new version; this is separate from the application's version.
 
 The [plugin CI workflow](../.github/workflows/plugins.yml) runs the two test commands on pull requests,
-main pushes, and version tags. Tests exercise the checker from a detached skill directory and check
-the bundled example against the website's full `parseSiteSettings` parser. The standalone checker
+main pushes, and version tags. Tests verify both skill entrypoints, exercise the checker from a
+detached skill directory, and check the bundled example against the website's full
+`parseSiteSettings` parser. The standalone checker
 tests folder fields, node shape, IDs, and documentation coverage; it does not validate other profile
 sections. The skill describes full validation when a Structures checkout is available.
 

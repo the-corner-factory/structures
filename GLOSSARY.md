@@ -43,7 +43,7 @@ root shadcn registry. It is source copied into consumer projects, not a hosted s
 | `packages/gitgraph-*`                       | Vendored Gitgraph workspace packages with TypeScript source and tracked compiled output.    |
 | `registry.json`, `docs/registry.md`         | Registry distribution manifest and consumer contract.                                       |
 | `scripts/`                                  | Static prerendering, registry validation/consumer checks, and graph debugging.              |
-| `.agents/plugins/structures/`               | Portable Agent Plugins package and architecture skill, with Codex metadata in the manifest. |
+| `.agents/plugins/structures/`               | Portable plugin with architecture and commit skills, and Codex UI metadata in its manifest. |
 | `.agents/plugins/marketplace.json`          | Repository marketplace exposing the Structures plugin for installation.                     |
 | `.github/workflows/`                        | Release-tag verification/deployment, registry consumer CI, and plugin validation.           |
 
@@ -82,9 +82,26 @@ uses `view=map|cards` and `template=<id>` (a building block, `prompt`, `artifact
 `design-md`, or `product-md`),
 for example `/agentic?view=cards&template=agents-md`. Missing or invalid values show the system map
 and Harness. Controls update the URL without resetting scroll; reloads and Back/Forward restore
-the view and template together. The defaults are omitted when controls update the URL. Hover and
+the view and template together. Both views' Detailed checkbox enables `detailed=true` to show full
+feature icon stacks, plus named badges in the map. By default, linked features appear as colored dots
+with accessible names, tooltips, and the same selection actions in both views; Prompt, Artifacts,
+and Markdown-file badges are hidden in the compact map. This preference survives view and profile changes.
+The defaults are omitted when controls update the URL. Hover and
 focus stay local. Heading links and copied heading URLs preserve the current query parameters.
-Prompt and Artifacts appear under Agent in both views, explaining its input and reusable output.
+Prompt and Artifacts appear under Agent in Detailed and cards views, explaining its input and reusable output.
+`SCOPED_EXAMPLES` defines feature badges for contents and configuration in both views. Plugins
+include skills, instructions, agent definitions, hooks, and MCP configuration; Harness includes
+skills and instructions. Agents include instructions, skills, tools, MCP configuration, and hooks.
+Project skills include instructions, supporting resources, hooks, and nested skills. MCP servers
+include tools, prompts, resources, instructions, and skills. Tools and Hooks include instructions.
+The existing `template=skills` still selects Project skills. Each badge has its own stable template
+ID, detail panel, reference, and download; [site settings](docs/site-settings.md#agentic) lists all IDs.
+Origins, parent blocks, and optional support requirements are fixed metadata, independent of profile
+overrides. Dashed badges, accessible descriptions, and detail text identify host or protocol
+extensions. Origin does not imply priority. Plugin instructions load through supported components;
+harness instructions include host guidance and user-wide preferences. Plugin entries trace delivery
+through Harness to the relevant block; harness entries trace Harness to Agent. Other badges trace their parent
+block's connections. MCP skill delivery and nested skill activation require extension support.
 The `GLOSSARY.md` example defines project terminology; its stable template/profile ID is `context-md`.
 
 Folder and issue explorers store their search filter in `q`, for example

@@ -244,17 +244,24 @@ it("loads and resets on the same topic, retains filters, clears old selections, 
 });
 
 it("keeps Agentic selections and hash when loading/resetting a profile", async () => {
-  const page = await renderSite("/agentic?view=cards&template=agents-md#agentic-readme");
+  const page = await renderSite(
+    "/agentic?view=cards&template=agents-md&detailed=true#agentic-readme",
+  );
   await loadSettings();
   await screen.findByRole("button", { name: /^Load$/ });
   expect(page.router.state.location.search).toEqual({
     settings: url,
     view: "cards",
     template: "agents-md",
+    detailed: true,
   });
   expect(page.router.state.location.hash).toBe("agentic-readme");
   await click(screen.getByRole("button", { name: "Reset" }));
-  expect(page.router.state.location.search).toEqual({ view: "cards", template: "agents-md" });
+  expect(page.router.state.location.search).toEqual({
+    view: "cards",
+    template: "agents-md",
+    detailed: true,
+  });
   expect(page.router.state.location.hash).toBe("agentic-readme");
 });
 

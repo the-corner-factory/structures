@@ -158,9 +158,27 @@ references to branch IDs. Duplicate edges, self-edges, and unknown branch refere
 
 ### Agentic
 
-`agentic` maps existing IDs to content overrides. Supported IDs are `harness`, `plugins`, `agents`,
-`mcp-servers`, `skills`, `instructions`, `tools`, `hooks`, `prompt`, `artifacts`, `agents-md`, `context-md`,
-`design-md`, and `product-md`.
+`agentic` maps existing IDs to content overrides. Supported IDs are grouped below:
+
+| Group               | IDs                                                                                           |
+| ------------------- | --------------------------------------------------------------------------------------------- |
+| Building blocks     | `harness`, `plugins`, `agents`, `mcp-servers`, `skills`, `instructions`, `tools`, `hooks`     |
+| Agent examples      | `prompt`, `artifacts`                                                                         |
+| Project documents   | `agents-md`, `context-md`, `design-md`, `product-md`                                          |
+| Plugin contents     | `plugin-skills`, `plugin-instructions`, `plugin-agents`, `plugin-hooks`, `plugin-mcp-servers` |
+| Harness guidance    | `harness-skills`, `harness-instructions`                                                      |
+| Agent configuration | `agent-instructions`, `agent-skills`, `agent-tools`, `agent-mcp-servers`, `agent-hooks`       |
+| Skill contents      | `skill-instructions`, `skill-resources`, `skill-hooks`, `nested-skills`                       |
+| MCP capabilities    | `mcp-tools`, `mcp-prompts`, `mcp-resources`, `mcp-instructions`, `mcp-skills`                 |
+| Tool guidance       | `tool-instructions`                                                                           |
+| Hook guidance       | `hook-instructions`                                                                           |
+
+The `skills` ID selects Project skills and is retained for existing links and profiles.
+Contents and configuration appear as icon-only badges inside their parent blocks in both views.
+Their origin labels and support requirements remain fixed when their content is overridden.
+Dashed badges indicate host or protocol extensions, explained in their accessible descriptions
+and detail panels. Plugin instructions load through supported plugin components; Harness
+instructions explain host guidance and user-wide preferences. Neither origin establishes priority.
 The `context-md` ID selects `GLOSSARY.md` and is retained for existing links and profiles.
 
 Each override may contain string fields `name`, `kind`, `description`, `distinction`, `source`,

@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "structures",
-  "version": "0.1.1",
-  "description": "Analyze project architecture and generate documented Structures profiles for GitHub Gists.",
+  "version": "0.2.0",
+  "description": "Document project architecture with Structures profiles and generate Conventional Commit messages.",
   "author": {
     "name": "The Corner",
     "url": "https://github.com/the-corner-inc"
@@ -10,24 +10,26 @@
   "homepage": "https://github.com/the-corner-inc/structures",
   "repository": "https://github.com/the-corner-inc/structures",
   "license": "MIT",
-  "keywords": ["architecture", "documentation", "structures"],
+  "keywords": ["architecture", "documentation", "structures", "conventional-commits"],
   "extensions": {
     "com.openai": {
       "interface": {
         "displayName": "Structures",
-        "shortDescription": "Turn project architecture into an interactive guide",
-        "longDescription": "Analyze a local project or related repositories, explain their architecture, and generate settings.json with inline documentation plus a Markdown overview. Publish the files as a GitHub Gist when requested, then load the profile in Structures.",
+        "shortDescription": "Document project architecture and prepare commits",
+        "longDescription": "Analyze a local project or related repositories, explain their architecture, and generate settings.json with inline documentation plus a Markdown overview. Publish the files as a GitHub Gist when requested, then load the profile in Structures. Generate Conventional Commit messages using repository rules, preview them in chat, or create a local commit with --push.",
         "developerName": "The Corner",
         "category": "Developer Tools",
         "capabilities": [
           "Analyze project structure",
           "Generate architecture documentation",
-          "Publish requested Gists"
+          "Publish requested Gists",
+          "Prepare Conventional Commits"
         ],
         "websiteURL": "https://github.com/the-corner-inc/structures",
         "supportURL": "https://github.com/the-corner-inc/structures/issues",
         "defaultPrompt": [
-          "Analyze this project and generate a documented Structures profile ready for a GitHub Gist."
+          "Analyze this project and generate a documented Structures profile ready for a GitHub Gist.",
+          "Generate a Conventional Commit message for the current changes using this project's commit rules."
         ],
         "composerIcon": "./assets/icon.png",
         "logo": "./assets/icon.png"

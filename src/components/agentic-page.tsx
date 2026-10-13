@@ -20,13 +20,14 @@ import {
   AGENTIC_RELATIONSHIPS,
   AGENTIC_TEMPLATES,
   INSTRUCTION_FILES,
+  SCOPED_EXAMPLES,
   type AgenticSearch,
 } from "#/lib/agentic.ts";
 
 const route = getRouteApi("/agentic");
 
 export function AgenticPage() {
-  const { view = "map", template } = route.useSearch();
+  const { view = "map", template, detailed = false } = route.useSearch();
   const navigate = route.useNavigate();
   const { settings } = useSiteSettings();
   const templates = AGENTIC_TEMPLATES.map((item) => ({ ...item, ...settings?.agentic?.[item.id] }));
@@ -55,7 +56,13 @@ export function AgenticPage() {
   const conditional = relationship?.conditional ?? [];
   const isInstructionFile = instructionFiles.some((file) => file.id === selected.id);
   const isAgentExample = agentExamples.some((example) => example.id === selected.id);
-  const selectedGroupId = isInstructionFile ? "instructions" : isAgentExample ? "agents" : null;
+  const scopedExample = SCOPED_EXAMPLES.find((example) => example.id === selected.id);
+  const origin = selected.id === "skills" ? "project" : scopedExample?.origin;
+  const selectedGroupId = isInstructionFile
+    ? "instructions"
+    : isAgentExample
+      ? "agents"
+      : scopedExample?.mapNodeId;
   const selectedGroup = isInstructionFile
     ? elements.find((item) => item.id === "instructions")!.name
     : isAgentExample
@@ -78,51 +85,75 @@ export function AgenticPage() {
             </h2>
             <p>
               {view === "map"
-                ? "Nine building blocks. One connected system."
+                ? "Nine building blocks. Explore their contents and configuration."
                 : "Explore contents, configuration, and example templates."}
             </p>
           </div>
-          <fieldset className="agentic-view-switch" aria-label="Explore view">
-            <label>
+          <div className="agentic-view-controls">
+            <label className="agentic-detailed-toggle">
               <input
-                className="sr-only"
-                type="radio"
-                name="agentic-view"
-                value="map"
-                checked={view === "map"}
-                onChange={() => {
-                  setView("map");
-                  setHovered(null);
-                  setFocused(null);
-                }}
+                type="checkbox"
+                checked={detailed}
+                onChange={(event) =>
+                  updateSearch({ detailed: event.target.checked ? true : undefined })
+                }
               />
-              <NetworkIcon aria-hidden="true" /> System map
+              Detailed
             </label>
-            <label>
-              <input
-                className="sr-only"
-                type="radio"
-                name="agentic-view"
-                value="cards"
-                checked={view === "cards"}
-                onChange={() => setView("cards")}
-              />
-              <LayoutGridIcon aria-hidden="true" /> Cards & templates
-            </label>
-          </fieldset>
+            <fieldset className="agentic-view-switch" aria-label="Explore view">
+              <label>
+                <input
+                  className="sr-only"
+                  type="radio"
+                  name="agentic-view"
+                  value="map"
+                  checked={view === "map"}
+                  onChange={() => {
+                    setView("map");
+                    setHovered(null);
+                    setFocused(null);
+                  }}
+                />
+                <NetworkIcon aria-hidden="true" /> System map
+              </label>
+              <label>
+                <input
+                  className="sr-only"
+                  type="radio"
+                  name="agentic-view"
+                  value="cards"
+                  checked={view === "cards"}
+                  onChange={() => setView("cards")}
+                />
+                <LayoutGridIcon aria-hidden="true" /> Cards & templates
+              </label>
+            </fieldset>
+          </div>
         </div>
         {view === "map" ? (
-          <AgenticMap selected={selected} onSelect={setSelected} templates={templates} />
+          <AgenticMap
+            selected={selected}
+            onSelect={setSelected}
+            templates={templates}
+            detailed={detailed}
+          />
         ) : (
           <>
             <p className="agentic-card-legend">
-              Yellow: contents or configuration. Dashed: host extension or custom delivery.
+              Yellow: contents or configuration. Dashed cards and badges require host or extension
+              support.
             </p>
-            <div className="agentic-grid">
+            <div className="agentic-grid" data-detailed={detailed}>
               {elements.map((element) => {
                 const Icon = element.icon;
                 const active = selected.id === element.id;
                 const instructions = element.id === "instructions";
+                const scopedTemplates = SCOPED_EXAMPLES.filter(
+                  (example) => example.mapNodeId === element.id,
+                ).map((example) => ({
+                  ...example,
+                  template: templates.find((item) => item.id === example.id)!,
+                }));
                 return (
                   <div
                     key={element.id}
@@ -157,6 +188,32 @@ export function AgenticPage() {
                         {element.description}
                       </span>
                     </button>
+                    {scopedTemplates.length > 0 && (
+                      <div className="agentic-scoped-templates">
+                        {scopedTemplates.map(
+                          ({ id, icon: ExampleIcon, label, support, template }) => (
+                            <button
+                              key={id}
+                              type="button"
+                              className="icon-button agentic-scoped-badge"
+                              data-category={label}
+                              data-conditional={Boolean(support)}
+                              title={support ? `${template.name}: ${support}` : template.name}
+                              aria-label={template.name}
+                              aria-pressed={selected.id === id}
+                              aria-controls="agentic-readme"
+                              onClick={() => setSelected(template)}
+                            >
+                              {detailed ? (
+                                <ExampleIcon aria-hidden="true" />
+                              ) : (
+                                <span className="agentic-map-dot" aria-hidden="true" />
+                              )}
+                            </button>
+                          ),
+                        )}
+                      </div>
+                    )}
                     {element.id === "agents" &&
                       agentExamples.map((example) => (
                         <button
@@ -209,7 +266,7 @@ export function AgenticPage() {
                   {relationship.description}
                 </>
               ) : (
-                "Hover or focus a card to explore its contents and configuration. Dashed highlights need the host extension or custom delivery described here. Calling another component does not imply containment."
+                "Hover or focus a card to explore its contents and configuration. Dashed highlights require the host or protocol extension described here. Calling another component does not imply containment."
               )}
             </p>
           </>
@@ -240,7 +297,19 @@ export function AgenticPage() {
         </header>
         <div className="agentic-distinction" aria-live="polite" aria-atomic="true">
           <h3>How {selected.name} fits in</h3>
-          <p>{selected.distinction}</p>
+          {origin && (
+            <span className="agentic-origin" data-category={scopedExample?.label}>
+              Origin: {origin}
+            </span>
+          )}
+          <p>
+            {scopedExample?.support && (
+              <>
+                <strong>{scopedExample.support}</strong>{" "}
+              </>
+            )}
+            {selected.distinction}
+          </p>
           <a href={selected.source} target="_blank" rel="noreferrer">
             {selected.sourceLabel} <ArrowUpRightIcon aria-hidden="true" />
           </a>

@@ -167,6 +167,14 @@ describe("site settings validation", () => {
         "agents-md": { readme: "# AGENTS.md\nRun pnpm test." },
         "design-md": { readme: "# DESIGN.md\nUse the team's design tokens." },
         "product-md": { readme: "# PRODUCT.md\nDescribe the team's users and goals." },
+        "plugin-skills": { name: "Plugin workflows", readme: "# Release checklist" },
+        "harness-skills": { name: "Personal workflows", readme: "# Code review" },
+        "plugin-instructions": { name: "Plugin guidance", readme: "# Tool usage" },
+        "harness-instructions": { name: "Personal guidance", readme: "# Working preferences" },
+        "plugin-agents": { name: "Review agents" },
+        "agent-mcp-servers": { readme: "# Specialist connections" },
+        "mcp-skills": { name: "Remote workflows" },
+        "nested-skills": { readme: "# Separately activated workflows" },
       },
     };
     expect(parseSiteSettings(settings)).toEqual(settings);

@@ -54,7 +54,9 @@ The `test:e2e` script exists, but there is currently no app Playwright configura
   TanStack Router search parameters so reloads, links, and Back/Forward restore it. Read from the
   URL directly, preserve other applicable parameters on updates, and use safe defaults for invalid
   values. Keep hover, focus, and unapplied drafts local. `/agentic` uses `view=map|cards` and
-  `template=<id>` from `AGENTIC_TEMPLATES`; defaults are the system map and Harness. Heading links
+  `template=<id>` from `AGENTIC_TEMPLATES`, plus `detailed=true` for full feature icons in both views; defaults are
+  the system map, Harness, and compact colored feature dots; text badges appear only in Detailed.
+  Heading links
   must preserve query parameters. Use history replacement for live typing, and avoid scroll resets
   for in-page configuration changes.
   Folder and issue explorers use `q` for their search filter; preserve it on item, library, and
@@ -130,8 +132,9 @@ The `test:e2e` script exists, but there is currently no app Playwright configura
 - Preserve unrelated working-tree changes and avoid committing build/cache output. Update
   these instructions and `GLOSSARY.md` when the documented architecture or workflow changes.
 - The Codex plugin lives in `.agents/plugins/structures/`, exposed by `.agents/plugins/marketplace.json`.
-  Its portable `plugin.json` uses `extensions.com.openai` for Codex metadata; keep the single
-  `skills/project-structures/` payload independent of any harness and the application runtime.
-  Keep its bundled profile example compatible with `parseSiteSettings`. When changing the plugin,
+  Its portable `plugin.json` uses `extensions.com.openai` for Codex metadata; keep both
+  `skills/project-structures/` and `skills/commit/` independent of any harness and the application
+  runtime.
+  Keep the bundled profile example compatible with `parseSiteSettings`. When changing the plugin,
   run `node --test scripts/check-structures-plugin.test.mjs` and
   `pnpm test src/lib/site-settings.test.ts`; see `docs/codex-plugin.md` for Git URL installation.

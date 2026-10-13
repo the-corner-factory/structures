@@ -21,7 +21,14 @@ test("the marketplace resolves a portable manifest with accessible skills and Co
   const manifest = JSON.parse(readFileSync(new URL("plugin.json", pluginRoot), "utf8"));
   assert.equal(manifest.$schema, "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json");
   assert.equal(manifest.name, entry.name);
-  assert.ok(readFileSync(new URL("SKILL.md", skillRoot), "utf8").startsWith("---\n"));
+  for (const name of ["project-structures", "commit"]) {
+    const skill = readFileSync(new URL(`skills/${name}/SKILL.md`, pluginRoot), "utf8");
+    assert.ok(skill.startsWith("---\n"));
+    assert.match(skill, new RegExp(`^name: ${name}$`, "m"));
+    assert.ok(
+      readFileSync(new URL(`skills/${name}/agents/openai.yaml`, pluginRoot), "utf8").length,
+    );
+  }
   const { interface: listing } = manifest.extensions["com.openai"];
   for (const field of ["composerIcon", "logo"]) {
     assert.ok(readFileSync(new URL(listing[field], pluginRoot)).length);

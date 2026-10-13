@@ -21,12 +21,13 @@ Drizzle boundaries for the future account and sharing experience.
 - Switch theme or minimize the explorer for focused reading.
 - Keep public browsing database-free while account infrastructure remains disabled by default.
 
-## Architecture skill and plugin
+## Structures plugin
 
 The [Structures plugin](docs/codex-plugin.md) analyzes a project and generates a documented website
-profile ready for a GitHub Gist. Install it in Codex through the repository's Git URL. It packages a
-portable Agent Skill with an Agent Plugins manifest; the guide explains how to reuse the same skill
-in other harnesses and what still needs testing.
+profile ready for a GitHub Gist. It also includes `commit`, which drafts Conventional Commit
+messages using the project's commit rules; `--push` creates a local commit. Install it in Codex
+through the repository's Git URL. It packages portable Agent Skills with an Agent Plugins manifest;
+the guide explains how to reuse the skills in other harnesses and what still needs testing.
 
 ## Development
 

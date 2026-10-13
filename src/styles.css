@@ -2452,6 +2452,31 @@ input:focus-visible {
   margin-bottom: 16px;
 }
 
+.agentic-view-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+}
+
+.agentic-detailed-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 550;
+  cursor: pointer;
+}
+
+.agentic-detailed-toggle input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
 .agentic-view-switch {
   display: flex;
   gap: 4px;
@@ -2513,6 +2538,43 @@ input:focus-visible {
   inset: 0;
   width: 100%;
   height: 100%;
+}
+
+.agentic-map-project-outline {
+  fill: color-mix(in srgb, var(--surface) 80%, transparent);
+  stroke: color-mix(in srgb, var(--muted) 55%, var(--border));
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.agentic-map-project-heading {
+  position: absolute;
+  top: calc(100% * 448 / 680);
+  left: 3%;
+  right: 3%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.agentic-map-project-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: clamp(13px, 1.4vw, 16px);
+}
+
+.agentic-map-project-title svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.agentic-map-project-caption {
+  margin-top: clamp(12px, 1.6vw, 24px);
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .agentic-map-connection {
@@ -2606,9 +2668,24 @@ input:focus-visible {
 }
 
 @media (min-width: 901px) {
-  .agentic-map-node:has(.agentic-map-files) {
+  .agentic-map-node:has(.agentic-map-files, .agentic-scoped-badge) {
     height: auto;
     min-height: calc(100% * 100 / 680);
+  }
+
+  .agentic-map[data-detailed="true"] .agentic-map-node[data-node="agents"] {
+    /* Keep the Agent's lower edge aligned with its incoming arrows. */
+    min-height: calc(100% * 160 / 680);
+  }
+
+  .agentic-map .agentic-scoped-templates {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .agentic-map .agentic-scoped-badge {
+    min-width: 24px;
+    flex-shrink: 1;
   }
 }
 
@@ -2644,7 +2721,7 @@ input:focus-visible {
 }
 
 @media (min-width: 901px) and (max-width: 1050px) {
-  .agentic-map-node:has(.agentic-file-badge) .agentic-map-node-summary {
+  .agentic-map-node:has(.agentic-file-badge, .agentic-scoped-badge) .agentic-map-node-summary {
     display: none;
   }
 }
@@ -2723,9 +2800,11 @@ input:focus-visible {
   background: var(--surface);
 }
 
-.agentic-map-detail .eyebrow {
-  margin-bottom: 8px;
-  font-size: 10px;
+.agentic-map-detail-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
 }
 
 .agentic-map-detail h3 {
@@ -2788,6 +2867,29 @@ input:focus-visible {
     padding: 20px;
   }
 
+  .agentic-map-project {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: inherit;
+    gap: 12px;
+    border: 1px solid color-mix(in srgb, var(--muted) 55%, var(--border));
+    border-radius: 12px;
+    padding: 16px;
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+  }
+
+  .agentic-map-project-heading {
+    position: static;
+    grid-column: 1 / -1;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .agentic-map-project-caption {
+    margin-top: 0;
+  }
+
   .agentic-map-node {
     position: relative;
     left: auto;
@@ -2827,6 +2929,12 @@ input:focus-visible {
 
   .agentic-map-hint {
     margin-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .agentic-map {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -2989,6 +3097,123 @@ input:focus-visible {
 .agentic-prompt-badge {
   align-self: flex-end;
   margin: 0 20px 12px;
+}
+
+.agentic-scoped-templates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 6px 6px 0 0;
+}
+
+.agentic-scoped-badge,
+.agentic-origin {
+  --example-color: light-dark(#7040ae, #bc9aff);
+  border: 1px solid color-mix(in srgb, var(--example-color) 40%, var(--border));
+  border-radius: 6px;
+  color: var(--example-color);
+  font-size: 12px;
+}
+
+.agentic-scoped-badge[data-category="Instructions"],
+.agentic-origin[data-category="Instructions"] {
+  --example-color: light-dark(#1a7f37, #7ee787);
+}
+
+.agentic-scoped-badge[data-category="Agents"],
+.agentic-origin[data-category="Agents"] {
+  --example-color: light-dark(#087f8c, #56d4dd);
+}
+
+.agentic-scoped-badge[data-category="Hooks"],
+.agentic-origin[data-category="Hooks"] {
+  --example-color: light-dark(#bf3989, #f19ac2);
+}
+
+.agentic-scoped-badge[data-category="Tools"],
+.agentic-origin[data-category="Tools"] {
+  --example-color: light-dark(#0969da, #79b8ff);
+}
+
+:is(.agentic-scoped-badge, .agentic-origin):is(
+  [data-category="MCP servers"],
+  [data-category="Resources"],
+  [data-category="Prompts"]
+) {
+  --example-color: light-dark(#9a6700, #e3b341);
+}
+
+.agentic-scoped-badge[data-conditional="true"] {
+  border-style: dashed;
+}
+
+.agentic-scoped-badge {
+  position: relative;
+  z-index: 1;
+  background: var(--surface-raised);
+  /* Outlined backplates suggest a collection without implying an item count. */
+  box-shadow:
+    3px -3px 0 -1px var(--surface-raised),
+    3px -3px 0 0 color-mix(in srgb, var(--example-color) 40%, var(--border)),
+    6px -6px 0 -1px var(--surface-raised),
+    6px -6px 0 0 color-mix(in srgb, var(--example-color) 25%, var(--border));
+}
+
+.agentic-scoped-badge svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.agentic-scoped-badge:hover,
+.agentic-scoped-badge[aria-pressed="true"] {
+  border-color: var(--example-color);
+  background: color-mix(in srgb, var(--example-color) 12%, var(--surface-raised));
+  color: var(--example-color);
+}
+
+.agentic-card > .agentic-scoped-templates {
+  align-self: flex-start;
+  margin: 0 20px 16px;
+}
+
+:is(.agentic-map, .agentic-grid)[data-detailed="false"] .agentic-scoped-templates {
+  gap: 2px;
+  padding: 0;
+}
+
+:is(.agentic-map, .agentic-grid)[data-detailed="false"] .agentic-scoped-badge {
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.agentic-map-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--example-color);
+}
+
+.agentic-page button:is(:hover, [aria-pressed="true"]) .agentic-map-dot {
+  outline: 1px solid var(--example-color);
+  outline-offset: 3px;
+}
+
+.agentic-origin {
+  display: inline-block;
+  background: color-mix(in srgb, var(--example-color) 8%, var(--surface-raised));
+  padding: 2px 7px;
+}
+
+.agentic-distinction > .agentic-origin {
+  margin: 4px 0 10px;
 }
 
 .agentic-readme {
