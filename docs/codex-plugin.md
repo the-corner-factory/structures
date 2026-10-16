@@ -1,6 +1,6 @@
 # Structures plugin
 
-The plugin in [`.agents/plugins/structures`](../.agents/plugins/structures/plugin.json) contains two
+The plugin in [`.agents/plugins/structures`](../.agents/plugins/structures/plugin.json) contains three
 skills:
 
 - `project-structures` analyzes the current project or requested related repositories and produces
@@ -9,6 +9,9 @@ skills:
 - `commit` drafts a Conventional Commit message from current changes and repository commit rules,
   including commitlint configuration. It previews the message in chat by default; `--push` creates
   a local commit with hooks enabled. Remote pushes require a separate, explicit request.
+- `rename-assets` renames content files using `[asset_name]-[type]-[modifier].[extension]`, with
+  meaningful subjects, roles, and variants. It asks for missing context, preserves file formats,
+  checks for collisions, and updates local references.
 
 The plugin is independent of the React application and requires no MCP server or added package
 dependencies. The documentation checker uses Node.js standard libraries. Installing this plugin
@@ -24,6 +27,7 @@ The package follows [Agent Plugins](https://agent-plugins.org/plugin-authors/man
     ├── plugin.json
     ├── skills/project-structures/SKILL.md
     ├── skills/commit/SKILL.md
+    ├── skills/rename-assets/SKILL.md
     ├── assets/icon.png
     └── LICENSE
 ```
@@ -51,9 +55,9 @@ codex plugin add structures@structures-marketplace
 
 To install from a particular branch or tag, append `--ref <branch-or-tag>` to the marketplace command.
 For local testing, use this repository's absolute path instead of the Git URL and omit `--sparse`.
-The marketplace is the repository catalog; `structures` is the plugin; `project-structures` and
-`commit` are its skills. Git URL installation requires these files on the selected remote ref,
-not just locally.
+The marketplace is the repository catalog; `structures` is the plugin; `project-structures`,
+`commit`, and `rename-assets` are its skills. Git URL installation requires these files on the
+selected remote ref, not just locally.
 Restart the desktop app if the new marketplace does not appear immediately.
 Test in a new chat with the installed plugin:
 
@@ -78,6 +82,19 @@ it selects the current task's changes. It leaves unrelated work untouched and ap
 repository's effective commit rules before committing. Despite its name, `--push` does not run
 `git push` or create a Git tag.
 
+To rename asset files:
+
+```text
+Use $rename-assets to standardize the files in public/images using [asset_name]-[type]-[modifier].[extension].
+```
+
+Use underscores within names and modifiers, and hyphens between parts. For example,
+`the_corner-icon-filled-white_bg.png` is already correct: `the_corner` is the asset name, `icon`
+is the type, and `filled` and `white_bg` are modifiers. Keep familiar abbreviations such as `bg`
+for background. An unclear filename such as `IMG_1042.webp` prompts
+a question about its subject and intended use, such as the blog topic or product it belongs to.
+Request a preview to see the proposed mapping without renaming files.
+
 For Gist publication, request it explicitly and choose visibility:
 
 ```text
@@ -91,10 +108,12 @@ URL** control. Omitted profile sections retain built-in examples, which the over
 ## Other harnesses
 
 The reusable workflows are the [Agent Skills](https://agentskills.io/specification) directories
-`skills/project-structures/` and `skills/commit/`. The architecture skill uses file access, a
-Node.js 24.15+ (24.x) or 26+ checker with no third-party dependencies, and optionally an authenticated
-Gist tool or `gh`. The commit skill uses Git and the target repository's installed validators.
-Neither skill depends on Codex tool names or application imports.
+`skills/project-structures/`, `skills/commit/`, and `skills/rename-assets/`. The architecture skill
+uses file access, a Node.js 24.15+ (24.x) or 26+ checker with no third-party dependencies, and
+optionally an authenticated Gist tool or `gh`. The commit skill uses Git and the target repository's
+installed validators.
+The asset-renaming skill uses file inspection, search, and rename tools. None of the skills depend
+on Codex tool names or application imports.
 
 - **Agent Plugins hosts:** distribute the whole `.agents/plugins/structures/` directory. The host
   must support the portable manifest and skills; installation and Git marketplace support depend
@@ -125,7 +144,7 @@ icons, MIT license, and self-contained skills together. Update the plugin versio
 when distributing a new version; this is separate from the application's version.
 
 The [plugin CI workflow](../.github/workflows/plugins.yml) runs the two test commands on pull requests,
-main pushes, and version tags. Tests verify both skill entrypoints, exercise the checker from a
+main pushes, and version tags. Tests verify all skill entrypoints, exercise the checker from a
 detached skill directory, and check the bundled example against the website's full
 `parseSiteSettings` parser. The standalone checker
 tests folder fields, node shape, IDs, and documentation coverage; it does not validate other profile

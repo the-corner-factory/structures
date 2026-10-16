@@ -21,7 +21,7 @@ test("the marketplace resolves a portable manifest with accessible skills and Co
   const manifest = JSON.parse(readFileSync(new URL("plugin.json", pluginRoot), "utf8"));
   assert.equal(manifest.$schema, "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json");
   assert.equal(manifest.name, entry.name);
-  for (const name of ["project-structures", "commit"]) {
+  for (const name of ["project-structures", "commit", "rename-assets"]) {
     const skill = readFileSync(new URL(`skills/${name}/SKILL.md`, pluginRoot), "utf8");
     assert.ok(skill.startsWith("---\n"));
     assert.match(skill, new RegExp(`^name: ${name}$`, "m"));

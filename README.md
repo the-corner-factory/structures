@@ -25,8 +25,11 @@ Drizzle boundaries for the future account and sharing experience.
 
 The [Structures plugin](docs/codex-plugin.md) analyzes a project and generates a documented website
 profile ready for a GitHub Gist. It also includes `commit`, which drafts Conventional Commit
-messages using the project's commit rules; `--push` creates a local commit. Install it in Codex
-through the repository's Git URL. It packages portable Agent Skills with an Agent Plugins manifest;
+messages using the project's commit rules; `--push` creates a local commit. The `rename-assets`
+skill applies `[asset_name]-[type]-[modifier].[extension]`, with underscores within parts and
+compact modifiers such as `white_bg`. It asks for context when a file's meaning is unclear.
+Install it in Codex through the repository's Git URL.
+It packages portable Agent Skills with an Agent Plugins manifest;
 the guide explains how to reuse the skills in other harnesses and what still needs testing.
 
 ## Development

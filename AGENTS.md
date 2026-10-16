@@ -132,9 +132,9 @@ The `test:e2e` script exists, but there is currently no app Playwright configura
 - Preserve unrelated working-tree changes and avoid committing build/cache output. Update
   these instructions and `GLOSSARY.md` when the documented architecture or workflow changes.
 - The Codex plugin lives in `.agents/plugins/structures/`, exposed by `.agents/plugins/marketplace.json`.
-  Its portable `plugin.json` uses `extensions.com.openai` for Codex metadata; keep both
-  `skills/project-structures/` and `skills/commit/` independent of any harness and the application
-  runtime.
+  Its portable `plugin.json` uses `extensions.com.openai` for Codex metadata; keep all bundled
+  skills (`project-structures`, `commit`, and `rename-assets`) independent of any harness and the
+  application runtime.
   Keep the bundled profile example compatible with `parseSiteSettings`. When changing the plugin,
   run `node --test scripts/check-structures-plugin.test.mjs` and
   `pnpm test src/lib/site-settings.test.ts`; see `docs/codex-plugin.md` for Git URL installation.

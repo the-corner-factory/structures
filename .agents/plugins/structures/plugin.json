@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "structures",
-  "version": "0.2.0",
-  "description": "Document project architecture with Structures profiles and generate Conventional Commit messages.",
+  "version": "0.3.0",
+  "description": "Document project architecture, generate Conventional Commit messages, and rename assets consistently.",
   "author": {
     "name": "The Corner",
     "url": "https://github.com/the-corner-inc"
@@ -10,26 +10,34 @@
   "homepage": "https://github.com/the-corner-inc/structures",
   "repository": "https://github.com/the-corner-inc/structures",
   "license": "MIT",
-  "keywords": ["architecture", "documentation", "structures", "conventional-commits"],
+  "keywords": [
+    "architecture",
+    "documentation",
+    "structures",
+    "conventional-commits",
+    "asset-naming"
+  ],
   "extensions": {
     "com.openai": {
       "interface": {
         "displayName": "Structures",
-        "shortDescription": "Document project architecture and prepare commits",
-        "longDescription": "Analyze a local project or related repositories, explain their architecture, and generate settings.json with inline documentation plus a Markdown overview. Publish the files as a GitHub Gist when requested, then load the profile in Structures. Generate Conventional Commit messages using repository rules, preview them in chat, or create a local commit with --push.",
+        "shortDescription": "Document architecture, prepare commits, and rename assets",
+        "longDescription": "Analyze a local project or related repositories, explain their architecture, and generate settings.json with inline documentation plus a Markdown overview. Publish the files as a GitHub Gist when requested, then load the profile in Structures. Generate Conventional Commit messages using repository rules, preview them in chat, or create a local commit with --push. Rename assets using descriptive asset_name, type, and compact modifier segments, with underscores within parts and hyphens between them, asking for context when their meaning is unclear.",
         "developerName": "The Corner",
         "category": "Developer Tools",
         "capabilities": [
           "Analyze project structure",
           "Generate architecture documentation",
           "Publish requested Gists",
-          "Prepare Conventional Commits"
+          "Prepare Conventional Commits",
+          "Rename assets consistently"
         ],
         "websiteURL": "https://github.com/the-corner-inc/structures",
         "supportURL": "https://github.com/the-corner-inc/structures/issues",
         "defaultPrompt": [
           "Analyze this project and generate a documented Structures profile ready for a GitHub Gist.",
-          "Generate a Conventional Commit message for the current changes using this project's commit rules."
+          "Generate a Conventional Commit message for the current changes using this project's commit rules.",
+          "Rename these assets as [asset_name]-[type]-[modifier].[extension], asking for context when their meaning is unclear."
         ],
         "composerIcon": "./assets/icon.png",
         "logo": "./assets/icon.png"

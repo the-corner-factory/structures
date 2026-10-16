@@ -43,7 +43,7 @@ root shadcn registry. It is source copied into consumer projects, not a hosted s
 | `packages/gitgraph-*`                       | Vendored Gitgraph workspace packages with TypeScript source and tracked compiled output.    |
 | `registry.json`, `docs/registry.md`         | Registry distribution manifest and consumer contract.                                       |
 | `scripts/`                                  | Static prerendering, registry validation/consumer checks, and graph debugging.              |
-| `.agents/plugins/structures/`               | Portable plugin with architecture and commit skills, and Codex UI metadata in its manifest. |
+| `.agents/plugins/structures/`               | Portable plugin with architecture, commit, and asset-renaming skills and Codex UI metadata. |
 | `.agents/plugins/marketplace.json`          | Repository marketplace exposing the Structures plugin for installation.                     |
 | `.github/workflows/`                        | Release-tag verification/deployment, registry consumer CI, and plugin validation.           |
 
