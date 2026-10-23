@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
+import { SkillPrompt } from "#/components/skill-prompt.tsx";
 import { TOPICS, type Topic } from "#/lib/structures.ts";
 
 const TOPIC_ICONS: Record<Topic["name"], LucideIcon> = {
@@ -60,6 +61,7 @@ export function HomeTopics() {
           );
         })}
       </div>
+      <SkillPrompt request="init" />
     </section>
   );
 }

@@ -1873,6 +1873,148 @@ input:focus-visible {
   margin: 0;
 }
 
+.skill-prompt {
+  width: min(100%, 620px);
+  margin: clamp(48px, 6vw, 72px) 0 32px;
+  font-size: 13px;
+  line-height: 1.5;
+  opacity: 0.3;
+}
+
+.skill-prompt:hover,
+.skill-prompt:focus-within {
+  opacity: 1;
+}
+
+.skill-prompt-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 10px;
+}
+
+.skill-prompt-heading strong {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.skill-prompt-heading a,
+.skill-prompt-command button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.skill-prompt-heading a {
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+.skill-prompt-heading a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.skill-prompt svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.skill-prompt-command {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.skill-prompt-command code {
+  flex: 1;
+  min-width: 0;
+  align-self: center;
+  padding: 12px 14px;
+  overflow-wrap: anywhere;
+  user-select: all;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.skill-prompt-command code span {
+  color: var(--accent);
+}
+
+.skill-prompt-command button {
+  flex-shrink: 0;
+  min-width: 82px;
+  min-height: 44px;
+  border: 0;
+  border-inline-start: 1px solid var(--border);
+  background: transparent;
+  color: var(--foreground);
+  padding: 10px 12px;
+  font-weight: 600;
+}
+
+.skill-prompt-command button:hover {
+  background: var(--accent-soft);
+}
+
+.skill-prompt-command button:focus-visible {
+  outline-offset: -3px;
+}
+
+.skill-prompt-hint {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.skill-prompt-error {
+  margin: 8px 0 0;
+  color: var(--danger);
+}
+
+.skill-prompt-placement {
+  padding: 0 clamp(20px, 3vw, 36px);
+}
+
+.board-with-skill {
+  display: flex;
+  flex-direction: column;
+}
+
+.board-with-skill > .kanban-board {
+  flex: 1;
+  min-height: 340px;
+}
+
+.board-with-skill .skill-prompt {
+  margin-top: 28px;
+}
+
+.presentation-mode .skill-prompt {
+  display: none;
+}
+
+@media (max-width: 520px) {
+  .skill-prompt-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .skill-prompt-command code {
+    padding-inline: 10px;
+  }
+}
+
+@media print {
+  .skill-prompt {
+    display: none;
+  }
+}
+
 .inline-link {
   color: var(--accent);
 }
@@ -3339,6 +3481,8 @@ input:focus-visible {
   min-height: 0;
   overflow: auto;
   display: grid;
+  grid-template-rows: minmax(min-content, 1fr) auto;
+  gap: clamp(48px, 6vw, 72px);
   place-items: safe center;
   padding: 28px;
   background:
@@ -3350,6 +3494,11 @@ input:focus-visible {
     var(--background);
   scrollbar-color: var(--border) transparent;
   scrollbar-width: thin;
+}
+
+.branch-main > .skill-prompt {
+  justify-self: start;
+  margin: 0;
 }
 
 .branch-diagram {

@@ -15,7 +15,9 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 
 import { LibraryChooser } from "#/components/library-chooser.tsx";
 import { useSiteSettings } from "#/components/site-settings-provider.tsx";
+import { SkillPrompt } from "#/components/skill-prompt.tsx";
 import { StructureTree } from "#/components/structure-tree.tsx";
+import { copyText } from "#/lib/clipboard.ts";
 import type { SiteSettings } from "#/lib/site-settings.ts";
 import {
   EXPLORER_FRAMEWORKS,
@@ -256,6 +258,11 @@ export function StructureExplorer({
             />
           </Suspense>
         )}
+        {(library || legacySource || custom) && (
+          <div className="skill-prompt-placement">
+            <SkillPrompt request={kind === "folders" ? "fix folder structure" : "help"} />
+          </div>
+        )}
       </main>
     </div>
   );
@@ -303,26 +310,4 @@ function downloadSettings(settings: FolderSettings | SiteSettings) {
       : `${settings.libraryName || "structure"}-settings.json`;
   anchor.click();
   URL.revokeObjectURL(url);
-}
-
-async function copyText(value: string) {
-  if (navigator.clipboard?.writeText) {
-    try {
-      await navigator.clipboard.writeText(value);
-      return;
-    } catch {
-      // Older browsers can expose the API while denying it outside a secure context.
-    }
-  }
-
-  const input = document.createElement("textarea");
-  input.value = value;
-  input.setAttribute("readonly", "");
-  input.style.position = "fixed";
-  input.style.opacity = "0";
-  document.body.append(input);
-  input.select();
-  const copied = document.execCommand("copy");
-  input.remove();
-  if (!copied) throw new Error("The browser denied clipboard access.");
 }

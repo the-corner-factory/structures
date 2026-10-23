@@ -63,6 +63,12 @@ maintains it. The standalone `check-template.mjs` adds path validation to the do
 Website/Gist `settings.json` files are derived exports. Commit titles and asset renames do not require
 or create a template. See [the plugin guide](docs/codex-plugin.md) for commands and distribution.
 
+Public reference pages introduce the skill with a shared `SkillPrompt` after their main content.
+Each prompt has a copyable request and an installation link; pages without a dedicated skill
+workflow offer `help`. Prompts use 0.3 opacity until hovered or focused, and are hidden in
+presentation and print views. Clipboard copying shares the explorer's browser fallback and
+restores keyboard focus.
+
 ## Runtime and navigation
 
 The application uses React 19 and strict TypeScript, with TanStack Start for server rendering,

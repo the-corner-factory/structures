@@ -13,6 +13,7 @@ import { useState } from "react";
 import { AgenticMap } from "#/components/agentic-map.tsx";
 import { PageTitle } from "#/components/page-title.tsx";
 import { useSiteSettings } from "#/components/site-settings-provider.tsx";
+import { SkillPrompt } from "#/components/skill-prompt.tsx";
 import { StructureMarkdown } from "#/components/structures/structure-markdown.tsx";
 import {
   AGENT_EXAMPLES,
@@ -322,6 +323,7 @@ export function AgenticPage() {
           agent app.
         </footer>
       </section>
+      <SkillPrompt request="document project" />
     </main>
   );
 }

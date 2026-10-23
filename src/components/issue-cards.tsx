@@ -10,6 +10,7 @@ import { useState } from "react";
 
 import { PageTitle } from "#/components/page-title.tsx";
 import { useSiteSettings } from "#/components/site-settings-provider.tsx";
+import { SkillPrompt } from "#/components/skill-prompt.tsx";
 import { flattenStructures } from "#/components/structures/structure-data.ts";
 import { StructureMarkdown } from "#/components/structures/structure-markdown.tsx";
 import { defaultSource, nodeId } from "#/lib/structures.ts";
@@ -266,6 +267,7 @@ export function IssueCards() {
               </Link>
             </div>
           </footer>
+          <SkillPrompt request="help" />
         </section>
       </main>
     </div>

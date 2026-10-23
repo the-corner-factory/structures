@@ -359,6 +359,9 @@ it("falls back to the system map and Harness for invalid query parameters", asyn
 it("highlights the elements each card can include without changing the selected template", async () => {
   const { container } = await renderPage();
   await click(screen.getByRole("radio", { name: "Cards & templates" }));
+  const relationshipStatus = within(
+    screen.getByRole("region", { name: "Explore customizations" }),
+  ).getByRole("status");
   const highlighted = () =>
     Array.from(container.querySelectorAll('[data-embedded="true"] .agentic-card-select'))
       .map((button) => button.getAttribute("aria-label") ?? "")
@@ -388,12 +391,12 @@ it("highlights the elements each card can include without changing the selected 
     fireEvent.pointerEnter(button);
     expect(highlighted()).toEqual([...children].sort());
     expect(conditional()).toEqual([...extensions].sort());
-    expect(screen.getByRole("status").textContent).toContain(`${name}:`);
+    expect(relationshipStatus.textContent).toContain(`${name}:`);
     expect(screen.getByRole("button", { name: "Harness", pressed: true })).toBeTruthy();
     fireEvent.pointerLeave(button);
     expect(highlighted()).toEqual([]);
     expect(conditional()).toEqual([]);
-    expect(screen.getByRole("status").textContent).toContain("Hover or focus a card");
+    expect(relationshipStatus.textContent).toContain("Hover or focus a card");
     fireEvent.focus(button);
     expect(highlighted()).toEqual([...children].sort());
     expect(conditional()).toEqual([...extensions].sort());

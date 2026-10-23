@@ -7,6 +7,7 @@ import { useState } from "react";
 
 import { BranchGraph } from "#/components/branch-graph.tsx";
 import { useSiteSettings } from "#/components/site-settings-provider.tsx";
+import { SkillPrompt } from "#/components/skill-prompt.tsx";
 import { BRANCH_FLOWS, branchSource, fetchBranchFlow, type BranchNode } from "#/lib/branches.ts";
 import { useHydrated } from "#/lib/use-hydrated.ts";
 
@@ -126,6 +127,7 @@ export function BranchFlowPage({
             <BranchGraph flow={flow} onHover={setHoveredBranch} />
           </div>
         )}
+        <SkillPrompt request="help" />
       </main>
     </div>
   );
@@ -156,6 +158,7 @@ function BranchFlowChooser({ onSelect }: { onSelect: (dir: string) => void }) {
           </div>
         </section>
       </div>
+      <SkillPrompt request="help" />
     </section>
   );
 }

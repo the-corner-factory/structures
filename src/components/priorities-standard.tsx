@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 import { PageTitle } from "#/components/page-title.tsx";
 import { useSiteSettings } from "#/components/site-settings-provider.tsx";
+import { SkillPrompt } from "#/components/skill-prompt.tsx";
 import { AnchorHeading } from "#/components/structures/anchor-heading.tsx";
 import { flattenStructures } from "#/components/structures/structure-data.ts";
 import type { SiteStructureNode } from "#/lib/site-settings.ts";
@@ -137,6 +138,7 @@ export function PrioritiesStandard() {
           <FileCode2Icon aria-hidden="true" /> See example issues
         </Link>
       </div>
+      <SkillPrompt request="help" />
     </section>
   );
 }

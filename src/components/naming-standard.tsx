@@ -12,6 +12,7 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { PageTitle } from "#/components/page-title.tsx";
 import { useSiteSettings } from "#/components/site-settings-provider.tsx";
+import { SkillPrompt } from "#/components/skill-prompt.tsx";
 import { AnchorHeading } from "#/components/structures/anchor-heading.tsx";
 
 const PREFIXES: Array<{
@@ -172,6 +173,7 @@ export function NamingStandard() {
           <FileCode2Icon aria-hidden="true" /> See example issues
         </Link>
       </div>
+      <SkillPrompt request="create commit title" />
     </section>
   );
 }

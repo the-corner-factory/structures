@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { useSiteSettings } from "#/components/site-settings-provider.tsx";
+import { SkillPrompt } from "#/components/skill-prompt.tsx";
 import { StructureMarkdown } from "#/components/structures/structure-markdown.tsx";
 import { nodeId, type BoardVariant, type FolderStructure } from "#/lib/structures.ts";
 import { useStructureMarkdown, useStructureSettings } from "#/lib/use-structure-settings.ts";
@@ -159,7 +160,7 @@ export function StructureBoard({
         </div>
       </aside>
 
-      <main className="board-main">
+      <main className="board-main board-with-skill">
         {settingsQuery.isPending && <BoardSkeleton heading={config.heading} />}
         {settingsQuery.isError && (
           <div className="sidebar-message error-message">
@@ -194,6 +195,9 @@ export function StructureBoard({
             <p>{config.emptyDescription}</p>
           </section>
         )}
+        <div className="skill-prompt-placement">
+          <SkillPrompt request="help" />
+        </div>
       </main>
     </div>
   );

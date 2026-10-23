@@ -1,5 +1,6 @@
 import { ChevronRightIcon } from "lucide-react";
 
+import { SkillPrompt } from "#/components/skill-prompt.tsx";
 import { EXPLORER_FRAMEWORKS, type ExplorerKind } from "#/lib/structures.ts";
 
 interface LibraryChooserProps {
@@ -39,6 +40,7 @@ export function LibraryChooser({ kind, onSelect }: LibraryChooserProps) {
           </section>
         ))}
       </div>
+      <SkillPrompt request={kind === "folders" ? "fix folder structure" : "help"} />
     </section>
   );
 }
