@@ -2,6 +2,29 @@
 
 All notable changes to this project are documented here.
 
+## [1.8.0](https://github.com/the-corner-inc/structures/compare/v1.7.0...v1.8.0) (2026-10-23)
+
+### Features
+
+- Use one `/structures` command for folder templates, audits, fixes, commit titles, and architecture guides ([5fd65f6](https://github.com/the-corner-inc/structures/commit/5fd65f6c516eb892b9903186cc2a7050c3a6c68b))
+- **assets:** Rename files with descriptive subjects, roles, and variants while updating local references ([9370bc9](https://github.com/the-corner-inc/structures/commit/9370bc94b06d7dd7beb304a4ed165800c190bcf2))
+
+### Breaking plugin changes
+
+1. Plugin **0.4.0** replaces the standalone skills with one entrypoint. Use
+   `/structures document project`, `/structures create commit title`, or
+   `/structures rename assets` instead of the old skill names. Hosts using dollar-sign syntax use
+   `$structures` followed by the same request.
+2. Store the maintained folder template in `.structures/config.json`. Run `/structures init`
+   to create it, then `/structures audit folders` or `/structures fix folder structure`.
+   Website/Gist `settings.json` files are derived exports; existing website URLs still work.
+
+### Verification
+
+- Lint/type-checking, 250 application tests, 12 plugin/release checks, the production build,
+  static prerender, and registry validation passed.
+- The registry consumer install matrix remains required before pushing this release.
+
 ## [1.7.0](https://github.com/the-corner-inc/structures/compare/v1.6.0...v1.7.0) (2026-10-13)
 
 ### Features
