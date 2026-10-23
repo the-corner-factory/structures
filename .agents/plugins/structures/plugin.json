@@ -23,11 +23,11 @@
       "interface": {
         "displayName": "Structures",
         "shortDescription": "One entrypoint for structure, commits, assets, and documentation",
-        "longDescription": "Use /structures followed by a task: create a commit title, fix folder structure, rename assets, or document a project. Maintain folder templates in .structures/config.json and load only the requested workflow. Audit folders without edits, apply corrections with reference updates, and export documented website profiles as settings.json. Commit previews stay in chat; commit --push creates a local commit without a remote push. Publish architecture as a Gist only when requested.",
+        "longDescription": "Use /structures followed by a task: initialize or update a folder structure, create a commit title, fix folder structure, rename assets, or document a project. Choose a local file/project, Gist, or repository to seed .structures/config.json; external sources refresh only on request. Load only the requested workflow. Audit folders without edits, apply corrections with reference updates, and export documented website profiles as settings.json. Commit previews stay in chat; commit --push creates a local commit without a remote push. Publish architecture as a Gist only when requested.",
         "developerName": "The Corner",
         "category": "Developer Tools",
         "capabilities": [
-          "Maintain .structures/config.json templates",
+          "Initialize or update templates from local files, Gists, or repositories",
           "Analyze project structure",
           "Generate architecture documentation",
           "Correct folder organization",
@@ -38,6 +38,7 @@
         "websiteURL": "https://github.com/the-corner-inc/structures",
         "supportURL": "https://github.com/the-corner-inc/structures/issues",
         "defaultPrompt": [
+          "Use $structures to initialize a folder structure from a local file, Gist, or repository.",
           "Use $structures to create a commit title for the current changes.",
           "Use $structures to fix folder structure using .structures/config.json.",
           "Use $structures to rename assets in the selected folder.",

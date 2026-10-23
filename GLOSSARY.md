@@ -59,12 +59,16 @@ The folder workflow supports read-only audits and corrections that update affect
 It uses the website profile's version-1 JSON shape with one project-root container, literal file
 and folder names, and inline placement documentation. It is curated: unlisted paths are allowed.
 Folder fixes read it without rewriting policy to match drift; `init` or an explicit template update
-maintains it. The standalone `check-template.mjs` adds path validation to the documentation checker.
-Website/Gist `settings.json` files are derived exports. Commit titles and asset renames do not require
+maintains it. Setup asks for a local file/project, Gist, or repository and stores a validated local
+snapshot with source provenance in the root documentation. External templates refresh only on
+request; local rules and unrelated profile sections survive updates. The standalone
+`check-template.mjs` adds path validation to the documentation checker.
+Website/Gist `settings.json` files are derived exports or explicitly selected import sources. Commit titles and asset renames do not require
 or create a template. See [the plugin guide](docs/codex-plugin.md) for commands and distribution.
 
 Public reference pages introduce the skill with a shared `SkillPrompt` after their main content.
-Each prompt has a copyable request and an installation link; pages without a dedicated skill
+Each prompt has copyable requests and an installation link. Folder pages offer `init folder structure`
+and `fix folder structure` in one block; pages without a dedicated skill
 workflow offer `help`. Prompts use 0.3 opacity until hovered or focused, and are hidden in
 presentation and print views. Clipboard copying shares the explorer's browser fallback and
 restores keyboard focus.

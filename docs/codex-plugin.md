@@ -5,19 +5,19 @@ skill: `/structures <request>`. Use natural language or a short command. Hosts t
 with `$` use `$structures <request>` instead. The single entrypoint and command references follow
 [Impeccable](https://github.com/pbakaus/impeccable); no Impeccable runtime is required.
 
-| Example                                                    | Result                                                                                        |
-| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `/structures`                                              | Show the actions without changing files.                                                      |
-| `/structures init`                                         | Create `.structures/config.json` from project conventions, or validate the existing template. |
-| `/structures update folder template`                       | Update the saved template while preserving unrelated sections and stable IDs.                 |
-| `/structures audit folders`                                | Report placement issues without edits.                                                        |
-| `/structures fix folder structure`                         | Correct misplaced files using the template and update affected references.                    |
-| `/structures create commit title`                          | Return only a Conventional Commit subject in a copyable block.                                |
-| `/structures create commit message`                        | Draft a message using the project's effective commit rules.                                   |
-| `/structures commit --push`                                | Create a local commit with hooks enabled; no remote push.                                     |
-| `/structures rename assets in public/images`               | Rename assets and update local references.                                                    |
-| `/structures document project`                             | Export a documented website profile and architecture overview.                                |
-| `/structures publish architecture as a secret GitHub Gist` | Prepare and publish the requested guide.                                                      |
+| Example                                                    | Result                                                                                      |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `/structures`                                              | Show the actions without changing files.                                                    |
+| `/structures init folder structure`                        | Choose a local file/project, Gist, or repository and initialize `.structures/config.json`.  |
+| `/structures update folder structure`                      | Refresh the template from the chosen source, preserving local rules and unrelated sections. |
+| `/structures audit folders`                                | Report placement issues without edits.                                                      |
+| `/structures fix folder structure`                         | Correct misplaced files using the template and update affected references.                  |
+| `/structures create commit title`                          | Return only a Conventional Commit subject in a copyable block.                              |
+| `/structures create commit message`                        | Draft a message using the project's effective commit rules.                                 |
+| `/structures commit --push`                                | Create a local commit with hooks enabled; no remote push.                                   |
+| `/structures rename assets in public/images`               | Rename assets and update local references.                                                  |
+| `/structures document project`                             | Export a documented website profile and architecture overview.                              |
+| `/structures publish architecture as a secret GitHub Gist` | Prepare and publish the requested guide.                                                    |
 
 Only the requested workflow is loaded. A request to fix folders and suggest a commit title applies
 the folder corrections and drafts a title; it does not commit. Analysis-only and preview requests
@@ -27,7 +27,15 @@ remain read-only. Missing folder configuration does not block commit titles or a
 
 The maintained template lives in `<project-root>/.structures/config.json`, including when a command
 is invoked from a subdirectory. This repository's [template](../.structures/config.json) records its
-architectural boundaries. Other projects derive their own conventions through `init`.
+architectural boundaries. `init` also accepts the longer `init folder structure` command.
+
+Initialization asks whether to load a local file/project, a Gist, or a repository unless you have
+already supplied the source. External templates become local snapshots; audits and fixes use the
+saved copy. Use `update folder structure` (or `update folder template`) to refresh it on request.
+The skill records the source path or URL and resolved revision in the root's inline documentation.
+An existing template is retained during initialization; updates preserve stable IDs, local
+documentation, exceptions, and unrelated profile sections, resolving conflicts before replacement.
+Invalid or unavailable sources leave the existing configuration unchanged.
 
 The template reuses the [website profile format](site-settings.md): `version: 1`, `folders`, a tree,
 and inline documentation. It has one root container representing the project directory. Descendant
@@ -35,7 +43,8 @@ folder and file names define literal relative paths; IDs identify nodes and neve
 Documentation records responsibilities, placement rules, and exceptions. See the full
 [template contract](../.agents/plugins/structures/skills/structures/references/template.md).
 
-This is a curated placement guide, not a list of everything allowed or a scaffolding command.
+Setup creates the template configuration, not example source files or directories. This is a
+curated placement guide, not a list of everything allowed or a scaffolding command.
 Omitted files remain valid. Folder corrections preserve the template and check imports, routes,
 exports, globs, public paths, and collisions before moving files. An absent template is initialized
 from clear project rules during a fix; an audit only recommends initialization. Invalid templates

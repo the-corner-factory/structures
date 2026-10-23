@@ -15,7 +15,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 
 import { LibraryChooser } from "#/components/library-chooser.tsx";
 import { useSiteSettings } from "#/components/site-settings-provider.tsx";
-import { SkillPrompt } from "#/components/skill-prompt.tsx";
+import { FOLDER_SKILL_REQUESTS, SkillPrompt } from "#/components/skill-prompt.tsx";
 import { StructureTree } from "#/components/structure-tree.tsx";
 import { copyText } from "#/lib/clipboard.ts";
 import type { SiteSettings } from "#/lib/site-settings.ts";
@@ -260,7 +260,7 @@ export function StructureExplorer({
         )}
         {(library || legacySource || custom) && (
           <div className="skill-prompt-placement">
-            <SkillPrompt request={kind === "folders" ? "fix folder structure" : "help"} />
+            <SkillPrompt request={kind === "folders" ? FOLDER_SKILL_REQUESTS : "help"} />
           </div>
         )}
       </main>

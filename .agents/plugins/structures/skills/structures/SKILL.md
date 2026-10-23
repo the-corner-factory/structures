@@ -1,6 +1,6 @@
 ---
 name: structures
-description: Manage project structure through one entrypoint. Use to create a folder template in .structures/config.json, audit or fix folder organization, document architecture for the Structures website, draft Conventional Commit titles or messages, or rename assets consistently.
+description: Manage project structure through one entrypoint. Use to initialize or update .structures/config.json from local folders, a Gist, or a repository, audit or fix folder organization, document architecture for the Structures website, draft Conventional Commit titles or messages, or rename assets consistently.
 license: MIT
 ---
 
@@ -13,15 +13,16 @@ of the target project's location.
 
 ## Commands
 
-| Request after `/structures`                                              | Action                                                                                  | Reference                               |
-| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- | --------------------------------------- |
-| `init`, `create folder template`, `update folder template`               | Create or update `.structures/config.json` from project rules and the requested layout. | [Template](references/template.md)      |
-| `audit folders`, `analyze folder structure`                              | Report mismatches without changing files.                                               | [Folders](references/folders.md)        |
-| `fix folder structure`, `reorganize folders`                             | Apply necessary moves using the saved template and update references.                   | [Folders](references/folders.md)        |
-| `create commit title`, `commit`, `create commit message`                 | Draft a Conventional Commit title or message in chat.                                   | [Commit](references/commit.md)          |
-| `commit --push`                                                          | Create a local commit using the existing commit workflow; this does not push remotely.  | [Commit](references/commit.md)          |
-| `rename assets [path]`                                                   | Rename content files consistently and update references.                                | [Assets](references/rename-assets.md)   |
-| `document project`, `generate profile`, `publish architecture as a Gist` | Generate a website export and overview; publish only when requested.                    | [Documentation](references/document.md) |
+| Request after `/structures`                                              | Action                                                                                 | Reference                               |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- | --------------------------------------- |
+| `init`, `init folder structure`, `create folder template`                | Choose a local, Gist, or repository source and initialize `.structures/config.json`.   | [Setup](references/setup.md)            |
+| `update folder structure`, `update folder template`                      | Refresh the saved template from the chosen source while preserving local rules.        | [Setup](references/setup.md)            |
+| `audit folders`, `analyze folder structure`                              | Report mismatches without changing files.                                              | [Folders](references/folders.md)        |
+| `fix folder structure`, `reorganize folders`                             | Apply necessary moves using the saved template and update references.                  | [Folders](references/folders.md)        |
+| `create commit title`, `commit`, `create commit message`                 | Draft a Conventional Commit title or message in chat.                                  | [Commit](references/commit.md)          |
+| `commit --push`                                                          | Create a local commit using the existing commit workflow; this does not push remotely. | [Commit](references/commit.md)          |
+| `rename assets [path]`                                                   | Rename content files consistently and update references.                               | [Assets](references/rename-assets.md)   |
+| `document project`, `generate profile`, `publish architecture as a Gist` | Generate a website export and overview; publish only when requested.                   | [Documentation](references/document.md) |
 
 ## Routing
 
@@ -44,7 +45,7 @@ project directory. Inspect each explicitly requested repository separately.
 
 The durable folder template is `<project-root>/.structures/config.json`. Folder commands and
 documentation read [the template contract](references/template.md). A website/Gist `settings.json`
-is a derived export, never a second source of folder policy. Existing templates remain authoritative
+is a derived export or an explicitly selected import source, never a second source of folder policy. Existing templates remain authoritative
 until the user requests a template update; a folder fix must not rewrite the template to accept drift.
 
 Commit and asset-renaming requests do not require a template or create one as a side effect.

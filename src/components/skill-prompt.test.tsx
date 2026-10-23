@@ -3,7 +3,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vite-plus/test";
 
-import { SkillPrompt } from "./skill-prompt.tsx";
+import { FOLDER_SKILL_REQUESTS, SkillPrompt } from "./skill-prompt.tsx";
 
 afterEach(() => {
   cleanup();
@@ -47,6 +47,33 @@ it("falls back when clipboard access is denied and restores keyboard focus", asy
   expect(execCommand).toHaveBeenCalledWith("copy");
   expect(document.querySelector("textarea")).toBeNull();
   expect(document.activeElement).toBe(copy);
+});
+
+it("copies each folder example separately and clears feedback from the previous command", async () => {
+  const writeText = vi.fn().mockResolvedValue(undefined);
+  vi.stubGlobal("navigator", { clipboard: { writeText } });
+  render(<SkillPrompt request={FOLDER_SKILL_REQUESTS} />);
+
+  const init = screen.getByRole("button", { name: "Copy /structures init folder structure" });
+  const fix = screen.getByRole("button", { name: "Copy /structures fix folder structure" });
+  fireEvent.click(init);
+  await waitFor(() => expect(init.textContent).toBe("Copied"));
+  expect(fix.textContent).toBe("Copy");
+  expect(writeText).toHaveBeenLastCalledWith("/structures init folder structure");
+
+  writeText.mockRejectedValueOnce(new Error("Copy unavailable"));
+  fireEvent.click(fix);
+  await waitFor(() =>
+    expect(screen.getByRole("status").textContent).toContain("“/structures fix folder structure”"),
+  );
+  expect(init.textContent).toBe("Copy");
+  expect(screen.queryByText("Copied")).toBeNull();
+
+  fireEvent.click(fix);
+  await waitFor(() => expect(fix.textContent).toBe("Copied"));
+  expect(init.textContent).toBe("Copy");
+  expect(writeText).toHaveBeenLastCalledWith("/structures fix folder structure");
+  expect(screen.getByRole("status").textContent).toBe("Command copied.");
 });
 
 it("offers manual copying and cleans up when both clipboard methods fail", async () => {

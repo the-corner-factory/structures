@@ -25,7 +25,8 @@ sections retain their website semantics and must survive template updates unchan
 
 ## Create or update
 
-For `init` or a template request, inspect project instructions, architecture docs, framework entry
+For explicit initialization or update requests, start with [source selection](setup.md).
+When deriving a template from a project, inspect project instructions, architecture docs, framework entry
 points, manifests, and representative modules. Derive the intended layout from the user's chosen
 standard and current project rules; distinguish existing violations from the desired organization.
 Ask about unresolved ownership or conflicting rules only after presenting the concrete alternatives.

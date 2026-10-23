@@ -1923,6 +1923,12 @@ input:focus-visible {
   flex-shrink: 0;
 }
 
+.skill-prompt-commands {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .skill-prompt-command {
   display: flex;
   align-items: stretch;
