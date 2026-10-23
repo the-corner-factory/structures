@@ -24,28 +24,44 @@ root shadcn registry. It is source copied into consumer projects, not a hosted s
 
 ## Code map
 
-| Location                                    | Responsibility                                                                              |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `src/router.tsx`                            | Router creation, per-router QueryClient, query provider, error/not-found defaults.          |
-| `src/routes/`                               | TanStack file routes, route parameters, search validation, auth layouts, auth API.          |
-| `src/components/`                           | Website shell, explorer integration, boards, standards pages, branch diagrams.              |
-| `src/components/structures/`                | Portable explorer, shared tree/data helpers, Markdown renderer, scoped CSS.                 |
-| `src/lib/structures.ts`                     | Folder/issue catalog types, library/topic lists, URL resolution, fetch boundaries.          |
-| `src/lib/site-settings.ts`                  | Website profile types, complete-document validation, and Gist/raw URL fetching.             |
-| `src/components/site-settings-provider.tsx` | Shared browser-only profile query, context, and loading/error boundary.                     |
-| `src/lib/use-structure-settings.ts`         | Website profile/catalog selection and inline or fetched Markdown resolution.                |
-| `src/lib/branches.ts`                       | Branch graph types, parsing, preset list, and fetching.                                     |
-| `src/lib/agentic.ts`                        | Agent concept cards, reference links, and Markdown templates.                               |
-| `src/lib/material-icons.ts`                 | Material icon manifest and filename/folder icon lookup.                                     |
-| `src/lib/auth/`, `src/lib/db/`, `src/env/`  | Optional accounts, PostgreSQL access, and validated environment variables.                  |
-| `src/styles.css`                            | Website layout, colors, dark theme, responsive behavior, and print styles.                  |
-| `public/assets/`                            | Built-in JSON catalogs and their Markdown content.                                          |
-| `packages/gitgraph-*`                       | Vendored Gitgraph workspace packages with TypeScript source and tracked compiled output.    |
-| `registry.json`, `docs/registry.md`         | Registry distribution manifest and consumer contract.                                       |
-| `scripts/`                                  | Static prerendering, registry validation/consumer checks, and graph debugging.              |
-| `.agents/plugins/structures/`               | Portable plugin with architecture, commit, and asset-renaming skills and Codex UI metadata. |
-| `.agents/plugins/marketplace.json`          | Repository marketplace exposing the Structures plugin for installation.                     |
-| `.github/workflows/`                        | Release-tag verification/deployment, registry consumer CI, and plugin validation.           |
+| Location                                    | Responsibility                                                                           |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `src/router.tsx`                            | Router creation, per-router QueryClient, query provider, error/not-found defaults.       |
+| `src/routes/`                               | TanStack file routes, route parameters, search validation, auth layouts, auth API.       |
+| `src/components/`                           | Website shell, explorer integration, boards, standards pages, branch diagrams.           |
+| `src/components/structures/`                | Portable explorer, shared tree/data helpers, Markdown renderer, scoped CSS.              |
+| `src/lib/structures.ts`                     | Folder/issue catalog types, library/topic lists, URL resolution, fetch boundaries.       |
+| `src/lib/site-settings.ts`                  | Website profile types, complete-document validation, and Gist/raw URL fetching.          |
+| `src/components/site-settings-provider.tsx` | Shared browser-only profile query, context, and loading/error boundary.                  |
+| `src/lib/use-structure-settings.ts`         | Website profile/catalog selection and inline or fetched Markdown resolution.             |
+| `src/lib/branches.ts`                       | Branch graph types, parsing, preset list, and fetching.                                  |
+| `src/lib/agentic.ts`                        | Agent concept cards, reference links, and Markdown templates.                            |
+| `src/lib/material-icons.ts`                 | Material icon manifest and filename/folder icon lookup.                                  |
+| `src/lib/auth/`, `src/lib/db/`, `src/env/`  | Optional accounts, PostgreSQL access, and validated environment variables.               |
+| `src/styles.css`                            | Website layout, colors, dark theme, responsive behavior, and print styles.               |
+| `public/assets/`                            | Built-in JSON catalogs and their Markdown content.                                       |
+| `packages/gitgraph-*`                       | Vendored Gitgraph workspace packages with TypeScript source and tracked compiled output. |
+| `registry.json`, `docs/registry.md`         | Registry distribution manifest and consumer contract.                                    |
+| `scripts/`                                  | Static prerendering, registry validation/consumer checks, and graph debugging.           |
+| `.agents/plugins/structures/`               | Unified Structures skill for templates, folder corrections, commits, assets, and docs.   |
+| `.agents/plugins/marketplace.json`          | Repository marketplace exposing the Structures plugin for installation.                  |
+| `.github/workflows/`                        | Release-tag verification/deployment, registry consumer CI, and plugin validation.        |
+
+## Structures skill and template
+
+The portable plugin exposes one `structures` skill at
+`.agents/plugins/structures/skills/structures/SKILL.md`. Natural-language requests after
+`/structures` (or `$structures`) route to command references inside that directory. The former
+standalone architecture, commit, and asset-renaming skills are now workflows of this entrypoint.
+The folder workflow supports read-only audits and corrections that update affected references.
+
+[`.structures/config.json`](.structures/config.json) is this project's maintained folder template.
+It uses the website profile's version-1 JSON shape with one project-root container, literal file
+and folder names, and inline placement documentation. It is curated: unlisted paths are allowed.
+Folder fixes read it without rewriting policy to match drift; `init` or an explicit template update
+maintains it. The standalone `check-template.mjs` adds path validation to the documentation checker.
+Website/Gist `settings.json` files are derived exports. Commit titles and asset renames do not require
+or create a template. See [the plugin guide](docs/codex-plugin.md) for commands and distribution.
 
 ## Runtime and navigation
 

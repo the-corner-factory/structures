@@ -1,9 +1,3 @@
----
-name: rename-assets
-description: Rename asset files using descriptive asset_name, type, and modifier segments, with underscores within parts and hyphens between them. Use for standardizing logos, blog media, product assets, or other content filenames; ask for context when their meaning is unclear.
-license: MIT
----
-
 # Rename assets
 
 Rename the requested files using `[asset_name]-[type]-[modifier].[extension]`.

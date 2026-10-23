@@ -1,8 +1,3 @@
----
-name: commit
-description: Generate a Conventional Commit message from current changes and repository commit rules. Use when asked for a commit message or commit tag, or when invoking commit with --push to create a local commit.
----
-
 # Commit
 
 Generate a message based on [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
@@ -10,9 +5,10 @@ and the repository's effective commit rules.
 
 ## Modes
 
-- `$commit`: preview only. Return the message in one copyable `md` code block in chat.
-  Leave the working tree, staging area, and Git history unchanged.
-- `$commit --push`: generate the message and create a local commit. This flag authorizes
+- `/structures commit`: preview only. Return the message in one copyable `md` code block in chat.
+  For a title-only request such as `/structures create commit title`, return just the subject line
+  inside that block. Leave the working tree, staging area, and Git history unchanged.
+- `/structures commit --push`: generate the message and create a local commit. This flag authorizes
   committing the selected changes without another confirmation. It does **not** mean
   `git push`; publishing requires a separate, explicit user request.
 

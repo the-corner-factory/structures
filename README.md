@@ -23,14 +23,22 @@ Drizzle boundaries for the future account and sharing experience.
 
 ## Structures plugin
 
-The [Structures plugin](docs/codex-plugin.md) analyzes a project and generates a documented website
-profile ready for a GitHub Gist. It also includes `commit`, which drafts Conventional Commit
-messages using the project's commit rules; `--push` creates a local commit. The `rename-assets`
-skill applies `[asset_name]-[type]-[modifier].[extension]`, with underscores within parts and
-compact modifiers such as `white_bg`. It asks for context when a file's meaning is unclear.
-Install it in Codex through the repository's Git URL.
-It packages portable Agent Skills with an Agent Plugins manifest;
-the guide explains how to reuse the skills in other harnesses and what still needs testing.
+The [Structures plugin](docs/codex-plugin.md) provides one skill: `/structures`, followed by what
+you want to do. For example:
+
+```text
+/structures create commit title
+/structures fix folder structure
+/structures rename assets in public/images
+/structures document project
+```
+
+Use `/structures init` to capture a folder template in [`.structures/config.json`](.structures/config.json).
+Folder fixes follow that template and update affected references; `/structures audit folders`
+reports findings without edits. Commit titles follow the repository's rules, and
+`/structures commit --push` creates a local commit without pushing remotely. Architecture exports
+use `settings.json` for the website and Gists. Install the plugin through the repository's Git URL;
+the guide covers `$structures` invocation and reuse in other Agent Skills hosts.
 
 ## Development
 

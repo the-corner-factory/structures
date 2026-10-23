@@ -1,16 +1,9 @@
----
-name: project-structures
-description: Analyze a project's architecture and generate a Structures website settings.json with inline documentation and a Markdown overview, optionally publishing both as a GitHub Gist. Use for documenting project organization or creating a Structures profile from a codebase.
-license: MIT
-compatibility: Requires file access and Node.js 24.15+ (24.x) or 26+ to run the bundled checker. Publishing requires an authenticated GitHub Gist tool or GitHub CLI.
----
-
 # Project structures
 
 Produce a curated, evidence-based architecture guide that can be loaded in the Structures website.
-Create local `settings.json` and `<project>-structures.md` files; publish a Gist only when requested.
-Use the bundled format and example. Resolve bundled paths relative to this `SKILL.md`, not the
-project being inspected. The workflow works in any Agent Skills host with file and shell access.
+Maintain the folder template in `.structures/config.json`; produce `settings.json` and a Markdown
+overview as derived exports. Publish a Gist only when requested. Bundled resource paths resolve
+from the parent skill directory; Markdown links here are relative to this reference.
 
 ## Inspect the project
 
@@ -36,15 +29,19 @@ remote URLs. If a host's browse URL cannot be established, use a relative path i
 
 ## Generate the guide
 
-Read [the profile contract](references/profile-format.md). Adapt
-[the bundled example](assets/settings.example.json) to the inspected project; its names and
-conventions are illustrative, not defaults for the target project.
+Read [the template workflow](template.md) and [the profile contract](profile-format.md). Load and
+validate `.structures/config.json`, initializing it from evidenced project rules if absent. Preserve
+an existing template unless its update was requested. Report mismatches between intended structure
+and the checkout in the overview; never present template-only paths as verified implementation.
 
-Write both files to a fresh output directory outside tracked source unless the user chose a
-destination. Keep existing source and output files intact. `settings.json` must be the exact JSON
-filename so ordinary Gist page links resolve in Structures.
+Write the derived `settings.json` and `<project>-structures.md` to `.structures/exports/` unless the
+user chose an export directory. Preserve unrelated files and review existing exports before updating
+them. Keep the JSON filename `settings.json` so ordinary Gist page links resolve in Structures.
+For several repositories, retain a config in each root and combine their exported trees under
+distinct overview containers, with globally unique IDs and documentation keys; resolve ID collisions
+in the combined export without changing the local templates.
 
-- Create `version: 1` and a `folders` section. Give every node an explicit, stable, globally unique
+- Export the saved `version: 1` and `folders` section. Give every node an explicit, stable, globally unique
   ID and inline Markdown documentation keyed by its lowercase ID. Derive IDs from repository and
   relative path, replacing path separators and resolving collisions. Preserve existing IDs on
   updates when they still identify the same node.
@@ -72,7 +69,8 @@ Run the bundled checker from its installed skill directory, using absolute paths
 node <skill-directory>/scripts/check-documentation.mjs <output-directory>/settings.json
 ```
 
-It checks folder fields, node shape, identity, and complete documentation coverage. Check any optional
+Also validate each local config with `scripts/check-template.mjs` from the skill directory.
+The documentation checker checks folder fields, node shape, identity, and complete coverage. Check any optional
 sections against the bundled contract too. When a Structures checkout is available, validate the
 whole profile with its `parseSiteSettings` function through the existing Vite+/Vitest tooling.
 Report which validation actually ran; the documentation checker alone is not full profile validation.

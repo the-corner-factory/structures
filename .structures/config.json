@@ -1,0 +1,170 @@
+{
+  "version": 1,
+  "folders": {
+    "libraryName": "Structures",
+    "structures": [
+      {
+        "id": "structures",
+        "name": "Structures",
+        "type": "container",
+        "children": [
+          {
+            "id": "structures-src",
+            "name": "src",
+            "type": "folder",
+            "children": [
+              {
+                "id": "structures-src-routes",
+                "name": "routes",
+                "type": "folder"
+              },
+              {
+                "id": "structures-src-components",
+                "name": "components",
+                "type": "folder",
+                "children": [
+                  {
+                    "id": "structures-src-components-structures",
+                    "name": "structures",
+                    "type": "folder"
+                  }
+                ]
+              },
+              {
+                "id": "structures-src-lib",
+                "name": "lib",
+                "type": "folder",
+                "children": [
+                  {
+                    "id": "structures-src-lib-site-settings",
+                    "name": "site-settings.ts",
+                    "type": "file"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "structures-registry",
+            "name": "registry.json",
+            "type": "file"
+          },
+          {
+            "id": "structures-glossary",
+            "name": "GLOSSARY.md",
+            "type": "file"
+          },
+          {
+            "id": "structures-public",
+            "name": "public",
+            "type": "folder",
+            "children": [
+              {
+                "id": "structures-public-assets",
+                "name": "assets",
+                "type": "folder"
+              }
+            ]
+          },
+          {
+            "id": "structures-packages",
+            "name": "packages",
+            "type": "folder",
+            "children": [
+              {
+                "id": "structures-gitgraph-core",
+                "name": "gitgraph-core",
+                "type": "folder"
+              },
+              {
+                "id": "structures-gitgraph-react",
+                "name": "gitgraph-react",
+                "type": "folder"
+              }
+            ]
+          },
+          {
+            "id": "structures-scripts",
+            "name": "scripts",
+            "type": "folder"
+          },
+          {
+            "id": "structures-docs",
+            "name": "docs",
+            "type": "folder"
+          },
+          {
+            "id": "structures-agents",
+            "name": ".agents",
+            "type": "folder",
+            "children": [
+              {
+                "id": "structures-plugins",
+                "name": "plugins",
+                "type": "folder",
+                "children": [
+                  {
+                    "id": "structures-plugin",
+                    "name": "structures",
+                    "type": "folder",
+                    "children": [
+                      {
+                        "id": "structures-skills",
+                        "name": "skills",
+                        "type": "folder",
+                        "children": [
+                          {
+                            "id": "structures-skill",
+                            "name": "structures",
+                            "type": "folder"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "structures-template-dir",
+            "name": ".structures",
+            "type": "folder",
+            "children": [
+              {
+                "id": "structures-template-config",
+                "name": "config.json",
+                "type": "file"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "documentation": {
+      "structures": "# Structures\n\nThis curated template records the placement rules from AGENTS.md and GLOSSARY.md for the React website, portable explorer, vendored packages, and agent plugin. Unlisted files are allowed. It is a placement guide, not a scaffolding or deletion list.\n",
+      "structures-src": "# src\n\n`src/` contains application routes, components, and shared data behavior.\n",
+      "structures-src-routes": "# routes\n\n`src/routes/` contains TanStack file routes, validated search parameters, and page metadata. Keep route UI thin and delegate to components.\n",
+      "structures-src-components": "# components\n\n`src/components/` contains website UI, profile integration, and explorer composition. `structure-explorer.tsx` composes shared tree and Markdown components for the website; `structures/structure-explorer.tsx` exposes the portable component API.\n",
+      "structures-src-components-structures": "# Portable explorer\n\n`src/components/structures/` contains the distributed explorer, shared tree validation, Markdown renderer, and scoped styles. Internal imports are relative; distributed code remains independent of website providers and routing.\n",
+      "structures-src-lib": "# lib\n\n`src/lib/` owns shared data contracts, fetching, validation, and catalog configuration.\n",
+      "structures-src-lib-site-settings": "# site-settings.ts\n\n`src/lib/site-settings.ts` validates the complete website profile and resolves remote JSON, including Gists. Invalid profiles fail before any custom section is applied.\n",
+      "structures-registry": "# registry.json\n\n`registry.json` declares the reusable explorer's shipped files and dependencies. Review `docs/registry.md` before changing that distribution.\n",
+      "structures-glossary": "# GLOSSARY.md\n\n`GLOSSARY.md` records the checked-out architecture, data flows, and implementation limits. Contribution commands live in `AGENTS.md` and `CONTRIBUTING.md`.\n",
+      "structures-public-assets": "# assets\n\npublic/assets/ contains built-in catalog settings.json files and their md/ documentation.\n",
+      "structures-public": "# public\n\nStatic website content belongs in public/. Example project catalogs are content, not implementation rules.\n",
+      "structures-gitgraph-core": "# gitgraph-core\n\npackages/gitgraph-core/ is the local core fork; build it before the React package.\n",
+      "structures-gitgraph-react": "# gitgraph-react\n\npackages/gitgraph-react/ is the local React rendering fork.\n",
+      "structures-packages": "# packages\n\nVendored workspace packages live in packages/. Rebuild tracked lib/ output after changing their src/ files.\n",
+      "structures-scripts": "# scripts\n\nscripts/ contains repository validation, release, prerendering, and consumer-check utilities.\n",
+      "structures-docs": "# docs\n\ndocs/ contains maintained contribution-facing contracts, including registry, website profile, and plugin documentation.\n",
+      "structures-skill": "# structures\n\n.agents/plugins/structures/skills/structures/ contains SKILL.md, references/, scripts/, assets/, and optional agents/ UI metadata.\n",
+      "structures-skills": "# skills\n\nKeep one discoverable Structures entrypoint; command workflows are reference documents inside it.\n",
+      "structures-plugin": "# structures\n\n.agents/plugins/structures/ packages the manifest, MIT license, icons, and unified skill.\n",
+      "structures-plugins": "# plugins\n\n.agents/plugins/ contains the marketplace catalog and the portable plugin.\n",
+      "structures-agents": "# .agents\n\nRepository-distributed agent resources live under .agents/.\n",
+      "structures-template-config": "# config.json\n\n.structures/config.json is the folder placement template. Audit and fix commands read it; change it only for a requested template update. Omitted paths are allowed.\n",
+      "structures-template-dir": "# .structures\n\n.structures/ stores the maintained project template; exports/ may contain derived website or Gist artifacts.\n"
+    }
+  }
+}

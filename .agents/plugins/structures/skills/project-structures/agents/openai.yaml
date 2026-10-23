@@ -1,4 +1,0 @@
-interface:
-  display_name: "Project structures"
-  short_description: "Generate a documented Structures profile from a project"
-  default_prompt: "Use $project-structures to analyze this project and generate Gist-ready architecture documentation."

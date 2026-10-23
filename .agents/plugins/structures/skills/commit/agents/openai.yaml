@@ -1,4 +1,0 @@
-interface:
-  display_name: "Commit"
-  short_description: "Preview commit messages or create a local commit"
-  default_prompt: "Use $commit to draft a Conventional Commit message for the current changes."

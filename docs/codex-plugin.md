@@ -1,135 +1,132 @@
 # Structures plugin
 
-The plugin in [`.agents/plugins/structures`](../.agents/plugins/structures/plugin.json) contains three
-skills:
+The plugin in [`.agents/plugins/structures`](../.agents/plugins/structures/plugin.json) exposes one
+skill: `/structures <request>`. Use natural language or a short command. Hosts that invoke skills
+with `$` use `$structures <request>` instead. The single entrypoint and command references follow
+[Impeccable](https://github.com/pbakaus/impeccable); no Impeccable runtime is required.
 
-- `project-structures` analyzes the current project or requested related repositories and produces
-  `settings.json` with inline Markdown plus a project overview. A requested Gist upload uses an
-  available authenticated Gist tool or GitHub CLI; local generation needs neither.
-- `commit` drafts a Conventional Commit message from current changes and repository commit rules,
-  including commitlint configuration. It previews the message in chat by default; `--push` creates
-  a local commit with hooks enabled. Remote pushes require a separate, explicit request.
-- `rename-assets` renames content files using `[asset_name]-[type]-[modifier].[extension]`, with
-  meaningful subjects, roles, and variants. It asks for missing context, preserves file formats,
-  checks for collisions, and updates local references.
+| Example                                                    | Result                                                                                        |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `/structures`                                              | Show the actions without changing files.                                                      |
+| `/structures init`                                         | Create `.structures/config.json` from project conventions, or validate the existing template. |
+| `/structures update folder template`                       | Update the saved template while preserving unrelated sections and stable IDs.                 |
+| `/structures audit folders`                                | Report placement issues without edits.                                                        |
+| `/structures fix folder structure`                         | Correct misplaced files using the template and update affected references.                    |
+| `/structures create commit title`                          | Return only a Conventional Commit subject in a copyable block.                                |
+| `/structures create commit message`                        | Draft a message using the project's effective commit rules.                                   |
+| `/structures commit --push`                                | Create a local commit with hooks enabled; no remote push.                                     |
+| `/structures rename assets in public/images`               | Rename assets and update local references.                                                    |
+| `/structures document project`                             | Export a documented website profile and architecture overview.                                |
+| `/structures publish architecture as a secret GitHub Gist` | Prepare and publish the requested guide.                                                      |
 
-The plugin is independent of the React application and requires no MCP server or added package
-dependencies. The documentation checker uses Node.js standard libraries. Installing this plugin
-does not grant source access or authorize publication.
+Only the requested workflow is loaded. A request to fix folders and suggest a commit title applies
+the folder corrections and drafts a title; it does not commit. Analysis-only and preview requests
+remain read-only. Missing folder configuration does not block commit titles or asset renaming.
 
-The package follows [Agent Plugins](https://agent-plugins.org/plugin-authors/manifest), which
-[Codex supports](https://developers.openai.com/plugins/build/plugins#plugin-structure):
+## Folder template
+
+The maintained template lives in `<project-root>/.structures/config.json`, including when a command
+is invoked from a subdirectory. This repository's [template](../.structures/config.json) records its
+architectural boundaries. Other projects derive their own conventions through `init`.
+
+The template reuses the [website profile format](site-settings.md): `version: 1`, `folders`, a tree,
+and inline documentation. It has one root container representing the project directory. Descendant
+folder and file names define literal relative paths; IDs identify nodes and never serve as paths.
+Documentation records responsibilities, placement rules, and exceptions. See the full
+[template contract](../.agents/plugins/structures/skills/structures/references/template.md).
+
+This is a curated placement guide, not a list of everything allowed or a scaffolding command.
+Omitted files remain valid. Folder corrections preserve the template and check imports, routes,
+exports, globs, public paths, and collisions before moving files. An absent template is initialized
+from clear project rules during a fix; an audit only recommends initialization. Invalid templates
+are reported rather than silently replaced. Ambiguous architectural changes need a concrete decision.
+
+Validate a template with the bundled, dependency-free checker:
+
+```sh
+node <skill-directory>/scripts/check-template.mjs <project-root>/.structures/config.json
+```
+
+It checks folder structure, literal path segments, case-insensitive path collisions, IDs, and
+documentation coverage. The website's `parseSiteSettings` owns validation of optional profile
+sections. The plugin tests also run the repository template and bundled example through that parser.
+
+`document project` uses the saved template and reports differences from the checkout. It writes
+derived `settings.json` and `<project>-structures.md` files to `.structures/exports/` by default.
+`settings.json` retains its exact name because ordinary Gist page URLs resolve that filename in the
+website. Maintain `.structures/config.json`; regenerate exports instead of editing two templates.
+For multiple repositories, keep one config in each root and combine the exported guides as needed.
+
+## Commits, assets, and publication
+
+Commit previews use staged changes when present, preserving partial staging. With nothing staged,
+they select the requested work or current task's changes. Effective repository rules, including
+commitlint, govern the message. The existing `--push` option creates a local commit; remote pushes,
+tags, and history rewriting require their own requests.
+
+Asset names use `[asset_name]-[type]-[modifier].[extension]`, with underscores within parts and
+hyphens between parts. For example, `the_corner-icon-filled-white_bg.png` is already correct.
+The workflow checks collisions, updates references, preserves formats, and asks for missing subject
+or usage context. Request a preview to see a proposed mapping without renaming files.
+
+Gist-ready output alone does not request publication. Publishing uses an authenticated Gist tool or
+GitHub CLI, uploads the export and overview, and verifies the uploaded files. Secret Gists are
+unlisted and readable by anyone with the link. Load the resulting Gist page URL through the
+website's **Website settings URL** control. Omitted sections retain built-in examples, identified
+in the overview. Local generation needs no GitHub connection.
+
+## Packaging and installation
+
+The portable [Agent Plugins](https://agent-plugins.org/plugin-authors/manifest) package is:
 
 ```text
 .agents/plugins/
 ├── marketplace.json
 └── structures/
     ├── plugin.json
-    ├── skills/project-structures/SKILL.md
-    ├── skills/commit/SKILL.md
-    ├── skills/rename-assets/SKILL.md
+    ├── skills/structures/
+    │   ├── SKILL.md
+    │   ├── agents/openai.yaml
+    │   ├── references/
+    │   ├── scripts/
+    │   └── assets/config.example.json
     ├── assets/icon.png
     └── LICENSE
 ```
 
-`plugin.json` holds the portable identity and version. Hosts discover skills in `skills/` by
-convention; the portable manifest has no `skills` field. Codex presentation metadata is isolated in
-`extensions.com.openai.interface`. Each skill's resources and optional `agents/openai.yaml`
-metadata live inside its directory. There are no MCP servers or hooks to configure.
+`plugin.json` holds identity and version; hosts discover `skills/structures/` by convention.
+Codex presentation metadata stays in `extensions.com.openai.interface`. The workflow has no
+application imports, MCP servers, hooks, added dependencies, or dependency on Codex tool names.
+The checkers require Node.js 24.15+ (24.x) or 26+. Reuse this one skill and its references rather
+than distributing separate copies of each workflow.
 
-Keep this single manifest and bundled skills as the source of truth. The old `.codex-plugin/plugin.json`
-compatibility manifest is unnecessary for clients that support this format. Marketplace discovery
-was checked with Codex CLI 0.160.0; older clients may need an update.
-
-## Install and use
-
-The repo marketplace is [`.agents/plugins/marketplace.json`](../.agents/plugins/marketplace.json).
-Once these files are committed and pushed to GitHub, users can install from the repository's Git
-URL in a supported Codex CLI. The sparse checkout includes the catalog and complete plugin without
-downloading the application source:
+Once the files are committed and pushed, install using the repository marketplace:
 
 ```sh
 codex plugin marketplace add https://github.com/the-corner-inc/structures.git --sparse .agents/plugins
 codex plugin add structures@structures-marketplace
 ```
 
-To install from a particular branch or tag, append `--ref <branch-or-tag>` to the marketplace command.
-For local testing, use this repository's absolute path instead of the Git URL and omit `--sparse`.
-The marketplace is the repository catalog; `structures` is the plugin; `project-structures`,
-`commit`, and `rename-assets` are its skills. Git URL installation requires these files on the
-selected remote ref, not just locally.
-Restart the desktop app if the new marketplace does not appear immediately.
-Test in a new chat with the installed plugin:
+Append `--ref <branch-or-tag>` to select a remote revision. For local testing, use this repository's
+absolute path instead of the Git URL and omit `--sparse`. The marketplace is the catalog;
+`structures` is both the plugin name and its single skill name. Start a new chat after loading the
+updated plugin. In a host with `$` invocation, use:
 
 ```text
-Use $project-structures to analyze this project and generate a documented Structures profile.
+Use $structures to create a commit title for the current changes.
 ```
 
-To preview a commit message in a copyable Markdown code block:
+The former `project-structures`, `commit`, `rename-assets`, and `fix-folder-structure` skill
+directories are consolidated into command references. Replace old invocations with `/structures`
+plus the task. The names `project-structures`, `rename-assets`, and `fix-folder-structure` are also
+recognized after `/structures` for migration; no separate skill installation is needed.
 
-```text
-Use $commit to generate a message for the current changes.
-```
+Agent Plugins hosts can distribute the complete plugin directory. For Agent Skills hosts, copy
+`skills/structures/` with all resources into the host's skill location and include the plugin's
+MIT `LICENSE`. `agents/openai.yaml` is optional UI metadata. Host-specific installation and slash
+command discovery need testing in that host; a Git URL alone is not a universal installer.
 
-To create a local commit with the generated message:
-
-```text
-Use $commit --push to commit the current changes.
-```
-
-The commit skill uses staged changes when present, preserving partial staging. With nothing staged,
-it selects the current task's changes. It leaves unrelated work untouched and applies the
-repository's effective commit rules before committing. Despite its name, `--push` does not run
-`git push` or create a Git tag.
-
-To rename asset files:
-
-```text
-Use $rename-assets to standardize the files in public/images using [asset_name]-[type]-[modifier].[extension].
-```
-
-Use underscores within names and modifiers, and hyphens between parts. For example,
-`the_corner-icon-filled-white_bg.png` is already correct: `the_corner` is the asset name, `icon`
-is the type, and `filled` and `white_bg` are modifiers. Keep familiar abbreviations such as `bg`
-for background. An unclear filename such as `IMG_1042.webp` prompts
-a question about its subject and intended use, such as the blog topic or product it belongs to.
-Request a preview to see the proposed mapping without renaming files.
-
-For Gist publication, request it explicitly and choose visibility:
-
-```text
-Use $project-structures to analyze this project and publish the architecture guide as a secret GitHub Gist.
-```
-
-Secret Gists are unlisted, readable by anyone with the link. Local files can be inspected and
-redacted before uploading. Load the resulting Gist page URL through Structures' **Website settings
-URL** control. Omitted profile sections retain built-in examples, which the overview identifies.
-
-## Other harnesses
-
-The reusable workflows are the [Agent Skills](https://agentskills.io/specification) directories
-`skills/project-structures/`, `skills/commit/`, and `skills/rename-assets/`. The architecture skill
-uses file access, a Node.js 24.15+ (24.x) or 26+ checker with no third-party dependencies, and
-optionally an authenticated Gist tool or `gh`. The commit skill uses Git and the target repository's
-installed validators.
-The asset-renaming skill uses file inspection, search, and rename tools. None of the skills depend
-on Codex tool names or application imports.
-
-- **Agent Plugins hosts:** distribute the whole `.agents/plugins/structures/` directory. The host
-  must support the portable manifest and skills; installation and Git marketplace support depend
-  on that host.
-- **Agent Skills hosts:** copy the desired skill directory from `skills/` into the host's
-  documented skill location, including any `scripts/`, `references/`, and `assets/`. Include the
-  plugin's `LICENSE` in that copy. `agents/openai.yaml` is optional OpenAI UI metadata; the workflow
-  does not depend on it. Invoke the skill using that harness's syntax.
-- **Other plugin formats:** add a small manifest or packaging adapter when supporting a specific
-  host. Reuse the same skill files rather than maintaining another copy of the workflow.
-
-A Git URL is a source location, not a universal installer. Other harnesses have not been tested.
-Before advertising one, install a packaged copy in that harness, generate both local files from a
-small repository, and run the bundled checker. Test publication separately only when requested.
-
-## Validate
+## Validate and distribute
 
 From the repository root:
 
@@ -139,38 +136,26 @@ pnpm test src/lib/site-settings.test.ts
 pnpm format:check
 ```
 
-The marketplace resolves `./.agents/plugins/structures` relative to the repository root. Keep the manifest,
-icons, MIT license, and self-contained skills together. Update the plugin version in its manifest
-when distributing a new version; this is separate from the application's version.
+The [plugin CI workflow](../.github/workflows/plugins.yml) runs both test commands on pull requests,
+main pushes, and version tags. Tests verify the single discoverable entrypoint, packaged resource
+links, template validation, detached checker execution, and website compatibility. They do not
+prove host command discovery or the quality of every agent-driven reorganization.
 
-The [plugin CI workflow](../.github/workflows/plugins.yml) runs the two test commands on pull requests,
-main pushes, and version tags. Tests verify all skill entrypoints, exercise the checker from a
-detached skill directory, and check the bundled example against the website's full
-`parseSiteSettings` parser. The standalone checker
-tests folder fields, node shape, IDs, and documentation coverage; it does not validate other profile
-sections. The skill describes full validation when a Structures checkout is available.
-
-For a read-only check that the local CLI discovers the marketplace, run from any directory with
-the repository's absolute path:
+For a read-only local marketplace discovery check:
 
 ```sh
 codex plugin list --marketplace structures-marketplace --available --json \
   -c 'marketplaces.structures-marketplace={source_type="local",source="/absolute/path/to/structures"}'
 ```
 
-This checks discovery without installing or changing the user's configured marketplaces. After
-pushing, repeat installation from the Git URL in a test environment and start a new chat to verify
-skill invocation; local discovery alone does not establish that the remote ref is ready.
-
-## Distribute updates through Git
-
-Distribution uses the repository marketplace, following
-[Codex's Git marketplace support](https://developers.openai.com/plugins/build/plugins).
-After updated plugin files are committed and pushed, users can refresh the configured source:
+Keep the manifest, icons, MIT license, and skill resources together. Update the plugin's manifest
+version when distributing a new version, separately from the application version. After changes
+are committed and pushed, users can refresh the configured source:
 
 ```sh
 codex plugin marketplace upgrade structures-marketplace
 ```
 
-A marketplace pinned to a fixed commit or tag stays at that revision. Choose a branch ref when
-users should receive future changes from that branch.
+A marketplace pinned to a commit or tag stays at that revision; use a branch to receive subsequent
+changes. Local checks do not establish that the remote ref contains the new skill. Test Git URL
+installation and a fresh-chat invocation after publication; test Gist publication only when requested.

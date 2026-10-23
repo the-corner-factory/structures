@@ -1,4 +1,0 @@
-interface:
-  display_name: "Rename assets"
-  short_description: "Rename assets with meaningful, consistent filenames"
-  default_prompt: "Use $rename-assets to rename the selected files as [asset_name]-[type]-[modifier].[extension], asking for context when their meaning is unclear."

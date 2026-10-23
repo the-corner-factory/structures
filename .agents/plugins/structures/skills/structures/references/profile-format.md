@@ -1,7 +1,9 @@
 # Structures website profile, version 1
 
 This is the website-wide profile, not a legacy folder catalog or portable explorer prop.
-The filename is exactly `settings.json`. Use UTF-8 JSON with two-space indentation and a final newline.
+Store the local template as `.structures/config.json`; the website/Gist export filename is exactly
+`settings.json`. Both use UTF-8 JSON with two-space indentation and a final newline.
+Local templates add the path constraints in [the template contract](template.md).
 Inline Markdown is JSON string content, not separate files. This contract follows
 [Structures' website settings documentation](https://github.com/the-corner-inc/structures/blob/main/docs/site-settings.md).
 

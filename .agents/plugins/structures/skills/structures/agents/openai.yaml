@@ -1,0 +1,4 @@
+interface:
+  display_name: "Structures"
+  short_description: "Manage folder templates, commits, assets, and documentation"
+  default_prompt: "Use $structures to help me choose an action for this project."
