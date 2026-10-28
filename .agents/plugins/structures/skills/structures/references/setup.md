@@ -58,8 +58,9 @@ replacement during `init`.
 
 Build the candidate in a temporary file. Import the folder policy only; preserve unrelated profile
 sections. On updates, compare incoming and existing placement rules, retain stable IDs for unchanged
-paths, and preserve local documentation and exceptions. Apply unambiguous requested changes; ask
-about conflicting local and incoming rules before replacing them. Omitted source paths do not
+paths, and preserve local documentation, module naming/grouping rules, and exceptions. Capture
+evidenced source-module conventions using [Modules](rename-modules.md). Apply unambiguous requested
+changes; ask about conflicting local and incoming rules before replacing them. Omitted source paths do not
 authorize deleting project files.
 
 Record the source path or URL, template file, and resolved revision when available in a **Template

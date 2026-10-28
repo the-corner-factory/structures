@@ -1,6 +1,9 @@
 # Rename assets
 
-Rename the requested files using `[asset_name]-[type]-[modifier].[extension]`.
+For TypeScript source files, use [Modules](rename-modules.md), including when the request calls them
+assets. Use both workflows for mixed content and source requests.
+
+Rename the requested content assets using `[asset_name]-[type]-[modifier].[extension]`.
 Keep the workflow portable: use the host's file inspection, search, and rename tools.
 
 ## Choose meaningful names

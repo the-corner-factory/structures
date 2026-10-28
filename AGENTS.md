@@ -135,7 +135,9 @@ The `test:e2e` script exists, but there is currently no app Playwright configura
   Its portable `plugin.json` uses `extensions.com.openai` for Codex metadata. Keep one `structures`
   skill entrypoint with command workflows in its `references/` directory, independent of any
   harness and the application runtime. `/structures <request>` routes templates, folder audits/fixes,
-  commits, asset renaming, and architecture documentation. Setup selects a local file/project,
+  commits, asset and TypeScript module renaming, and architecture documentation. Module naming and
+  companion-grouping rules live in the relevant folder’s inline template documentation; audits and
+  fixes consult them, and template refreshes preserve local rules. Setup selects a local file/project,
   Gist, or repository and saves a local snapshot; external templates refresh only on request.
   The maintained project folder template
   is `.structures/config.json`; `settings.json` is a derived website/Gist export. Folder fixes must

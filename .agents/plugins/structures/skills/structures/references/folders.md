@@ -23,8 +23,9 @@ Use the saved template together with the user's requested standard and applicabl
 checking framework-required paths against installed tooling. Use consistent patterns in comparable
 modules only where the template and documented rules are silent. Trace
 representative imports and entry points to establish each directory's actual responsibility.
-Distinguish explicit rules from inferred conventions. Read folder responsibilities from template
-documentation; derive concrete paths from node names and hierarchy as the template contract specifies.
+Consult [module naming rules](rename-modules.md) when auditing or fixing source filenames and
+companion grouping, including files omitted from the tree. Distinguish explicit rules from inferred
+conventions. Read folder responsibilities from template documentation; derive concrete paths from node names and hierarchy as the template contract specifies.
 Treat omitted paths as unspecified, not obsolete. Example catalogs and exported profiles become
 policy only when deliberately adopted into `.structures/config.json`.
 

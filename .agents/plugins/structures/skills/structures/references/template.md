@@ -23,6 +23,14 @@ describes each directory's responsibility, placement rules, and intentional exce
 are allowed; missing example files or empty directories do not need creating. Optional profile
 sections retain their website semantics and must survive template updates unchanged unless requested.
 
+## Module naming rules
+
+Keep source-file naming and companion-grouping rules in the relevant folder's inline documentation,
+under **Module naming rules**, using the [module workflow](rename-modules.md). This preserves the
+version-1 profile contract and keeps the scope beside its placement rules. The optional `naming`
+section retains its commit-message semantics. Setup and explicit updates capture evidenced module
+conventions; source refreshes preserve local rules and exceptions. Audits read them without writes.
+
 ## Create or update
 
 For explicit initialization or update requests, start with [source selection](setup.md).

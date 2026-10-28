@@ -15,6 +15,9 @@ with `$` use `$structures <request>` instead. The single entrypoint and command 
 | `/structures create commit title`                          | Return only a Conventional Commit subject in a copyable block.                              |
 | `/structures create commit message`                        | Draft a message using the project's effective commit rules.                                 |
 | `/structures commit --push`                                | Create a local commit with hooks enabled; no remote push.                                   |
+| `/structures audit modules src`                            | Report source naming and companion-grouping mismatches without edits.                       |
+| `/structures rename modules src`                           | Rename TypeScript modules and companions using saved project rules.                         |
+| `/structures set module naming rules`                      | Save scoped conventions in the template without renaming files.                             |
 | `/structures rename assets in public/images`               | Rename assets and update local references.                                                  |
 | `/structures document project`                             | Export a documented website profile and architecture overview.                              |
 | `/structures publish architecture as a secret GitHub Gist` | Prepare and publish the requested guide.                                                    |
@@ -65,6 +68,26 @@ derived `settings.json` and `<project>-structures.md` files to `.structures/expo
 `settings.json` retains its exact name because ordinary Gist page URLs resolve that filename in the
 website. Maintain `.structures/config.json`; regenerate exports instead of editing two templates.
 For multiple repositories, keep one config in each root and combine the exported guides as needed.
+
+## TypeScript module naming
+
+`rename modules` handles source files and their companion tests, templates, and styles. It follows
+project-specific casing, role suffixes, and grouping rules, updating imports, re-exports, lazy
+routes, and other references together. Framework filenames and published module paths retain their
+contracts. `audit modules` and previews report the proposed mapping without writing anything.
+
+Rules are saved under **Module naming rules** in the relevant folder's inline documentation in
+`.structures/config.json`. Folder audits/fixes consult them, and template updates preserve local
+rules and exceptions. `set module naming rules` updates this policy without moving source files.
+The existing `naming` profile section continues to describe commit messages. This is agent guidance;
+the template validator does not lint TypeScript filenames, and installing the skill does not make
+it run automatically during implementation.
+
+For example, request `/structures set module naming rules: store modules in src/shared use
+<name>.store.ts` and then `/structures rename modules src/shared`. With that adopted convention,
+`guest-draft-store.ts` becomes `guest-draft.store.ts`. A page-folder rule can similarly group a
+consultation page's source, template, and spec. These conventions are scoped to the chosen project,
+not imposed on all TypeScript code. Exact one-off renames do not invent broader policy.
 
 ## Commits, assets, and publication
 

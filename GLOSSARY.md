@@ -54,6 +54,9 @@ The portable plugin exposes one `structures` skill at
 `/structures` (or `$structures`) route to command references inside that directory. The former
 standalone architecture, commit, and asset-renaming skills are now workflows of this entrypoint.
 The folder workflow supports read-only audits and corrections that update affected references.
+The module workflow audits and renames TypeScript files and their companions, retaining scoped
+naming and grouping rules in the template’s inline documentation. Folder audits consult those
+rules, and source refreshes preserve them; they are agent guidance, not an automatic linter.
 
 [`.structures/config.json`](.structures/config.json) is this project's maintained folder template.
 It uses the website profile's version-1 JSON shape with one project-root container, literal file
