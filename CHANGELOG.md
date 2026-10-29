@@ -2,6 +2,27 @@
 
 All notable changes to this project are documented here.
 
+## [1.9.0](https://github.com/the-corner-inc/structures/compare/v1.8.0...v1.9.0) (2026-10-29)
+
+### Features
+
+- **Issues:** Preview task, bug-report, and feature-request templates, copy their Markdown, or download files for `.github/ISSUE_TEMPLATE/`. Website profiles can supply their own templates, and shared URLs retain the selected template ([2b88cbb](https://github.com/the-corner-inc/structures/commit/2b88cbb90df8f43705d9f31e5ef84d6e09d8bfb4)).
+- **Structures prompts:** Copy relevant skill requests from reference pages, including folder initialization and fixes, and open the installation guide ([929d7ce](https://github.com/the-corner-inc/structures/commit/929d7ced59491acca0484de0f3579ffded162e1d)).
+- **Folder templates:** Initialize from a local file/project, Gist, or repository. Refresh external sources on request while preserving local rules ([9376425](https://github.com/the-corner-inc/structures/commit/9376425d2fb2089b7515019a814c407bf530c0dc)).
+- **TypeScript naming:** Audit or rename modules and their companion files, update references, and save scoped naming rules in `.structures/config.json` ([882dad9](https://github.com/the-corner-inc/structures/commit/882dad94c023a21a5b44ae3f7f12f41c25af8663)).
+
+### Compatibility
+
+- Structures plugin **0.5.0** includes the template and module-naming updates; the `/structures` entrypoint remains the same.
+- A custom profile's `issues` section must supply `templates` to show templates. Omitting the whole `issues` section retains the built-ins.
+
+### Verification
+
+- Lint/type-checking, 283 application tests, 12 plugin/release checks, the production build,
+  static prerender, and registry validation passed.
+- Formatting still reports existing issues in historical changelog entries and the saved design critique.
+- The registry consumer install matrix remains required before pushing this release.
+
 ## [1.8.0](https://github.com/the-corner-inc/structures/compare/v1.7.0...v1.8.0) (2026-10-23)
 
 ### Features
