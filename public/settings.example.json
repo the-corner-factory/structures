@@ -70,6 +70,14 @@
       "ready": "# Ready\n\nThe team has agreed on scope and acceptance criteria.",
       "done": "# Done\n\nThe change is reviewed, tested, and delivered."
     },
+    "templates": [
+      {
+        "id": "bug-report",
+        "name": "Team bug report",
+        "description": "Help the team reproduce a customer problem.",
+        "body": "## Summary\n\nDescribe the customer impact.\n\n## Reproduction steps\n\n1. Start from…\n2. Perform…\n3. Observe…\n\n## Expected behavior\n\nWhat should happen?\n\n## Actual behavior\n\nWhat happens instead?\n\n## Environment\n\nInclude the application version, browser, and operating system.\n\n## Evidence\n\nAdd screenshots or logs with credentials and personal data removed.\n"
+      }
+    ],
     "examples": [
       {
         "number": 1,

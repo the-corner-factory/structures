@@ -29,14 +29,14 @@ in its original catalog format.
 
 `version` is required and must be `1`. The logo and all five content sections are optional:
 
-| Field      | Content                                                                      | When omitted                                           |
-| ---------- | ---------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `logo`     | Navigation logo URL, optional dark-mode URL, and alternative text.           | The Corner logo remains visible.                       |
-| `folders`  | One folder tree and inline Markdown documentation.                           | Built-in folder libraries remain available.            |
-| `issues`   | One issue taxonomy, documentation, priority explanations, and sample issues. | Built-in issue examples and workflow remain available. |
-| `naming`   | Naming title, introduction, commit types, worked example, and rules.         | Built-in naming guidance remains available.            |
-| `branches` | One branch graph using the existing branch-flow format.                      | Built-in strategy chooser remains available.           |
-| `agentic`  | Content overrides for existing concept/template IDs.                         | Built-in Agentic content remains available.            |
+| Field      | Content                                                                                 | When omitted                                                       |
+| ---------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `logo`     | Navigation logo URL, optional dark-mode URL, and alternative text.                      | The Corner logo remains visible.                                   |
+| `folders`  | One folder tree and inline Markdown documentation.                                      | Built-in folder libraries remain available.                        |
+| `issues`   | One issue taxonomy, documentation, priority explanations, sample issues, and templates. | Built-in issue examples, templates, and workflow remain available. |
+| `naming`   | Naming title, introduction, commit types, worked example, and rules.                    | Built-in naming guidance remains available.                        |
+| `branches` | One branch graph using the existing branch-flow format.                                 | Built-in strategy chooser remains available.                       |
+| `agentic`  | Content overrides for existing concept/template IDs.                                    | Built-in Agentic content remains available.                        |
 
 Status derives from `issues`; there is no separate `status` section. Even `{ "version": 1 }` is a
 valid profile that retains every built-in section.
@@ -135,6 +135,40 @@ from the tree, so cards and Status use the same taxonomy.
 A supplied `issues` section replaces the entire built-in issue profile. Omitting `examples` or
 setting it to `[]` shows no sample issues. Custom labels never inherit the built-in sample issues
 or documentation.
+
+### Issue templates
+
+The `/issues` page defaults to Examples. Its Templates view previews reusable Markdown with
+Copy body and Download .md actions. Without an `issues` override, the templates are General task,
+Bug report, and Feature request, in that order.
+
+`issues.templates` is an optional replacement array, displayed in array order:
+
+```json
+{
+  "id": "bug-report",
+  "name": "Team bug report",
+  "description": "Help the team reproduce a customer problem.",
+  "body": "## Summary\n\nDescribe the problem.\n\n## Reproduction steps\n\n1. Start from…\n"
+}
+```
+
+All four fields are required. IDs must be unique within the template list and contain only lowercase
+ASCII letters or digits separated by single hyphens. Names must have more than three characters
+after trimming; descriptions and bodies must not be blank. The body contains Markdown without
+GitHub frontmatter. Templates are independent of taxonomy IDs and do not assign labels or users.
+Any invalid template rejects the complete profile.
+
+A supplied `issues` section with omitted `templates` or `templates: []` shows no templates.
+Omitting the entire `issues` section retains the built-ins. Copy returns the body unchanged;
+download adds safely quoted YAML `name` and `about` frontmatter and uses `<id>.md` as the filename.
+Put downloaded files in `.github/ISSUE_TEMPLATE/` on the repository's default branch to use them
+in GitHub's issue chooser. See [GitHub's template documentation](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/about-issue-and-pull-request-templates).
+
+Share a selection with `/issues?view=templates&template=bug-report`. Examples is the default view;
+an omitted or unavailable template selects the first entry. Both controls preserve profile settings,
+filters, and heading anchors and support reloads and Back/Forward. Loading or resetting a profile
+retains the selected ID, resolving it against the new template list or falling back to its first entry.
 
 ### Naming
 

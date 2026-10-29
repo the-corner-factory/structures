@@ -14,6 +14,8 @@ retain built-in content.
 
 The site also explains issue labels, priorities, statuses, naming conventions, branching strategies,
 and agent concepts. Issue cards and boards are educational examples, not a persisted issue tracker.
+The Issues page also previews reusable task, bug-report, and feature-request templates. Copy returns
+the Markdown body; download adds GitHub template frontmatter for `.github/ISSUE_TEMPLATE/`.
 The Agentic page opens with an interactive system map, with concept cards and downloadable
 Markdown templates also available. Selecting a map block highlights its directed connections and opens the matching
 example; a text connection list also supports small screens and assistive technology. The page
@@ -140,23 +142,32 @@ without resetting scroll or the heading anchor. Selecting a file or folder prese
 the global `settings` or legacy `source`; changing the library or loading another profile also
 retains the filter.
 
+The Issues index uses `view=templates` and `template=<id>` for its template browser. Examples is
+the default view; absent or unavailable template IDs select the first entry. Both controls preserve
+other search parameters and heading anchors without scrolling. Profile Load/Reset retains the
+selection and resolves it against the new list. `src/lib/issue-templates.ts` supplies the three
+built-ins and GitHub Markdown serialization; the preview and copy action share the same body.
+`issues.templates` replaces the list in array order. A supplied issue section without templates
+shows an empty list; a profile omitting `issues` retains the built-ins. Templates use independent,
+unique lowercase hyphenated IDs and do not assign taxonomy labels.
+
 Each page supplies a content-specific title and description through route `head` metadata.
 `src/lib/seo.ts` keeps search and social titles/descriptions aligned and resolves explorer library,
 document, and branch-preset metadata from route parameters and the selected source. This metadata
 is server-rendered and included in the static pages without fetching custom sources on the server.
 
-| URL                                               | Main behavior                                                   |
-| ------------------------------------------------- | --------------------------------------------------------------- |
-| `/`                                               | Topic chooser; profile input is in the shared navigation.       |
-| `/folders`                                        | Library chooser alongside the default `user` structure.         |
-| `/folders/$library`, `/folders/$library/$element` | Folder explorer and selected documentation.                     |
-| `/issues`                                         | Sample issue cards with contextual label/status documentation.  |
-| `/issues/$library`, `/issues/$library/$element`   | Issue taxonomy explorer and documentation.                      |
-| `/issues/labels`, `/status`                       | Label gallery and Kanban status board.                          |
-| `/issues/priorities`, `/naming`                   | Priority and naming reference pages.                            |
-| `/branches`                                       | Profile graph, built-in `?flow=<preset>`, or legacy `?source=`. |
-| `/agentic`                                        | Agent concepts and downloadable example templates.              |
-| `/login`, `/signup`, `/account`, `/api/auth/*`    | Optional account UI and Better Auth boundary.                   |
+| URL                                               | Main behavior                                                    |
+| ------------------------------------------------- | ---------------------------------------------------------------- |
+| `/`                                               | Topic chooser; profile input is in the shared navigation.        |
+| `/folders`                                        | Library chooser alongside the default `user` structure.          |
+| `/folders/$library`, `/folders/$library/$element` | Folder explorer and selected documentation.                      |
+| `/issues`                                         | Example issues and a Templates view with Markdown copy/download. |
+| `/issues/$library`, `/issues/$library/$element`   | Issue taxonomy explorer and documentation.                       |
+| `/issues/labels`, `/status`                       | Label gallery and Kanban status board.                           |
+| `/issues/priorities`, `/naming`                   | Priority and naming reference pages.                             |
+| `/branches`                                       | Profile graph, built-in `?flow=<preset>`, or legacy `?source=`.  |
+| `/agentic`                                        | Agent concepts and downloadable example templates.               |
+| `/login`, `/signup`, `/account`, `/api/auth/*`    | Optional account UI and Better Auth boundary.                    |
 
 The `_auth` and `_guest` route directories are pathless layouts. Explorer document route filenames
 use `$library_.$element.tsx`; the underscore keeps the document route out of the library layout's

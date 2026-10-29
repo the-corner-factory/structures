@@ -2,6 +2,9 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
+import { copyText } from "#/lib/clipboard.ts";
+import { githubIssueTemplate, ISSUE_TEMPLATES } from "#/lib/issue-templates.ts";
+import type { IssueSearch } from "#/lib/router-search.ts";
 import type { IssueSettings, SiteSettings } from "#/lib/site-settings.ts";
 
 import { IssueCards } from "./issue-cards";
@@ -11,6 +14,9 @@ const { navigate, fetchMarkdown } = vi.hoisted(() => ({
   fetchMarkdown: vi.fn(),
 }));
 let settings: SiteSettings | undefined;
+let search: IssueSearch = {};
+
+vi.mock("#/lib/clipboard.ts", () => ({ copyText: vi.fn() }));
 
 vi.mock("#/components/site-settings-provider.tsx", () => ({
   useSiteSettings: () => ({
@@ -29,6 +35,7 @@ vi.mock("@tanstack/react-router", () => ({
     </a>
   ),
   useNavigate: () => navigate,
+  useSearch: () => search,
 }));
 
 vi.mock("@tanstack/react-query", () => ({
@@ -83,7 +90,73 @@ vi.mock("#/lib/structures.ts", async (importOriginal) => {
 afterEach(() => {
   cleanup();
   settings = undefined;
+  search = {};
   vi.clearAllMocks();
+});
+
+describe("issue template view", () => {
+  it("previews and downloads the selected built-in, falling back for unavailable IDs", () => {
+    search = { view: "templates", template: "bug-report" };
+    const page = render(<IssueCards />);
+    expect(screen.getByRole("button", { name: "Bug report", pressed: true })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Reproduction steps" })).toBeTruthy();
+    expect(screen.queryByText("fix(auth): refresh session before token expires")).toBeNull();
+    const download = screen.getByRole("link", { name: "Download .md" });
+    expect(download.getAttribute("download")).toBe("bug-report.md");
+    expect(decodeURIComponent(download.getAttribute("href")!)).toBe(
+      `data:text/markdown;charset=utf-8,${githubIssueTemplate(ISSUE_TEMPLATES[1])}`,
+    );
+    search = { view: "templates", template: "missing" };
+    page.rerender(<IssueCards />);
+    expect(screen.getByRole("button", { name: "General task", pressed: true })).toBeTruthy();
+  });
+
+  it("copies only the body, resets feedback on content changes, and reports clipboard failure", async () => {
+    search = { view: "templates" };
+    const page = render(<IssueCards />);
+    vi.mocked(copyText).mockResolvedValueOnce(undefined);
+    fireEvent.click(screen.getByRole("button", { name: "Copy body" }));
+    await screen.findByText("Issue body copied.");
+    expect(copyText).toHaveBeenCalledWith(ISSUE_TEMPLATES[0].body);
+
+    settings = {
+      version: 1,
+      issues: {
+        ...customIssues,
+        templates: [{ ...ISSUE_TEMPLATES[0], body: "## Team task\nNew body." }],
+      },
+    };
+    page.rerender(<IssueCards />);
+    expect(screen.queryByText("Issue body copied.")).toBeNull();
+    expect(screen.getByRole("heading", { name: "Team task" })).toBeTruthy();
+    vi.mocked(copyText).mockRejectedValueOnce(new Error("Denied"));
+    fireEvent.click(screen.getByRole("button", { name: "Copy body" }));
+    await screen.findByText(
+      "Could not copy. Download the Markdown file to copy its body manually.",
+    );
+    expect(copyText).toHaveBeenLastCalledWith("## Team task\nNew body.");
+  });
+
+  it("replaces templates with custom content and keeps omitted or empty custom lists empty", () => {
+    search = { view: "templates" };
+    settings = {
+      version: 1,
+      issues: { ...customIssues, templates: [{ ...ISSUE_TEMPLATES[0], name: "Team task" }] },
+    };
+    const page = render(<IssueCards />);
+    expect(screen.getByRole("button", { name: "Team task", pressed: true })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Bug report" })).toBeNull();
+    for (const templates of [undefined, []]) {
+      settings = { version: 1, issues: { ...customIssues, templates } };
+      page.rerender(<IssueCards />);
+      expect(screen.getByText("No issue templates are configured.")).toBeTruthy();
+      expect(screen.queryByRole("button", { name: "Copy body" })).toBeNull();
+      expect(screen.queryByRole("link", { name: "Download .md" })).toBeNull();
+    }
+    settings = { version: 1 };
+    page.rerender(<IssueCards />);
+    expect(screen.getByRole("button", { name: "General task", pressed: true })).toBeTruthy();
+  });
 });
 
 const customIssues: IssueSettings = {

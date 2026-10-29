@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import pluginExample from "../../.agents/plugins/structures/skills/structures/assets/config.example.json";
 import folderTemplate from "../../.structures/config.json";
 import exampleSettings from "../../public/settings.example.json";
+import { ISSUE_TEMPLATES } from "./issue-templates";
 import { fetchSiteSettings, normalizeSettingsUrl, parseSiteSettings } from "./site-settings";
 
 const rawUrl = "https://gist.githubusercontent.com/team/abc123/raw/settings.json";
@@ -55,6 +56,47 @@ const issueSettings = {
 };
 
 describe("site settings validation", () => {
+  it("preserves built-in and custom templates and intentionally empty lists", () => {
+    for (const templates of [ISSUE_TEMPLATES, [{ ...ISSUE_TEMPLATES[0], id: "team-task" }], []]) {
+      const profile = { version: 1, issues: { ...issueSettings, templates } };
+      expect(parseSiteSettings(profile)).toEqual(profile);
+    }
+    expect(
+      parseSiteSettings({ version: 1, issues: issueSettings }).issues?.templates,
+    ).toBeUndefined();
+  });
+
+  it.each([
+    { id: "Bug" },
+    { id: "bug/report" },
+    { id: "bug--report" },
+    { id: "-bug" },
+    { id: "bug-" },
+    { id: "" },
+    { name: "Bug" },
+    { name: "   abc  " },
+    { description: " " },
+    { body: "\n" },
+    { body: null },
+    { name: 4 },
+  ])("rejects invalid issue templates: %j", (override) => {
+    expect(() =>
+      parseSiteSettings({
+        version: 1,
+        issues: { ...issueSettings, templates: [{ ...ISSUE_TEMPLATES[0], ...override }] },
+      }),
+    ).toThrow("issues.templates");
+  });
+
+  it("rejects duplicate template IDs", () => {
+    expect(() =>
+      parseSiteSettings({
+        version: 1,
+        issues: { ...issueSettings, templates: [ISSUE_TEMPLATES[0], ISSUE_TEMPLATES[0]] },
+      }),
+    ).toThrow("Duplicate issue template ID");
+  });
+
   it("accepts the plugin's distributed profile without discarding fields", () => {
     expect(parseSiteSettings(pluginExample)).toEqual(pluginExample);
   });

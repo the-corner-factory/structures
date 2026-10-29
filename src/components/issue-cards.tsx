@@ -1,18 +1,22 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import {
   CheckCircleIcon,
   CircleDotIcon,
   ExternalLinkIcon,
+  FileTextIcon,
   MessageSquareIcon,
   TagsIcon,
 } from "lucide-react";
 import { useState } from "react";
 
+import { IssueTemplatePreview } from "#/components/issue-template-preview.tsx";
 import { PageTitle } from "#/components/page-title.tsx";
 import { useSiteSettings } from "#/components/site-settings-provider.tsx";
 import { SkillPrompt } from "#/components/skill-prompt.tsx";
 import { flattenStructures } from "#/components/structures/structure-data.ts";
 import { StructureMarkdown } from "#/components/structures/structure-markdown.tsx";
+import { ISSUE_TEMPLATES } from "#/lib/issue-templates.ts";
+import type { IssueSearch } from "#/lib/router-search.ts";
 import { defaultSource, nodeId } from "#/lib/structures.ts";
 import { useStructureMarkdown } from "#/lib/use-structure-settings.ts";
 
@@ -138,10 +142,22 @@ const sampleIssues: IssueCardData[] = [
 ];
 
 export function IssueCards() {
-  const navigate = useNavigate();
+  const navigate = useNavigate({ from: "/issues/" });
+  const { view, template } = useSearch({ strict: false });
   const site = useSiteSettings();
   const [hoveredLabel, setHoveredLabel] = useState<string | null>(null);
   const custom = site.settings?.issues;
+  const templatesMode = view === "templates";
+  const templates = custom ? (custom.templates ?? []) : ISSUE_TEMPLATES;
+  const selected = templates.find((item) => item.id === template) ?? templates[0];
+  const updateSearch = (next: IssueSearch) =>
+    navigate({
+      to: "/issues",
+      search: (previous) => ({ ...previous, ...next }),
+      hash: true,
+      resetScroll: false,
+      hashScrollIntoView: false,
+    });
   const source = custom ? site.url! : defaultSource("issues");
   const nodes = new Map(
     flattenStructures(custom?.structures ?? []).map((node) => [nodeId(node), node]),
@@ -160,7 +176,7 @@ export function IssueCards() {
     : sampleIssues;
   const descriptionQuery = useStructureMarkdown(
     source,
-    hoveredLabel && (custom ? hoveredLabel : labelElementId(hoveredLabel)),
+    !templatesMode && hoveredLabel ? (custom ? hoveredLabel : labelElementId(hoveredLabel)) : null,
     custom ? (custom.documentation ?? {}) : undefined,
   );
 
@@ -170,34 +186,73 @@ export function IssueCards() {
   };
 
   return (
-    <div className="board-layout issue-board-layout">
-      <aside className="board-sidebar" aria-label="Issue label descriptions">
-        <header className="board-sidebar-header">
-          <div className="board-heading">
-            <TagsIcon aria-hidden="true" />
-            <div>
-              <h1>Label logic</h1>
-              <p>Hover a label to read what it means</p>
+    <div
+      className="board-layout issue-board-layout"
+      data-view={templatesMode ? "templates" : "examples"}
+    >
+      {templatesMode ? (
+        <aside className="board-sidebar" aria-label="Issue templates">
+          <header className="board-sidebar-header">
+            <div className="board-heading">
+              <FileTextIcon aria-hidden="true" />
+              <div>
+                <h2>Issue templates</h2>
+                <p>Choose a starting point for your issue</p>
+              </div>
             </div>
+          </header>
+          <div className="board-doc-scroll issue-template-list">
+            {!site.isPending &&
+              !site.error &&
+              templates.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-label={item.name}
+                  aria-describedby={`issue-template-description-${item.id}`}
+                  aria-pressed={selected?.id === item.id}
+                  aria-controls="issue-template"
+                  onClick={() =>
+                    updateSearch({ template: item.id === templates[0].id ? undefined : item.id })
+                  }
+                >
+                  <strong>{item.name}</strong>
+                  <span id={`issue-template-description-${item.id}`}>{item.description}</span>
+                </button>
+              ))}
           </div>
-        </header>
-        <div className="board-doc-scroll" aria-live="polite">
-          {!hoveredLabel && <div className="sidebar-message">Hover a label to read its logic.</div>}
-          {hoveredLabel && descriptionQuery.isPending && <DocSkeleton />}
-          {hoveredLabel && descriptionQuery.isError && (
-            <div className="sidebar-message">
-              <strong>No description found</strong>
-              <span>{descriptionQuery.error?.message}</span>
-              <button type="button" onClick={() => descriptionQuery.refetch()}>
-                Try again
-              </button>
+        </aside>
+      ) : (
+        <aside className="board-sidebar" aria-label="Issue label descriptions">
+          <header className="board-sidebar-header">
+            <div className="board-heading">
+              <TagsIcon aria-hidden="true" />
+              <div>
+                <h1>Label logic</h1>
+                <p>Hover a label to read what it means</p>
+              </div>
             </div>
-          )}
-          {hoveredLabel && descriptionQuery.data !== undefined && (
-            <StructureMarkdown className="board-doc">{descriptionQuery.data}</StructureMarkdown>
-          )}
-        </div>
-      </aside>
+          </header>
+          <div className="board-doc-scroll" aria-live="polite">
+            {!hoveredLabel && (
+              <div className="sidebar-message">Hover a label to read its logic.</div>
+            )}
+            {hoveredLabel && descriptionQuery.isPending && <DocSkeleton />}
+            {hoveredLabel && descriptionQuery.isError && (
+              <div className="sidebar-message">
+                <strong>No description found</strong>
+                <span>{descriptionQuery.error?.message}</span>
+                <button type="button" onClick={() => descriptionQuery.refetch()}>
+                  Try again
+                </button>
+              </div>
+            )}
+            {hoveredLabel && descriptionQuery.data !== undefined && (
+              <StructureMarkdown className="board-doc">{descriptionQuery.data}</StructureMarkdown>
+            )}
+          </div>
+        </aside>
+      )}
 
       <main className="board-main issue-board-main">
         <section className="issue-cards-page">
@@ -205,14 +260,18 @@ export function IssueCards() {
             eyebrow="Conventional commit naming"
             title="Issues"
             intro={
-              <p>
-                Example issues whose titles follow{" "}
-                <Link to="/naming" className="inline-link">
-                  the conventional-commit standard
-                </Link>
-                , tagged with priority and type labels and a status badge. Hover a label or the
-                status badge to read its logic in the sidebar.
-              </p>
+              templatesMode ? (
+                <p>Choose a template, copy its body, or download it for your GitHub repository.</p>
+              ) : (
+                <p>
+                  Example issues whose titles follow{" "}
+                  <Link to="/naming" className="inline-link">
+                    the conventional-commit standard
+                  </Link>
+                  , tagged with priority and type labels and a status badge. Hover a label or the
+                  status badge to read its logic in the sidebar.
+                </p>
+              )
             }
             action={
               <Link to="/naming" className="naming-cta">
@@ -220,6 +279,32 @@ export function IssueCards() {
               </Link>
             }
           />
+
+          <fieldset className="issue-view-switch" aria-label="Issue view">
+            <label>
+              <input
+                className="sr-only"
+                type="radio"
+                name="issue-view"
+                checked={!templatesMode}
+                onChange={() => updateSearch({ view: undefined })}
+              />
+              Examples
+            </label>
+            <label>
+              <input
+                className="sr-only"
+                type="radio"
+                name="issue-view"
+                checked={templatesMode}
+                onChange={() => {
+                  setHoveredLabel(null);
+                  updateSearch({ view: "templates" });
+                }}
+              />
+              Templates
+            </label>
+          </fieldset>
 
           {site.isPending && <div className="sidebar-message">Loading issues…</div>}
           {site.error && (
@@ -231,42 +316,55 @@ export function IssueCards() {
               </button>
             </div>
           )}
-          {!site.isPending && !site.error && issues.length === 0 && (
-            <p className="sidebar-message">No example issues are configured.</p>
-          )}
-          <div className="issue-card-list">
-            {!site.isPending &&
-              !site.error &&
-              issues.map((issue) => (
-                <IssueCard
-                  key={issue.number}
-                  issue={issue}
-                  activeLabel={hoveredLabel}
-                  onHoverLabel={setHoveredLabel}
-                  onOpenLabel={openSubPage}
-                />
-              ))}
-          </div>
+          {templatesMode ? (
+            !site.isPending &&
+            !site.error &&
+            (selected ? (
+              <IssueTemplatePreview key={JSON.stringify(selected)} template={selected} />
+            ) : (
+              <p className="sidebar-message">No issue templates are configured.</p>
+            ))
+          ) : (
+            <>
+              {!site.isPending && !site.error && issues.length === 0 && (
+                <p className="sidebar-message">No example issues are configured.</p>
+              )}
+              <div className="issue-card-list">
+                {!site.isPending &&
+                  !site.error &&
+                  issues.map((issue) => (
+                    <IssueCard
+                      key={issue.number}
+                      issue={issue}
+                      activeLabel={hoveredLabel}
+                      onHoverLabel={setHoveredLabel}
+                      onOpenLabel={openSubPage}
+                    />
+                  ))}
+              </div>
 
-          <footer className="issue-sub-footer">
-            <h2>How issues are tagged</h2>
-            <p>
-              Every issue carries a priority and one or more type labels. Explore what each means.
-            </p>
-            <div className="issue-sub-links">
-              <Link to="/issues/priorities" className="issue-sub-link">
-                <strong>Priorities</strong>
-                <span>
-                  {custom ? "The priority scale" : "The P0–P4 scale"} that decides how quickly an
-                  issue should be tackled.
-                </span>
-              </Link>
-              <Link to="/issues/labels" className="issue-sub-link">
-                <strong>Labels</strong>
-                <span>The type taxonomy (bug, feat, docs, …) used to categorize issues.</span>
-              </Link>
-            </div>
-          </footer>
+              <footer className="issue-sub-footer">
+                <h2>How issues are tagged</h2>
+                <p>
+                  Every issue carries a priority and one or more type labels. Explore what each
+                  means.
+                </p>
+                <div className="issue-sub-links">
+                  <Link to="/issues/priorities" className="issue-sub-link">
+                    <strong>Priorities</strong>
+                    <span>
+                      {custom ? "The priority scale" : "The P0–P4 scale"} that decides how quickly
+                      an issue should be tackled.
+                    </span>
+                  </Link>
+                  <Link to="/issues/labels" className="issue-sub-link">
+                    <strong>Labels</strong>
+                    <span>The type taxonomy (bug, feat, docs, …) used to categorize issues.</span>
+                  </Link>
+                </div>
+              </footer>
+            </>
+          )}
           <SkillPrompt request="help" />
         </section>
       </main>

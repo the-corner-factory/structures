@@ -61,6 +61,9 @@ The `test:e2e` script exists, but there is currently no app Playwright configura
   for in-page configuration changes.
   Folder and issue explorers use `q` for their search filter; preserve it on item, library, and
   source changes, and omit it when the input is empty.
+  The Issues index uses `view=templates` and `template=<id>` for the template browser; default to
+  Examples and the first available template. Preserve these selections and heading anchors on
+  profile Load/Reset, resolving unavailable IDs against the current template list.
 - Website profiles use root-validated `settings=<URL>`, retained by the root search middleware.
   Keep the single URL/Load/Reset control in navigation and load profiles only after hydration via
   `SiteSettingsProvider`. `settings` takes precedence over legacy `source`; Reset removes both.
@@ -108,6 +111,10 @@ The `test:e2e` script exists, but there is currently no app Playwright configura
   overrides outside the portable registry API. Status derives from the issue tree's `Kanban` group.
   Omitted sections retain built-in defaults; a supplied issue section must never mix custom
   taxonomies with built-in examples or documentation. Validate the complete profile before use.
+  Issue templates use `{ id, name, description, body }` in `issues.templates`; a supplied issue
+  section without templates shows an empty list. Built-ins and GitHub Markdown serialization live
+  in `src/lib/issue-templates.ts`. Preview/copy share the exact body; downloads add quoted `name`
+  and `about` frontmatter. Keep these website-only fields outside the portable registry API.
 
 ## Server, packages, and releases
 

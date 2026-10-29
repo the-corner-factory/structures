@@ -16,7 +16,11 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testi
 import { afterEach, beforeEach, expect, it, vi } from "vite-plus/test";
 
 import { validateAgenticSearch } from "#/lib/agentic.ts";
-import { validateExplorerSearch, validateSiteSearch } from "#/lib/router-search.ts";
+import {
+  validateExplorerSearch,
+  validateIssueSearch,
+  validateSiteSearch,
+} from "#/lib/router-search.ts";
 import { parseSiteSettings } from "#/lib/site-settings.ts";
 
 import example from "../../public/settings.example.json";
@@ -39,10 +43,16 @@ vi.mock("./branch-graph", () => ({
 const url = "https://example.com/settings.json";
 const profile = parseSiteSettings(example);
 const clients: QueryClient[] = [];
+const scrollIntoView = vi.fn();
 const builtin = { libraryName: "user", structures: [{ name: "Default folder", type: "folder" }] };
 
 beforeEach(() => {
   vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+  scrollIntoView.mockClear();
+  Object.defineProperty(Element.prototype, "scrollIntoView", {
+    configurable: true,
+    value: scrollIntoView,
+  });
   vi.stubGlobal(
     "fetch",
     vi.fn(async (input: string) =>
@@ -79,7 +89,7 @@ async function renderSite(initial = "/") {
     createRoute({
       getParentRoute: () => root,
       path: "/issues",
-      validateSearch: validateExplorerSearch,
+      validateSearch: validateIssueSearch,
       component: IssueCards,
     }),
     createRoute({
@@ -263,6 +273,63 @@ it("keeps Agentic selections and hash when loading/resetting a profile", async (
     detailed: true,
   });
   expect(page.router.state.location.hash).toBe("agentic-readme");
+});
+
+it("restores issue template selection through URLs, history, and reloads without scrolling", async () => {
+  const page = await renderSite("/issues?q=bug&source=custom#issue-template");
+  expect(screen.getByRole("radio", { name: "Examples", checked: true })).toBeTruthy();
+  vi.mocked(window.scrollTo).mockClear();
+  await click(screen.getByRole("radio", { name: "Templates" }));
+  await click(screen.getByRole("button", { name: "Bug report" }));
+  expect(page.router.state.location.search).toEqual({
+    view: "templates",
+    template: "bug-report",
+    q: "bug",
+    source: "custom",
+  });
+  expect(page.router.state.location.hash).toBe("issue-template");
+  expect(window.scrollTo).not.toHaveBeenCalled();
+  expect(scrollIntoView).not.toHaveBeenCalled();
+  await click(screen.getByRole("button", { name: "Feature request" }));
+  await act(async () => page.router.history.back());
+  await screen.findByRole("button", { name: "Bug report", pressed: true });
+  await act(async () => page.router.history.forward());
+  await screen.findByRole("button", { name: "Feature request", pressed: true });
+  await click(screen.getByRole("radio", { name: "Examples" }));
+  expect(page.router.state.location.search.view).toBeUndefined();
+  expect(page.router.state.location.search.template).toBe("feature-request");
+  await click(screen.getByRole("radio", { name: "Templates" }));
+  const href = page.router.state.location.href;
+  page.unmount();
+  await renderSite(href);
+  expect(screen.getByRole("button", { name: "Feature request", pressed: true })).toBeTruthy();
+  const heading = screen.getByRole("heading", { name: "Problem" }).querySelector("a")!;
+  expect(
+    new URL(heading.getAttribute("href")!, `https://example.com${href}`).searchParams.get(
+      "template",
+    ),
+  ).toBe("feature-request");
+});
+
+it("keeps issue view, template, filter, and hash when loading/resetting a profile", async () => {
+  const page = await renderSite("/issues?view=templates&template=bug-report&q=bug#issue-template");
+  await loadSettings();
+  await screen.findByRole("button", { name: "Team bug report", pressed: true });
+  expect(page.router.state.location.search).toEqual({
+    settings: url,
+    view: "templates",
+    template: "bug-report",
+    q: "bug",
+  });
+  expect(page.router.state.location.hash).toBe("issue-template");
+  await click(screen.getByRole("button", { name: "Reset" }));
+  await screen.findByRole("button", { name: "Bug report", pressed: true });
+  expect(page.router.state.location.search).toEqual({
+    view: "templates",
+    template: "bug-report",
+    q: "bug",
+  });
+  expect(page.router.state.location.hash).toBe("issue-template");
 });
 
 it("shows failure without partial defaults and allows retry or reset", async () => {

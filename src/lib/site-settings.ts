@@ -9,6 +9,7 @@ import {
 } from "../components/structures/structure-data";
 import { AGENTIC_TEMPLATES } from "./agentic";
 import { parseBranchFlow, type BranchFlow } from "./branches";
+import { ISSUE_TEMPLATE_ID, type IssueTemplate } from "./issue-templates";
 import type { FolderSettings } from "./structures";
 
 export interface SiteStructureNode extends StructureNode {
@@ -37,6 +38,7 @@ export interface IssueExample {
 
 export interface IssueSettings extends SiteStructureSettings {
   examples?: IssueExample[];
+  templates?: IssueTemplate[];
 }
 
 export interface NamingSettings {
@@ -148,6 +150,31 @@ function normalizeDocumentation(settings: SiteStructureSettings, context: z.Refi
 
 const issueSchema = structureSchema
   .extend({
+    templates: z
+      .array(
+        z.object({
+          id: z.string().regex(ISSUE_TEMPLATE_ID, "Use a lowercase hyphenated ID."),
+          name: z
+            .string()
+            .refine((value) => value.trim().length > 3, "Use at least four characters."),
+          description: nonempty,
+          body: nonempty,
+        }),
+      )
+      .superRefine((templates, context) => {
+        const ids = new Set<string>();
+        templates.forEach((template, index) => {
+          if (ids.has(template.id)) {
+            context.addIssue({
+              code: "custom",
+              path: [index, "id"],
+              message: `Duplicate issue template ID: ${template.id}.`,
+            });
+          }
+          ids.add(template.id);
+        });
+      })
+      .optional(),
     examples: z
       .array(
         z.object({
