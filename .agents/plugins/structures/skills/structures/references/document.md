@@ -1,7 +1,7 @@
 # Project structures
 
 Produce a curated, evidence-based architecture guide that can be loaded in the Structures website.
-Maintain the folder template in `.structures/config.json`; produce `settings.json` and a Markdown
+Maintain the folder template in `.agents/configs/.structures/config.json`; produce `settings.json` and a Markdown
 overview as derived exports. Publish a Gist only when requested. Bundled resource paths resolve
 from the parent skill directory; Markdown links here are relative to this reference.
 
@@ -30,11 +30,11 @@ remote URLs. If a host's browse URL cannot be established, use a relative path i
 ## Generate the guide
 
 Read [the template workflow](template.md) and [the profile contract](profile-format.md). Load and
-validate `.structures/config.json`, initializing it from evidenced project rules if absent. Preserve
+validate `.agents/configs/.structures/config.json`, initializing it from evidenced project rules if absent. Preserve
 an existing template unless its update was requested. Report mismatches between intended structure
 and the checkout in the overview; never present template-only paths as verified implementation.
 
-Write the derived `settings.json` and `<project>-structures.md` to `.structures/exports/` unless the
+Write the derived `settings.json` and `<project>-structures.md` to `.agents/configs/.structures/exports/` unless the
 user chose an export directory. Preserve unrelated files and review existing exports before updating
 them. Keep the JSON filename `settings.json` so ordinary Gist page links resolve in Structures.
 For several repositories, retain a config in each root and combine their exported trees under

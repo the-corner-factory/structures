@@ -8,7 +8,7 @@ structure needs no changes. Keep architectural redesign proposals separate from 
 
 ## Establish the placement rules
 
-Read [the template workflow](template.md) and load `<project-root>/.structures/config.json`.
+Read [the template workflow](template.md) and load `<project-root>/.agents/configs/.structures/config.json`.
 Validate it with `scripts/check-template.mjs` from the skill directory before planning moves.
 If it is missing, follow the workflow's audit/fix handling. Keep the saved template unchanged
 throughout corrections; updating it to match a violation would conceal the problem.
@@ -27,7 +27,7 @@ Consult [module naming rules](rename-modules.md) when auditing or fixing source 
 companion grouping, including files omitted from the tree. Distinguish explicit rules from inferred
 conventions. Read folder responsibilities from template documentation; derive concrete paths from node names and hierarchy as the template contract specifies.
 Treat omitted paths as unspecified, not obsolete. Example catalogs and exported profiles become
-policy only when deliberately adopted into `.structures/config.json`.
+policy only when deliberately adopted into `.agents/configs/.structures/config.json`.
 
 When evidence conflicts or no consistent convention exists, report the ambiguity and propose a
 small concrete layout before asking for the missing decision. Continue independent, unambiguous

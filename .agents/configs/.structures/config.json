@@ -99,6 +99,25 @@
             "type": "folder",
             "children": [
               {
+                "id": "structures-agent-configs",
+                "name": "configs",
+                "type": "folder",
+                "children": [
+                  {
+                    "id": "structures-template-dir",
+                    "name": ".structures",
+                    "type": "folder",
+                    "children": [
+                      {
+                        "id": "structures-template-config",
+                        "name": "config.json",
+                        "type": "file"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
                 "id": "structures-plugins",
                 "name": "plugins",
                 "type": "folder",
@@ -123,18 +142,6 @@
                     ]
                   }
                 ]
-              }
-            ]
-          },
-          {
-            "id": "structures-template-dir",
-            "name": ".structures",
-            "type": "folder",
-            "children": [
-              {
-                "id": "structures-template-config",
-                "name": "config.json",
-                "type": "file"
               }
             ]
           }
@@ -162,9 +169,10 @@
       "structures-skills": "# skills\n\nKeep one discoverable Structures entrypoint; command workflows are reference documents inside it.\n",
       "structures-plugin": "# structures\n\n.agents/plugins/structures/ packages the manifest, MIT license, icons, and unified skill.\n",
       "structures-plugins": "# plugins\n\n.agents/plugins/ contains the marketplace catalog and the portable plugin.\n",
-      "structures-agents": "# .agents\n\nRepository-distributed agent resources live under .agents/.\n",
-      "structures-template-config": "# config.json\n\n.structures/config.json is the folder placement template. Audit and fix commands read it; change it only for a requested template update. Omitted paths are allowed.\n",
-      "structures-template-dir": "# .structures\n\n.structures/ stores the maintained project template; exports/ may contain derived website or Gist artifacts.\n"
+      "structures-agents": "# .agents\n\nProject agent resources live under `.agents/`: `configs/` stores project-specific skill configuration, `skills/` holds local workflows, and `plugins/` packages reusable integrations.\n",
+      "structures-template-config": "# config.json\n\n`.agents/configs/.structures/config.json` is the folder placement and module-naming template. Audit and fix commands read it; change it only for a requested template update. Omitted paths are allowed.\n",
+      "structures-template-dir": "# .structures\n\n`.agents/configs/.structures/` contains the Structures skill’s project configuration. `config.json` is the maintained folder template; `exports/` may contain derived website or Gist artifacts. Other skills use their own directories under `.agents/configs/`.\n",
+      "structures-agent-configs": "# configs\n\n`.agents/configs/` stores configuration for different skills. Keep each skill’s files in its own directory using the path declared by that skill, such as `.structures/` for Structures. Store workflow instructions and bundled resources in `skills/` or `plugins/`.\n"
     }
   }
 }

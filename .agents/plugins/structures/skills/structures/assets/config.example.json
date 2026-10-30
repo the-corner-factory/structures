@@ -41,7 +41,33 @@
             ]
           },
           { "id": "structures-registry", "name": "registry.json", "type": "file" },
-          { "id": "structures-glossary", "name": "GLOSSARY.md", "type": "file" }
+          { "id": "structures-glossary", "name": "GLOSSARY.md", "type": "file" },
+          {
+            "id": "structures-agents",
+            "name": ".agents",
+            "type": "folder",
+            "children": [
+              {
+                "id": "structures-agent-configs",
+                "name": "configs",
+                "type": "folder",
+                "children": [
+                  {
+                    "id": "structures-template-dir",
+                    "name": ".structures",
+                    "type": "folder",
+                    "children": [
+                      {
+                        "id": "structures-template-config",
+                        "name": "config.json",
+                        "type": "file"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
         ]
       }
     ],
@@ -54,7 +80,11 @@
       "structures-src-lib": "# lib\n\n`src/lib/` owns shared data contracts, fetching, validation, and catalog configuration.\n\n## Module naming rules\n\nScope: `src/lib/`. Use kebab-case TypeScript basenames, for example `site-settings.ts`, with adjacent `<basename>.test.ts` tests. Keep modules directly in this folder unless they form an existing feature subfolder. Preserve generated files and framework-required names.\n",
       "structures-src-lib-site-settings": "# site-settings.ts\n\n`src/lib/site-settings.ts` validates the complete website profile and resolves remote JSON, including Gists. Invalid profiles fail before any custom section is applied.\n",
       "structures-registry": "# registry.json\n\n`registry.json` declares the reusable explorer's shipped files and dependencies. Review `docs/registry.md` before changing that distribution.\n",
-      "structures-glossary": "# GLOSSARY.md\n\n`GLOSSARY.md` records the checked-out architecture, data flows, and implementation limits. Contribution commands live in `AGENTS.md` and `CONTRIBUTING.md`.\n"
+      "structures-glossary": "# GLOSSARY.md\n\n`GLOSSARY.md` records the checked-out architecture, data flows, and implementation limits. Contribution commands live in `AGENTS.md` and `CONTRIBUTING.md`.\n",
+      "structures-agents": "# .agents\n\nProject agent resources live under `.agents/`: `configs/` stores project-specific skill configuration, `skills/` holds local workflows, and `plugins/` packages reusable integrations.\n",
+      "structures-agent-configs": "# configs\n\n`.agents/configs/` stores configuration for different skills. Keep each skill’s files in its own directory using the path declared by that skill, such as `.structures/` for Structures. Store workflow instructions and bundled resources in `skills/` or `plugins/`.\n",
+      "structures-template-dir": "# .structures\n\n`.agents/configs/.structures/` contains the Structures skill’s project configuration. `config.json` is the maintained folder template; `exports/` may contain derived website or Gist artifacts. Other skills use their own directories under `.agents/configs/`.\n",
+      "structures-template-config": "# config.json\n\n`.agents/configs/.structures/config.json` is the folder placement and module-naming template. Audit and fix commands read it; change it only for a requested template update. Omitted paths are allowed.\n"
     }
   },
   "naming": {

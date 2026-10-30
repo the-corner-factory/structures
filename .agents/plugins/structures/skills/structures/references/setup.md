@@ -2,7 +2,7 @@
 
 Use this workflow for `init`, `init folder structure`, `create folder template`, `update folder
 structure`, and `update folder template`. It saves the intended layout in
-`<project-root>/.structures/config.json`; actual file reorganization uses [the fix workflow](folders.md).
+`<project-root>/.agents/configs/.structures/config.json`; actual file reorganization uses [the fix workflow](folders.md).
 Read [the template contract](template.md) before preparing the candidate.
 
 ## Choose the source
@@ -22,14 +22,14 @@ audits, fixes, and documentation use the saved copy without fetching new policy.
 
 ## Read the chosen structure
 
-- **Local:** read the selected `.structures/config.json` or website `settings.json`. For a project
+- **Local:** read the selected `.agents/configs/.structures/config.json` or website `settings.json`. For a project
   directory, prefer its saved template; otherwise derive a curated layout from its architecture
   documentation and representative files using the template workflow. Keep the source intact.
 - **Gist:** inspect the file list through an available connector, API, or CLI. Use the explicitly
-  named file, otherwise prefer `.structures/config.json`, `config.json`, then `settings.json`.
+  named file, otherwise prefer `.agents/configs/.structures/config.json`, `config.json`, then `settings.json`.
   Retrieve the complete content, following the raw-file URL if the API response is truncated.
   Ask which file to use when there is no clear template candidate.
-- **Repository:** honor a supplied revision and subdirectory. Prefer its `.structures/config.json`,
+- **Repository:** honor a supplied revision and subdirectory. Prefer its `.agents/configs/.structures/config.json`,
   then a documented folder profile or catalog. For a bare repository URL, resolve its default
   branch and record the revision read. If several templates are offered, ask the user to select
   one. If none exists, offer deriving a layout from the selected repository before doing so.
@@ -68,7 +68,7 @@ source** section of the root's inline documentation. This records provenance wit
 profile format, not a live remote dependency. Exclude credentials from recorded URLs.
 
 Validate the candidate with `scripts/check-template.mjs` from the skill directory and check optional
-sections as described in the template contract. Only after validation succeeds, create `.structures/`
+sections as described in the template contract. Only after validation succeeds, create `.agents/configs/.structures/`
 if needed and save `config.json` with two-space indentation and a final newline. Review the diff
 against the existing template, including local edits, before replacing it.
 

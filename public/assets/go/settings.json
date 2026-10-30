@@ -7,7 +7,29 @@
     {
       "name": ".agents",
       "type": "folder",
-      "children": [{ "name": "skills", "type": "folder" }]
+      "children": [
+        {
+          "id": "agents-configs",
+          "name": "configs",
+          "type": "folder",
+          "children": [
+            {
+              "name": ".structures",
+              "type": "folder",
+              "children": [
+                {
+                  "name": "config.json",
+                  "type": "file"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "skills",
+          "type": "folder"
+        }
+      ]
     },
     { "name": "api", "type": "folder" },
     { "name": "assets", "type": "folder" },

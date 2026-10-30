@@ -29,7 +29,10 @@ export function checkTemplate(profile) {
 }
 
 if (import.meta.main) {
-  assert.ok(process.argv[2], "Usage: node check-template.mjs <.structures/config.json>");
+  assert.ok(
+    process.argv[2],
+    "Usage: node check-template.mjs <.agents/configs/.structures/config.json>",
+  );
   const count = checkTemplate(JSON.parse(readFileSync(process.argv[2], "utf8")));
   console.log(`Checked ${count} folder template nodes with complete inline documentation.`);
 }

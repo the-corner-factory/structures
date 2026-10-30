@@ -16,6 +16,8 @@ supporting material for work that should follow a repeatable process.
 - Write concrete steps using the project's existing commands, conventions, and verification checks.
 - Add `scripts/`, `references/`, or `assets/` inside a skill only when needed, and reference them
   from `SKILL.md`.
+- Store project-specific skill configuration under `.agents/configs/`, using a separate directory
+  for each skill, such as `.agents/configs/.structures/config.json`.
 - Confirm that your agent tool supports this location and the capabilities the skill requires.
 
 ## Example layout

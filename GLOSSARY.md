@@ -45,6 +45,7 @@ root shadcn registry. It is source copied into consumer projects, not a hosted s
 | `packages/gitgraph-*`                       | Vendored Gitgraph workspace packages with TypeScript source and tracked compiled output. |
 | `registry.json`, `docs/registry.md`         | Registry distribution manifest and consumer contract.                                    |
 | `scripts/`                                  | Static prerendering, registry validation/consumer checks, and graph debugging.           |
+| `.agents/configs/`                          | Project-specific configuration for different skills, each in its own directory.          |
 | `.agents/plugins/structures/`               | Unified Structures skill for templates, folder corrections, commits, assets, and docs.   |
 | `.agents/plugins/marketplace.json`          | Repository marketplace exposing the Structures plugin for installation.                  |
 | `.github/workflows/`                        | Release-tag verification/deployment, registry consumer CI, and plugin validation.        |
@@ -60,7 +61,10 @@ The module workflow audits and renames TypeScript files and their companions, re
 naming and grouping rules in the template’s inline documentation. Folder audits consult those
 rules, and source refreshes preserve them; they are agent guidance, not an automatic linter.
 
-[`.structures/config.json`](.structures/config.json) is this project's maintained folder template.
+[`.agents/configs/.structures/config.json`](.agents/configs/.structures/config.json) is this project's
+maintained folder template. `.agents/configs/` groups project-specific configuration for different
+skills; Structures owns `.structures/`, alongside other skills' configuration directories. Workflow
+instructions and bundled resources remain in `.agents/skills/` or `.agents/plugins/`.
 It uses the website profile's version-1 JSON shape with one project-root container, literal file
 and folder names, and inline placement documentation. It is curated: unlisted paths are allowed.
 Folder fixes read it without rewriting policy to match drift; `init` or an explicit template update

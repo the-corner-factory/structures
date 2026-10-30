@@ -131,6 +131,30 @@ function structureNames(items: FolderStructure[]): string[] {
 }
 
 describe("catalog identity compatibility", () => {
+  it.each(["angular", "go", "tanstack-react"])(
+    "keeps skill configuration separate from workflows in %s",
+    async (library) => {
+      const assetDirectory = new URL(`../../public/assets/${library}/`, import.meta.url);
+      const settings = JSON.parse(
+        await readFile(new URL("settings.json", assetDirectory), "utf8"),
+      ) as FolderSettings;
+      const paths = new Map(structurePaths(settings.structures));
+
+      expect(paths.get("skills.md")).toBe(".agents/skills");
+      for (const [filename, path] of [
+        ["agents-configs.md", ".agents/configs"],
+        [".structures.md", ".agents/configs/.structures"],
+        ["config.json.md", ".agents/configs/.structures/config.json"],
+      ]) {
+        expect(paths.get(filename)).toBe(path);
+        expect(await readFile(new URL(`md/${filename}`, assetDirectory), "utf8")).toContain(
+          `**Path:** \`${path}\``,
+        );
+      }
+      if (library === "go") expect(paths.get("configs.md")).toBe("configs");
+    },
+  );
+
   it("validates every catalog and preserves the old TanStack layout IDs", async () => {
     const { parseStructures, nodeId } = await import("./structures.ts");
     const { flattenStructures } = await import("../components/structures/structure-data");

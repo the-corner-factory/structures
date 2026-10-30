@@ -45,8 +45,8 @@ test("the marketplace exposes one unified skill with Codex metadata and icons", 
 const example = JSON.parse(readFileSync(new URL("assets/config.example.json", skillRoot), "utf8"));
 
 test("accepts the distributed example with complete documentation", () => {
-  assert.equal(checkDocumentation(example), 9);
-  assert.equal(checkTemplate(example), 9);
+  assert.equal(checkDocumentation(example), 13);
+  assert.equal(checkTemplate(example), 13);
 });
 
 test("rejects template roots and names that cannot describe project-relative paths", () => {
@@ -72,7 +72,9 @@ test("rejects case-insensitive template path collisions even with unique IDs", (
 });
 
 test("accepts the repository's maintained folder template", () => {
-  const config = JSON.parse(readFileSync(new URL("../.structures/config.json", import.meta.url)));
+  const config = JSON.parse(
+    readFileSync(new URL("../.agents/configs/.structures/config.json", import.meta.url)),
+  );
   assert.ok(checkTemplate(config) > 0);
 });
 
@@ -108,7 +110,7 @@ test("checks optional node field types throughout the folder tree", () => {
       assert.throws(() => checkDocumentation(profile), new RegExp(`${field} must be a string`));
     }
     node[field] = "";
-    assert.equal(checkDocumentation(profile), 9);
+    assert.equal(checkDocumentation(profile), 13);
   }
 });
 
@@ -156,7 +158,7 @@ test("the detached skill runs without the application or installed dependencies"
       { cwd: directory, encoding: "utf8" },
     );
     assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stdout, /Checked 9 folder(?: template)? nodes/);
+    assert.match(result.stdout, /Checked 13 folder(?: template)? nodes/);
   }
   const missingInput = spawnSync(process.execPath, [checker], { cwd: directory, encoding: "utf8" });
   assert.equal(missingInput.status, 1);

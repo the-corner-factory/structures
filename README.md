@@ -34,7 +34,7 @@ you want to do. For example:
 ```
 
 Use `/structures init folder structure` to choose a local file/project, Gist, or repository and save
-a template in [`.structures/config.json`](.structures/config.json). External sources are copied locally;
+a template in [`.agents/configs/.structures/config.json`](.agents/configs/.structures/config.json). External sources are copied locally;
 `/structures update folder structure` refreshes the saved template on request.
 Folder fixes follow that template and update affected references; `/structures audit folders`
 reports findings without edits. Commit titles follow the repository's rules, and

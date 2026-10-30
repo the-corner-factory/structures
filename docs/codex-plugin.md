@@ -5,22 +5,22 @@ skill: `/structures <request>`. Use natural language or a short command. Hosts t
 with `$` use `$structures <request>` instead. The single entrypoint and command references follow
 [Impeccable](https://github.com/pbakaus/impeccable); no Impeccable runtime is required.
 
-| Example                                                    | Result                                                                                      |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `/structures`                                              | Show the actions without changing files.                                                    |
-| `/structures init folder structure`                        | Choose a local file/project, Gist, or repository and initialize `.structures/config.json`.  |
-| `/structures update folder structure`                      | Refresh the template from the chosen source, preserving local rules and unrelated sections. |
-| `/structures audit folders`                                | Report placement issues without edits.                                                      |
-| `/structures fix folder structure`                         | Correct misplaced files using the template and update affected references.                  |
-| `/structures create commit title`                          | Return only a Conventional Commit subject in a copyable block.                              |
-| `/structures create commit message`                        | Draft a message using the project's effective commit rules.                                 |
-| `/structures commit --push`                                | Create a local commit with hooks enabled; no remote push.                                   |
-| `/structures audit modules src`                            | Report source naming and companion-grouping mismatches without edits.                       |
-| `/structures rename modules src`                           | Rename TypeScript modules and companions using saved project rules.                         |
-| `/structures set module naming rules`                      | Save scoped conventions in the template without renaming files.                             |
-| `/structures rename assets in public/images`               | Rename assets and update local references.                                                  |
-| `/structures document project`                             | Export a documented website profile and architecture overview.                              |
-| `/structures publish architecture as a secret GitHub Gist` | Prepare and publish the requested guide.                                                    |
+| Example                                                    | Result                                                                                                     |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `/structures`                                              | Show the actions without changing files.                                                                   |
+| `/structures init folder structure`                        | Choose a local file/project, Gist, or repository and initialize `.agents/configs/.structures/config.json`. |
+| `/structures update folder structure`                      | Refresh the template from the chosen source, preserving local rules and unrelated sections.                |
+| `/structures audit folders`                                | Report placement issues without edits.                                                                     |
+| `/structures fix folder structure`                         | Correct misplaced files using the template and update affected references.                                 |
+| `/structures create commit title`                          | Return only a Conventional Commit subject in a copyable block.                                             |
+| `/structures create commit message`                        | Draft a message using the project's effective commit rules.                                                |
+| `/structures commit --push`                                | Create a local commit with hooks enabled; no remote push.                                                  |
+| `/structures audit modules src`                            | Report source naming and companion-grouping mismatches without edits.                                      |
+| `/structures rename modules src`                           | Rename TypeScript modules and companions using saved project rules.                                        |
+| `/structures set module naming rules`                      | Save scoped conventions in the template without renaming files.                                            |
+| `/structures rename assets in public/images`               | Rename assets and update local references.                                                                 |
+| `/structures document project`                             | Export a documented website profile and architecture overview.                                             |
+| `/structures publish architecture as a secret GitHub Gist` | Prepare and publish the requested guide.                                                                   |
 
 Only the requested workflow is loaded. A request to fix folders and suggest a commit title applies
 the folder corrections and drafts a title; it does not commit. Analysis-only and preview requests
@@ -28,9 +28,28 @@ remain read-only. Missing folder configuration does not block commit titles or a
 
 ## Folder template
 
-The maintained template lives in `<project-root>/.structures/config.json`, including when a command
-is invoked from a subdirectory. This repository's [template](../.structures/config.json) records its
+The maintained template lives in `<project-root>/.agents/configs/.structures/config.json`, including when a command
+is invoked from a subdirectory. This repository's [template](../.agents/configs/.structures/config.json) records its
 architectural boundaries. `init` also accepts the longer `init folder structure` command.
+
+`.agents/configs/` holds project-specific configuration for different skills, with a separate
+directory for each skill. Structures uses `.structures/`:
+
+```text
+.agents/
+├── configs/
+│   └── .structures/
+│       ├── config.json
+│       └── exports/       # Optional derived website/Gist files
+├── skills/                # Local workflow definitions
+└── plugins/               # Packaged skills and resources
+```
+
+Existing projects can move their root `.structures/config.json` to the new path, preserving its
+contents. The skill can still read the legacy file when the new one is absent; it migrates that file
+before a requested configuration write. Audits remain read-only. If both paths exist, the new path
+is authoritative and the legacy file is retained. Existing exports stay in place unless their move
+is requested.
 
 Initialization asks whether to load a local file/project, a Gist, or a repository unless you have
 already supplied the source. External templates become local snapshots; audits and fixes use the
@@ -56,7 +75,7 @@ are reported rather than silently replaced. Ambiguous architectural changes need
 Validate a template with the bundled, dependency-free checker:
 
 ```sh
-node <skill-directory>/scripts/check-template.mjs <project-root>/.structures/config.json
+node <skill-directory>/scripts/check-template.mjs <project-root>/.agents/configs/.structures/config.json
 ```
 
 It checks folder structure, literal path segments, case-insensitive path collisions, IDs, and
@@ -64,9 +83,9 @@ documentation coverage. The website's `parseSiteSettings` owns validation of opt
 sections. The plugin tests also run the repository template and bundled example through that parser.
 
 `document project` uses the saved template and reports differences from the checkout. It writes
-derived `settings.json` and `<project>-structures.md` files to `.structures/exports/` by default.
+derived `settings.json` and `<project>-structures.md` files to `.agents/configs/.structures/exports/` by default.
 `settings.json` retains its exact name because ordinary Gist page URLs resolve that filename in the
-website. Maintain `.structures/config.json`; regenerate exports instead of editing two templates.
+website. Maintain `.agents/configs/.structures/config.json`; regenerate exports instead of editing two templates.
 For multiple repositories, keep one config in each root and combine the exported guides as needed.
 
 ## TypeScript module naming
@@ -77,7 +96,7 @@ routes, and other references together. Framework filenames and published module 
 contracts. `audit modules` and previews report the proposed mapping without writing anything.
 
 Rules are saved under **Module naming rules** in the relevant folder's inline documentation in
-`.structures/config.json`. Folder audits/fixes consult them, and template updates preserve local
+`.agents/configs/.structures/config.json`. Folder audits/fixes consult them, and template updates preserve local
 rules and exceptions. `set module naming rules` updates this policy without moving source files.
 The existing `naming` profile section continues to describe commit messages. This is agent guidance;
 the template validator does not lint TypeScript filenames, and installing the skill does not make

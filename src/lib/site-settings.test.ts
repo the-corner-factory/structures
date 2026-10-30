@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
+import folderTemplate from "../../.agents/configs/.structures/config.json";
 import pluginExample from "../../.agents/plugins/structures/skills/structures/assets/config.example.json";
-import folderTemplate from "../../.structures/config.json";
 import exampleSettings from "../../public/settings.example.json";
 import { ISSUE_TEMPLATES } from "./issue-templates";
 import { fetchSiteSettings, normalizeSettingsUrl, parseSiteSettings } from "./site-settings";

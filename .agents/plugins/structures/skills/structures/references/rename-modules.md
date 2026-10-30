@@ -15,7 +15,7 @@ from consistent peers only where those sources are silent. Report conflicts with
 before changing the affected rule or files. Continue independent, unambiguous work.
 
 Save module conventions in a **Module naming rules** section of the relevant folder's inline
-`folders.documentation` entry in `.structures/config.json`. Use the root entry for project-wide
+`folders.documentation` entry in `.agents/configs/.structures/config.json`. Use the root entry for project-wide
 rules and document narrower exceptions beside their folder. Record:
 
 - Scope, basename casing, and role suffixes, with a conforming example.

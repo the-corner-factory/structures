@@ -1,9 +1,18 @@
 # Folder template
 
-Store the project's intended folder organization in `<project-root>/.structures/config.json`.
+Store the project's intended folder organization in `<project-root>/.agents/configs/.structures/config.json`.
 Resolve the project root as described in the entrypoint; a monorepo uses its root unless the user
 explicitly selects a package as an independent project. Keep each requested repository's template
 in that repository. Do not use the plugin's own directory as project storage.
+
+## Legacy location
+
+If the new path is absent but `<project-root>/.structures/config.json` exists, validate and use
+that saved template. Audits and previews leave it in place. Before a workflow authorized to write
+the template saves it, move the validated config to `.agents/configs/.structures/config.json`,
+preserving its content and local rules. Refuse to overwrite an existing destination. If both paths
+exist, use the new path and leave the legacy file untouched. Keep unrelated files in the old
+directory; move existing exports only when their migration is requested.
 
 ## Contract
 
@@ -39,7 +48,7 @@ points, manifests, and representative modules. Derive the intended layout from t
 standard and current project rules; distinguish existing violations from the desired organization.
 Ask about unresolved ownership or conflicting rules only after presenting the concrete alternatives.
 
-Create `.structures/` if needed and write `config.json` using UTF-8, two-space indentation, and a final
+Create `.agents/configs/.structures/` if needed and write `config.json` using UTF-8, two-space indentation, and a final
 newline. Record evidenced directories and their responsibilities; avoid invented conventions.
 Preserve existing IDs, documentation, optional sections, and local edits on requested updates.
 If a template already exists, `init` validates and reports it; replacement requires a template-update
@@ -52,7 +61,7 @@ already exists. Do not silently adopt a root `settings.json` or remote profile a
 Validate before saving a new or updated candidate, and before any folder moves:
 
 ```sh
-node <skill-directory>/scripts/check-template.mjs <candidate-or-project-root/.structures/config.json>
+node <skill-directory>/scripts/check-template.mjs <candidate-or-project-root/.agents/configs/.structures/config.json>
 ```
 
 The checker validates the folder tree, path segments, IDs, and documentation coverage. Inspect
@@ -70,7 +79,7 @@ checking filesystem collisions, symlinks, callers, and framework constraints.
   dependent moves. Preserve the template during corrections.
 - **Document:** use the saved template, initializing it if absent as part of the requested guide.
   Report differences between the template and checkout explicitly. Export a copy as `settings.json`
-  for website/Gist use; keep `.structures/config.json` as the maintained local source.
+  for website/Gist use; keep `.agents/configs/.structures/config.json` as the maintained local source.
 
 Return the saved template path, the conventions it captures, and validation results. Creating or
 updating the template does not itself request source moves, commits, or publication.
