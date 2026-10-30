@@ -2,6 +2,41 @@
 
 All notable changes to this project are documented here.
 
+## [1.10.0](https://github.com/the-corner-inc/structures/compare/v1.8.0...v1.10.0) (2026-10-30)
+
+### ⚠ Breaking change: skill configuration location
+
+Structures plugin **0.6.0** stores project configuration in
+`.agents/configs/.structures/config.json`, replacing the root `.structures/config.json` path.
+Update scripts, links, and integrations that reference the old location.
+
+1. Move your existing config to `.agents/configs/.structures/config.json`, preserving its contents.
+   If both files exist, the new path takes precedence; compare them before removing the old file.
+2. Use `.agents/configs/.structures/exports/` for new website/Gist exports. Existing exports stay
+   where they are unless you move them explicitly.
+
+The skill can still read the legacy config when the new one is absent, and migrates it before a
+requested configuration write. Audits remain read-only. The installed skill directory and
+`/structures` command are unchanged.
+
+### Features
+
+- **Skill configuration:** Angular, Go, and TanStack folder examples now document `.agents/configs/`
+  as the shared home for different skills' project settings, with one directory per skill.
+- **Folder and module rules:** Initialize or refresh templates from a local project, Gist, or
+  repository; preserve local rules; audit or rename TypeScript modules and their companions.
+- **Issues:** Preview reusable task, bug-report, and feature-request templates, copy their Markdown,
+  or download GitHub issue templates. Custom issue profiles must supply `issues.templates` to show them.
+- **Structures prompts:** Copy skill requests from reference pages and open the installation guide.
+
+### Verification
+
+- Passed lint/type-checking, 286 application tests, and 12 plugin/release checks.
+- Built the production server and prerendered 304 static routes.
+- Passed registry validation and clean Vite, Next.js, and TanStack consumer install/build/type checks.
+- New release notes and version files pass formatting. Existing formatting issues remain in
+  historical changelog entries and the saved design critique.
+
 ## [1.9.0](https://github.com/the-corner-inc/structures/compare/v1.8.0...v1.9.0) (2026-10-29)
 
 ### Features
