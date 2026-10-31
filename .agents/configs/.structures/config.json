@@ -151,8 +151,8 @@
     "documentation": {
       "structures": "# Structures\n\nThis curated template records the placement rules from AGENTS.md and GLOSSARY.md for the React website, portable explorer, vendored packages, and agent plugin. Unlisted files are allowed. It is a placement guide, not a scaffolding or deletion list.\n",
       "structures-src": "# src\n\n`src/` contains application routes, components, and shared data behavior.\n",
-      "structures-src-routes": "# routes\n\n`src/routes/` contains TanStack file routes, validated search parameters, and page metadata. Keep route UI thin and delegate to components.\n",
-      "structures-src-components": "# components\n\n`src/components/` contains website UI, profile integration, and explorer composition. `structure-explorer.tsx` composes shared tree and Markdown components for the website; `structures/structure-explorer.tsx` exposes the portable component API.\n",
+      "structures-src-routes": "# routes\n\n`src/routes/` owns TanStack file routes and their page-specific UI, state, handlers, validated search parameters, and metadata.\n",
+      "structures-src-components": "# components\n\n`src/components/` contains UI extracted for reuse or a meaningful independent responsibility, including profile integration and explorer composition. `structure-explorer.tsx` composes shared tree and Markdown components for the website; `structures/structure-explorer.tsx` exposes the portable component API.\n",
       "structures-src-components-structures": "# Portable explorer\n\n`src/components/structures/` contains the distributed explorer, shared tree validation, Markdown renderer, and scoped styles. Internal imports are relative; distributed code remains independent of website providers and routing.\n",
       "structures-src-lib": "# lib\n\n`src/lib/` owns shared data contracts, fetching, validation, and catalog configuration.\n",
       "structures-src-lib-site-settings": "# site-settings.ts\n\n`src/lib/site-settings.ts` validates the complete website profile and resolves remote JSON, including Gists. Invalid profiles fail before any custom section is applied.\n",

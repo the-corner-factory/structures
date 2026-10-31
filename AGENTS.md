@@ -48,8 +48,9 @@ The `test:e2e` script exists, but there is currently no app Playwright configura
 
 ## Implementation boundaries
 
-- Keep route files in `src/routes/` thin; put UI in `src/components/` and shared data behavior in
-  `src/lib/`. Use the app's `#/` import alias and existing TanStack patterns.
+- Keep page-specific UI, state, and handlers in `src/routes/`. Extract components into
+  `src/components/` for reuse or a meaningful independent responsibility, and keep shared data
+  behavior in `src/lib/`. Use the app's `#/` import alias and existing TanStack patterns.
 - Keep shareable page configuration (views, selected templates, applied filters) in validated
   TanStack Router search parameters so reloads, links, and Back/Forward restore it. Read from the
   URL directly, preserve other applicable parameters on updates, and use safe defaults for invalid

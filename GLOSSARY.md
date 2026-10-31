@@ -29,7 +29,7 @@ root shadcn registry. It is source copied into consumer projects, not a hosted s
 | Location                                    | Responsibility                                                                           |
 | ------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | `src/router.tsx`                            | Router creation, per-router QueryClient, query provider, error/not-found defaults.       |
-| `src/routes/`                               | TanStack file routes, route parameters, search validation, auth layouts, auth API.       |
+| `src/routes/`                               | TanStack page UI and state, route/search parameters, auth layouts and API.               |
 | `src/components/`                           | Website shell, explorer integration, boards, standards pages, branch diagrams.           |
 | `src/components/structures/`                | Portable explorer, shared tree/data helpers, Markdown renderer, scoped CSS.              |
 | `src/lib/structures.ts`                     | Folder/issue catalog types, library/topic lists, URL resolution, fetch boundaries.       |
