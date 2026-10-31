@@ -4,7 +4,7 @@ Bring the requested project or subtree into line with its own architecture. Use 
 workspace when no path is specified. Apply clear, necessary corrections when the user asks to fix
 or reorganize the structure, including `/structures fix folder structure`. Analysis,
 audit, review, and preview requests without a correction request are read-only. A consistent
-structure needs no changes. Keep architectural redesign proposals separate from placement fixes.
+structure needs no changes.
 
 ## Establish the placement rules
 
@@ -35,7 +35,13 @@ corrections. Avoid imposing a generic `components/services/utils` layout or a ne
 
 ## Map necessary corrections
 
-For each finding, identify the current path, the violated rule or observed convention, the
+Classify each finding as a misplaced existing module or a proposed architectural refactor.
+Extracting code into new components changes module boundaries. For an extraction, identify the
+responsibility being separated and its concrete benefit. Follow the project's declared ownership
+rules; file size alone does not establish a placement defect. Report architectural proposals
+separately from placement corrections, and apply them only within the user's requested scope.
+
+For each placement finding, identify the current path, the violated rule or observed convention, the
 destination, and the reason the move is needed. Read the file's responsibilities and callers;
 a filename alone is insufficient evidence. Leave intentional exceptions and already-conforming
 files in place. Create directories only to hold files that actually need moving.
