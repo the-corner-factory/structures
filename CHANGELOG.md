@@ -2,6 +2,28 @@
 
 All notable changes to this project are documented here.
 
+## [1.10.1](https://github.com/the-corner-inc/structures/compare/v1.10.0...v1.10.1) (2026-10-31)
+
+### Refactoring
+
+- **Folder guidance:** Structures plugin **0.6.1** distinguishes misplaced modules from proposals
+  to extract new components. Folder corrections follow the project's ownership rules; extraction
+  proposals must explain their responsibility and benefit and stay within the requested scope.
+
+### Documentation
+
+- **React placement:** Keep page-specific UI, state, and handlers in route files. Extract components
+  for reuse or a meaningful independent responsibility. The saved folder template follows the same
+  guidance.
+
+### Verification
+
+- Passed lint/type-checking, 286 application tests, and 12 plugin/release checks.
+- Built the 1.10.1 production server and prerendered 304 static routes.
+- Passed registry validation and clean Vite, Next.js, and TanStack consumer install/build/type checks.
+- Release notes and version files pass formatting. Existing formatting issues remain in historical
+  changelog entries and the saved design critique.
+
 ## [1.10.0](https://github.com/the-corner-inc/structures/compare/v1.8.0...v1.10.0) (2026-10-30)
 
 ### ⚠ Breaking change: skill configuration location

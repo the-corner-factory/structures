@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "structures",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Use /structures to manage folder templates, correct project organization, prepare commits, rename assets and TypeScript modules, retain naming rules, and document architecture.",
   "author": {
     "name": "The Corner",
