@@ -2,6 +2,31 @@
 
 All notable changes to this project are documented here.
 
+## [1.10.2](https://github.com/the-corner-inc/structures/compare/v1.10.1...v1.10.2) (2026-11-02)
+
+### Features
+
+- **Agentic map:** Explore a separate Model block and follow how context, responses, tool calls,
+  and results pass through the harness. The examples explain how feedback informs the next model
+  call without automatically training the model.
+- **Folder guides:** Angular, Go, and TanStack / React catalogs now explain `AGENTS.md`,
+  `GLOSSARY.md`, `PRODUCT.md`, `DESIGN.md`, and focused guidance under `.agents/`.
+
+### Bug Fixes
+
+- **Agentic map:** Clarify coding-agent workspace scope, distinguish guidance from execution,
+  and keep connection descriptions available to keyboard and assistive-technology users.
+- **Folder explorer:** Sort siblings alphabetically, ignoring case, with folders before files
+  at every depth. Issue taxonomy ordering stays as supplied.
+
+### Verification
+
+- Passed lint/type-checking, 293 application tests, and 12 plugin/release checks.
+- Built the 1.10.2 production server and prerendered 319 static routes.
+- Passed registry validation and clean Vite, Next.js, and TanStack consumer install/build/type checks.
+- Release notes and version files pass formatting. Existing formatting issues remain in historical
+  changelog entries and the saved design critique.
+
 ## [1.10.1](https://github.com/the-corner-inc/structures/compare/v1.10.0...v1.10.1) (2026-10-31)
 
 ### Refactoring
