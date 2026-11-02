@@ -45,7 +45,7 @@ it("uses one resolved template for custom map labels, cards, references, preview
     refetch: vi.fn(),
   });
   const { container, router } = await renderPage();
-  const map = screen.getByRole("group", { name: "Agent system building blocks" });
+  const map = screen.getByRole("group", { name: "Coding-agent workspace building blocks" });
   expect(within(map).getByRole("button", { name: "Team runtime", pressed: true })).toBeTruthy();
   expect(within(map).getByText("Executes our team workflow.")).toBeTruthy();
   expect(screen.getByRole("list", { name: "Team runtime connections" }).textContent).toContain(
@@ -181,7 +181,7 @@ it.each([true, "true"])("accepts detailed mode: %j", (detailed) => {
 
 it("shows only feature dots by default and restores text badges with Detailed", async () => {
   const page = await renderPage("/agentic?template=prompt#agentic-readme");
-  const map = screen.getByRole("group", { name: "Agent system building blocks" });
+  const map = screen.getByRole("group", { name: "Coding-agent workspace building blocks" });
   const badges = map.querySelectorAll(".agentic-scoped-badge, .agentic-file-badge");
   const toggle = screen.getByRole("checkbox", { name: "Detailed", checked: false });
   expect(map.getAttribute("data-detailed")).toBe("false");
@@ -269,7 +269,7 @@ it("keeps Detailed available in cards and preserves its setting across views", a
   expect(screen.getByRole("checkbox", { name: "Detailed", checked: true })).toBeTruthy();
   expect(
     screen
-      .getByRole("group", { name: "Agent system building blocks" })
+      .getByRole("group", { name: "Coding-agent workspace building blocks" })
       .getAttribute("data-detailed"),
   ).toBe("true");
 
@@ -287,7 +287,7 @@ it("keeps Detailed available in cards and preserves its setting across views", a
 
 it("keeps project arrows attached to the Agent when its detail level changes", async () => {
   await renderPage();
-  const map = screen.getByRole("group", { name: "Agent system building blocks" });
+  const map = screen.getByRole("group", { name: "Coding-agent workspace building blocks" });
   const paths = () =>
     Array.from(map.querySelectorAll(".agentic-map-connection > path"), (path) =>
       path.getAttribute("d"),
@@ -305,6 +305,46 @@ it("keeps project arrows attached to the Agent when its detail level changes", a
     expect.arrayContaining(["M500 496 V368", "M750 496 L602 368", "M250 496 L398 368"]),
   );
 });
+
+it.each(["/agentic", "/agentic?detailed=true"])(
+  "distinguishes workspace relationships and keeps project Skills violet in %s",
+  async (url) => {
+    await renderPage(url);
+    expect(
+      screen.getByRole("heading", { name: "Anatomy of a coding-agent workspace" }),
+    ).toBeTruthy();
+    const map = screen.getByRole("group", { name: "Coding-agent workspace building blocks" });
+    for (const [kind, count] of [
+      ["execution", 4],
+      ["capability", 2],
+      ["guidance", 3],
+      ["delivery", 1],
+    ] as const) {
+      expect(
+        map.querySelectorAll(`.agentic-map-connection-line[data-kind="${kind}"]`),
+      ).toHaveLength(count);
+      expect(
+        document.querySelector(
+          `.agentic-map-legend .agentic-map-connection-line[data-kind="${kind}"]`,
+        ),
+      ).toBeTruthy();
+    }
+    const mcp = map.querySelector('[data-node="mcp-servers"]')!;
+    expect(within(mcp as HTMLElement).getByText("Expose tools, resources & prompts")).toBeTruthy();
+    const skills = map.querySelector('[data-node="skills"]')!;
+    for (const name of [
+      "Project skills",
+      "Skill instructions",
+      "Skill resources",
+      "Skill hooks",
+      "Nested skills",
+    ]) {
+      await click(within(skills as HTMLElement).getByRole("button", { name }));
+      expect(skills.getAttribute("data-tone")).toBe("purple");
+      expect(skills.getAttribute("data-selected")).toBe("true");
+    }
+  },
+);
 
 it.each(["/agentic", "/agentic?detailed=true", "/agentic?view=cards"])(
   "orders badge categories alphabetically with conditional badges last in %s",
@@ -522,7 +562,7 @@ it("groups instruction files as badges and can return to the Instructions descri
 it("traces the sketch's directed connections and opens their existing templates", async () => {
   const { container } = await renderPage();
   expect(screen.getByRole("radio", { name: "System map", checked: true })).toBeTruthy();
-  const map = screen.getByRole("group", { name: "Agent system building blocks" });
+  const map = screen.getByRole("group", { name: "Coding-agent workspace building blocks" });
   expect(within(map).getAllByRole("button")).toHaveLength(32);
   const project = within(map).getByRole("group", { name: "Project" });
   expect(
@@ -586,12 +626,14 @@ it("defaults to the system map and preserves templates when switching views", as
   ]) {
     await click(screen.getByRole("button", { name }));
     await click(screen.getByRole("radio", { name: "Cards & templates" }));
-    expect(screen.queryByRole("group", { name: "Agent system building blocks" })).toBeNull();
+    expect(
+      screen.queryByRole("group", { name: "Coding-agent workspace building blocks" }),
+    ).toBeNull();
     expect(screen.getByRole("button", { name, pressed: true })).toBeTruthy();
     expect(screen.getByRole("link", { name: `Download ${name} template` })).toBeTruthy();
 
     await click(screen.getByRole("radio", { name: "System map" }));
-    const map = screen.getByRole("group", { name: "Agent system building blocks" });
+    const map = screen.getByRole("group", { name: "Coding-agent workspace building blocks" });
     expect(within(map).getByRole("button", { name: parent, pressed: true })).toBeTruthy();
     expect(within(map).getByRole("button", { name, pressed: true })).toBeTruthy();
     expect(screen.getByRole("link", { name: `Download ${name} template` })).toBeTruthy();
@@ -626,7 +668,7 @@ it("selects scoped contents, traces their parent connections, and preserves sele
     ["Hook instructions", "hook-instructions", "hook definition", "Hooks", 1],
     ["Project skills", "skills", "project", "Project skills", 1],
   ] as const) {
-    const map = screen.getByRole("group", { name: "Agent system building blocks" });
+    const map = screen.getByRole("group", { name: "Coding-agent workspace building blocks" });
     const block = within(map)
       .getByRole("button", { name: parent })
       .closest<HTMLElement>(".agentic-map-node")!;
@@ -746,7 +788,7 @@ it.each([
 
 it("opens agent examples and Markdown files directly from their graph blocks", async () => {
   const { container } = await renderPage("/agentic?detailed=true");
-  const map = screen.getByRole("group", { name: "Agent system building blocks" });
+  const map = screen.getByRole("group", { name: "Coding-agent workspace building blocks" });
   expect(container.querySelector("button button")).toBeNull();
 
   for (const [name, parent, region] of [

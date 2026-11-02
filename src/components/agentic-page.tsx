@@ -73,16 +73,16 @@ export function AgenticPage() {
   return (
     <main className="library-chooser topics-page agentic-page">
       <PageTitle
-        eyebrow="Agent systems, explained"
+        eyebrow="Coding-agent workspaces, explained"
         title="Agentic"
-        intro="Understand the pieces behind an agent: what runs it, what it can do, and what guides its work. Follow the connections, then explore each building block."
+        intro="Understand the pieces behind a coding agent: what runs it, what it can do, and what guides its work. Follow the connections, then explore each building block."
       />
 
       <section className="agentic-explore" aria-labelledby="agentic-explore-title">
         <div className="agentic-section-heading">
           <div>
             <h2 id="agentic-explore-title">
-              {view === "map" ? "Anatomy of an agent system" : "Explore customizations"}
+              {view === "map" ? "Anatomy of a coding-agent workspace" : "Explore customizations"}
             </h2>
             <p>
               {view === "map"

@@ -24,7 +24,7 @@ const mapNodes = [
   {
     id: "mcp-servers",
     label: "MCP servers",
-    summary: "Connect external capabilities",
+    summary: "Expose tools, resources & prompts",
     tone: "amber",
   },
   {
@@ -81,6 +81,7 @@ const connections = [
   {
     from: "plugins",
     to: "harness",
+    kind: "delivery",
     label: ["supply", "components to"],
     path: "M270 86 H378",
     x: 325,
@@ -89,6 +90,7 @@ const connections = [
   {
     from: "harness",
     to: "mcp-servers",
+    kind: "capability",
     label: ["connects to"],
     path: "M620 86 H728",
     x: 675,
@@ -97,6 +99,7 @@ const connections = [
   {
     from: "harness",
     to: "hooks",
+    kind: "execution",
     label: ["triggers"],
     path: "M400 136 L232 264",
     x: 302,
@@ -105,6 +108,7 @@ const connections = [
   {
     from: "harness",
     to: "agents",
+    kind: "execution",
     label: ["runs"],
     path: "M500 136 V264",
     x: 500,
@@ -113,6 +117,7 @@ const connections = [
   {
     from: "harness",
     to: "tools",
+    kind: "execution",
     label: ["executes", "authorized calls to"],
     path: "M600 136 L778 264",
     x: 690,
@@ -121,6 +126,7 @@ const connections = [
   {
     from: "mcp-servers",
     to: "tools",
+    kind: "capability",
     label: ["expose"],
     path: "M850 136 V264",
     x: 850,
@@ -129,6 +135,7 @@ const connections = [
   {
     from: "agents",
     to: "tools",
+    kind: "execution",
     label: ["requests", "calls to"],
     path: "M620 316 H728",
     x: 675,
@@ -137,6 +144,7 @@ const connections = [
   {
     from: "instructions",
     to: "agents",
+    kind: "guidance",
     label: ["orient"],
     path: "M500 496 V428",
     compactPath: "M500 496 V368",
@@ -147,6 +155,7 @@ const connections = [
   {
     from: "context-md",
     to: "agents",
+    kind: "guidance",
     label: ["inform", "when read"],
     path: "M750 496 L602 428",
     compactPath: "M750 496 L602 368",
@@ -157,6 +166,7 @@ const connections = [
   {
     from: "skills",
     to: "agents",
+    kind: "guidance",
     label: ["guide"],
     path: "M250 496 L398 428",
     compactPath: "M250 496 L398 368",
@@ -226,7 +236,11 @@ export function AgenticMap({
         key={node.id}
         className="agentic-map-node"
         data-node={node.id}
-        data-tone={active && scopedExample ? categoryTones[scopedExample.label] : node.tone}
+        data-tone={
+          active && scopedExample && node.id !== "skills"
+            ? categoryTones[scopedExample.label]
+            : node.tone
+        }
         data-selected={active}
         data-related={related.some(({ from, to }) => from === node.id || to === node.id)}
         style={
@@ -305,7 +319,7 @@ export function AgenticMap({
         className="agentic-map"
         data-detailed={detailed}
         role="group"
-        aria-label="Agent system building blocks"
+        aria-label="Coding-agent workspace building blocks"
       >
         <svg className="agentic-map-lines" viewBox="0 0 1000 680" aria-hidden="true">
           <path
@@ -335,9 +349,10 @@ export function AgenticMap({
               data-active={related.includes(connection)}
             >
               <path
+                className="agentic-map-connection-line"
+                data-kind={connection.kind}
                 d={detailed ? connection.path : (connection.compactPath ?? connection.path)}
                 markerEnd={`url(#${markerId}-${related.includes(connection) ? "accent" : "muted"})`}
-                strokeDasharray={connection.from === "plugins" ? "6 5" : undefined}
               />
               <text
                 x={connection.x}
@@ -365,12 +380,19 @@ export function AgenticMap({
         </div>
       </div>
       <div className="agentic-map-legend">
-        <span>
-          <i aria-hidden="true" /> Relationship
-        </span>
-        <span>
-          <i className="agentic-map-dashed" aria-hidden="true" /> Compatible component delivery
-        </span>
+        {[
+          ["execution", "Execution"],
+          ["capability", "Capability connection / exposure"],
+          ["guidance", "Guidance / context"],
+          ["delivery", "Compatible component delivery"],
+        ].map(([kind, label]) => (
+          <span key={kind}>
+            <svg viewBox="0 0 36 8" aria-hidden="true">
+              <path className="agentic-map-connection-line" data-kind={kind} d="M0 4 H36" />
+            </svg>
+            {label}
+          </span>
+        ))}
         <span className="agentic-map-hint">
           {detailed
             ? "Select a block or badge. Dashed badges require host or extension support."

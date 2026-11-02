@@ -2851,10 +2851,22 @@ input:focus-visible {
   color: var(--accent);
 }
 
-.agentic-map-connection > path {
+.agentic-map-connection-line {
   fill: none;
   stroke: currentColor;
   stroke-width: 1.5;
+}
+
+.agentic-map-connection-line[data-kind="capability"] {
+  stroke-dasharray: 8 4;
+}
+
+.agentic-map-connection-line[data-kind="guidance"] {
+  stroke-dasharray: 2 4;
+}
+
+.agentic-map-connection-line[data-kind="delivery"] {
+  stroke-dasharray: 8 4 2 4;
 }
 
 .agentic-map-connection[data-active="true"] > path {
@@ -3044,13 +3056,10 @@ input:focus-visible {
   gap: 7px;
 }
 
-.agentic-map-legend i {
-  width: 22px;
-  border-top: 1px solid currentColor;
-}
-
-.agentic-map-legend .agentic-map-dashed {
-  border-top-style: dashed;
+.agentic-map-legend svg {
+  width: 36px;
+  height: 8px;
+  flex-shrink: 0;
 }
 
 .agentic-map-hint {

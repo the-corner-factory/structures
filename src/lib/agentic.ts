@@ -181,7 +181,7 @@ For each actionable finding, include its location, impact, and a concrete correc
     description:
       "Connect agents to tools, resources, and reusable prompts through MCP servers. Servers can also deliver instructions and skill content.",
     distinction:
-      "MCP is the connection protocol. A server can expose several capabilities; a tool is one callable operation, which can also exist without MCP.",
+      "MCP is the connection protocol. Servers can expose callable tools, reference resources, and reusable prompt templates. Server instructions provide integration guidance; prompts supply messages for a selected task. Tools can also exist without MCP.",
     source: "https://modelcontextprotocol.io/docs/learn/server-concepts",
     sourceLabel: "MCP server concepts",
     readme: `# Project knowledge MCP server
@@ -959,7 +959,7 @@ Resources can contain text or binary data. Reading a document provides context; 
     icon: BookOpenIcon,
     description: "Server-wide guidance explaining how to use its capabilities.",
     distinction:
-      "An MCP server can return instructions during initialization. These explain conventions and workflows across its capabilities; the client decides how to surface or include that guidance.",
+      "An MCP server can return instructions during initialization. These explain conventions and workflows across its capabilities; the client decides how to surface or include that guidance. Unlike reusable MCP prompt templates selected for a task, server instructions provide integration guidance.",
     source: "https://blog.modelcontextprotocol.io/posts/2025-11-03-using-server-instructions/",
     sourceLabel: "MCP server instructions",
     readme: `# MCP instructions
