@@ -18,7 +18,9 @@ The Issues page also previews reusable task, bug-report, and feature-request tem
 the Markdown body; download adds GitHub template frontmatter for `.github/ISSUE_TEMPLATE/`.
 The Agentic page opens with an interactive system map, with concept cards and downloadable
 Markdown templates also available. Selecting a map block highlights its directed connections and opens the matching
-example; a text connection list also supports small screens and assistive technology. The page
+example; a text connection list also supports small screens and assistive technology. A separate
+Model block shows context and response exchange with the harness. Tool results return to the agent
+via the harness and inform subsequent model calls; this feedback does not train the model. The page
 does not execute agents. Accounts are scaffolded but disabled by default.
 
 A second deliverable is `structure-explorer`, an editable React component distributed through the

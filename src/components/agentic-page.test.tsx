@@ -51,7 +51,7 @@ it("uses one resolved template for custom map labels, cards, references, preview
   expect(screen.getByRole("list", { name: "Team runtime connections" }).textContent).toContain(
     "Team runtime runs Agent",
   );
-  expect(container.querySelectorAll('.agentic-map-connection[data-active="true"]')).toHaveLength(5);
+  expect(container.querySelectorAll('.agentic-map-connection[data-active="true"]')).toHaveLength(7);
   const reference = screen.getByRole("link", { name: "Team runtime reference" });
   expect(reference.getAttribute("href")).toBe("https://example.com/runtime");
   const download = screen.getByRole("link", { name: "Download Team runtime template" });
@@ -294,17 +294,70 @@ it("keeps project arrows attached to the Agent when its detail level changes", a
     );
 
   expect(paths()).toEqual(
-    expect.arrayContaining(["M500 496 V368", "M750 496 L602 368", "M250 496 L398 368"]),
+    expect.arrayContaining(["M500 676 V548", "M750 676 L602 548", "M250 676 L398 548"]),
   );
   await click(screen.getByRole("checkbox", { name: "Detailed" }));
   expect(paths()).toEqual(
-    expect.arrayContaining(["M500 496 V428", "M750 496 L602 428", "M250 496 L398 428"]),
+    expect.arrayContaining(["M500 676 V608", "M750 676 L602 608", "M250 676 L398 608"]),
   );
   await click(screen.getByRole("checkbox", { name: "Detailed" }));
   expect(paths()).toEqual(
-    expect.arrayContaining(["M500 496 V368", "M750 496 L602 368", "M250 496 L398 368"]),
+    expect.arrayContaining(["M500 676 V548", "M750 676 L602 548", "M250 676 L398 548"]),
   );
 });
+
+it.each(["/agentic", "/agentic?detailed=true"])(
+  "explains the model and tool feedback loop in %s",
+  async (url) => {
+    const readme = "# Team model\n\nUse tool feedback to choose the next step.";
+    vi.mocked(useSiteSettings).mockReturnValue({
+      settings: { version: 1, agentic: { model: { name: "Team model", readme } } },
+      isPending: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+    const separator = url.includes("?") ? "&" : "?";
+    const { router } = await renderPage(`${url}${separator}template=model#agentic-readme`);
+    const map = screen.getByRole("group", { name: "Coding-agent workspace building blocks" });
+    const project = within(map).getByRole("group", { name: "Project" });
+    expect(within(project).queryByRole("button", { name: "Team model" })).toBeNull();
+    expect(within(map).getByRole("button", { name: "Team model", pressed: true })).toBeTruthy();
+    const modelConnections = screen.getByRole("list", { name: "Team model connections" });
+    expect(modelConnections.textContent).toContain(
+      "Harness sends context & tool results to Team model",
+    );
+    expect(modelConnections.textContent).toContain(
+      "Team model returns text or tool requests to Harness",
+    );
+    expect(within(modelConnections).getAllByRole("listitem")).toHaveLength(2);
+    expect(
+      decodeURIComponent(
+        screen.getByRole("link", { name: "Download Team model template" }).getAttribute("href")!,
+      ),
+    ).toContain(readme);
+
+    await click(within(map).getByRole("button", { name: "Agent" }));
+    const agentConnections = screen.getByRole("list", { name: "Agent connections" });
+    expect(agentConnections.textContent).toContain("Agent requests calls to Tools");
+    expect(agentConnections.textContent).toContain("Tools return results to Agent via harness");
+    await click(within(map).getByRole("button", { name: "Team model" }));
+    await click(screen.getByRole("radio", { name: "Cards & templates" }));
+    expect(screen.getByRole("button", { name: "Team model", pressed: true })).toBeTruthy();
+    expect(router.state.location.search.template).toBe("model");
+    expect(router.state.location.hash).toBe("agentic-readme");
+    await act(async () => {
+      router.history.back();
+    });
+    await waitFor(() =>
+      expect(screen.getByRole("radio", { name: "System map", checked: true })).toBeTruthy(),
+    );
+    expect(
+      within(
+        screen.getByRole("group", { name: "Coding-agent workspace building blocks" }),
+      ).getByRole("button", { name: "Team model", pressed: true }),
+    ).toBeTruthy();
+  },
+);
 
 it.each(["/agentic", "/agentic?detailed=true"])(
   "distinguishes workspace relationships and keeps project Skills violet in %s",
@@ -315,7 +368,7 @@ it.each(["/agentic", "/agentic?detailed=true"])(
     ).toBeTruthy();
     const map = screen.getByRole("group", { name: "Coding-agent workspace building blocks" });
     for (const [kind, count] of [
-      ["execution", 4],
+      ["execution", 7],
       ["capability", 2],
       ["guidance", 3],
       ["delivery", 1],
@@ -543,7 +596,7 @@ it("groups instruction files as badges and can return to the Instructions descri
   const card = instructions.closest(".agentic-card")!;
   const files = within(card as HTMLElement).getByRole("group", { name: "Instruction files" });
 
-  expect(container.querySelectorAll(".agentic-card")).toHaveLength(8);
+  expect(container.querySelectorAll(".agentic-card")).toHaveLength(9);
   expect(container.querySelector("button button")).toBeNull();
   for (const name of ["AGENTS.md", "GLOSSARY.md", "DESIGN.md", "PRODUCT.md"]) {
     const badge = within(files).getByRole("button", { name });
@@ -563,7 +616,7 @@ it("traces the sketch's directed connections and opens their existing templates"
   const { container } = await renderPage();
   expect(screen.getByRole("radio", { name: "System map", checked: true })).toBeTruthy();
   const map = screen.getByRole("group", { name: "Coding-agent workspace building blocks" });
-  expect(within(map).getAllByRole("button")).toHaveLength(32);
+  expect(within(map).getAllByRole("button")).toHaveLength(33);
   const project = within(map).getByRole("group", { name: "Project" });
   expect(
     within(project).getByRole("button", { name: "Project skills" }).querySelector("strong")
@@ -586,11 +639,12 @@ it("traces the sketch's directed connections and opens their existing templates"
 
   const examples = [
     ["Plugins", "Plugins supply components to Harness", "Plugins / README.md", 1],
-    ["Harness", "Harness runs Agent", "Harness / README.md", 5],
+    ["Harness", "Harness runs Agent", "Harness / README.md", 7],
+    ["Model", "Model returns text or tool requests to Harness", "Model / README.md", 2],
     ["MCP servers", "MCP servers expose Tools", "MCP Servers / README.md", 2],
     ["Hooks", "Harness triggers Hooks", "Hooks / README.md", 1],
-    ["Agent", "Agent requests calls to Tools", "Agents / README.md", 5],
-    ["Tools", "Harness executes authorized calls to Tools", "Tools / README.md", 3],
+    ["Agent", "Agent requests calls to Tools", "Agents / README.md", 6],
+    ["Tools", "Harness executes authorized calls to Tools", "Tools / README.md", 4],
     ["Instructions", "Instructions orient Agent", "Instructions / README.md", 1],
     ["Project skills", "Project skills guide Agent", "Project skills / README.md", 1],
     ["Specs & context", "Specs & context inform Agent when read", "Instructions / GLOSSARY.md", 1],
@@ -650,11 +704,11 @@ it("selects scoped contents, traces their parent connections, and preserves sele
     ["Plugin agents", "plugin-agents", "plugin", "Plugins", 2],
     ["Plugin hooks", "plugin-hooks", "plugin", "Plugins", 2],
     ["Plugin MCP configuration", "plugin-mcp-servers", "plugin", "Plugins", 2],
-    ["Agent instructions", "agent-instructions", "agent definition", "Agent", 5],
-    ["Agent skills", "agent-skills", "agent definition", "Agent", 5],
-    ["Agent tools", "agent-tools", "agent definition", "Agent", 5],
-    ["Agent MCP configuration", "agent-mcp-servers", "agent definition", "Agent", 5],
-    ["Agent hooks", "agent-hooks", "agent definition", "Agent", 5],
+    ["Agent instructions", "agent-instructions", "agent definition", "Agent", 6],
+    ["Agent skills", "agent-skills", "agent definition", "Agent", 6],
+    ["Agent tools", "agent-tools", "agent definition", "Agent", 6],
+    ["Agent MCP configuration", "agent-mcp-servers", "agent definition", "Agent", 6],
+    ["Agent hooks", "agent-hooks", "agent definition", "Agent", 6],
     ["Skill instructions", "skill-instructions", "skill", "Project skills", 1],
     ["Skill resources", "skill-resources", "skill", "Project skills", 1],
     ["Skill hooks", "skill-hooks", "skill", "Project skills", 1],
@@ -664,7 +718,7 @@ it("selects scoped contents, traces their parent connections, and preserves sele
     ["MCP resources", "mcp-resources", "MCP server", "MCP servers", 2],
     ["MCP instructions", "mcp-instructions", "MCP server", "MCP servers", 2],
     ["MCP skills", "mcp-skills", "MCP server", "MCP servers", 2],
-    ["Tool instructions", "tool-instructions", "tool definition", "Tools", 3],
+    ["Tool instructions", "tool-instructions", "tool definition", "Tools", 4],
     ["Hook instructions", "hook-instructions", "hook definition", "Hooks", 1],
     ["Project skills", "skills", "project", "Project skills", 1],
   ] as const) {

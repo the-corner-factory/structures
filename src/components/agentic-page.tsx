@@ -86,7 +86,7 @@ export function AgenticPage() {
             </h2>
             <p>
               {view === "map"
-                ? "Nine building blocks. Explore their contents and configuration."
+                ? "Ten building blocks. Follow how context, model responses, and tool results drive the next step."
                 : "Explore contents, configuration, and example templates."}
             </p>
           </div>

@@ -10,6 +10,12 @@ import {
 
 const mapNodes = [
   {
+    id: "model",
+    label: "Model",
+    summary: "Generates text & tool requests",
+    tone: "teal",
+  },
+  {
     id: "plugins",
     label: "Plugins",
     summary: "Distribute compatible components",
@@ -76,103 +82,132 @@ const categoryTones: Record<string, string> = {
   Prompts: "amber",
 };
 
-// Fixed coordinates keep this nine-block teaching diagram aligned with its HTML buttons.
+// Fixed coordinates keep the teaching diagram aligned with its HTML buttons.
 const connections = [
+  {
+    from: "harness",
+    to: "model",
+    kind: "execution",
+    label: ["sends context", "& tool results to"],
+    path: "M460 216 V136",
+    x: 400,
+    y: 164,
+  },
+  {
+    from: "model",
+    to: "harness",
+    kind: "execution",
+    label: ["returns text", "or tool requests to"],
+    path: "M540 136 V216",
+    x: 600,
+    y: 164,
+  },
   {
     from: "plugins",
     to: "harness",
     kind: "delivery",
     label: ["supply", "components to"],
-    path: "M270 86 H378",
+    path: "M270 266 H378",
     x: 325,
-    y: 55,
+    y: 235,
   },
   {
     from: "harness",
     to: "mcp-servers",
     kind: "capability",
     label: ["connects to"],
-    path: "M620 86 H728",
+    path: "M620 266 H728",
     x: 675,
-    y: 66,
+    y: 246,
   },
   {
     from: "harness",
     to: "hooks",
     kind: "execution",
     label: ["triggers"],
-    path: "M400 136 L232 264",
+    path: "M400 316 L232 444",
     x: 302,
-    y: 202,
+    y: 382,
   },
   {
     from: "harness",
     to: "agents",
     kind: "execution",
     label: ["runs"],
-    path: "M500 136 V264",
+    path: "M500 316 V444",
     x: 500,
-    y: 202,
+    y: 382,
   },
   {
     from: "harness",
     to: "tools",
     kind: "execution",
     label: ["executes", "authorized calls to"],
-    path: "M600 136 L778 264",
+    path: "M600 316 L778 444",
     x: 690,
-    y: 196,
+    y: 376,
   },
   {
     from: "mcp-servers",
     to: "tools",
     kind: "capability",
     label: ["expose"],
-    path: "M850 136 V264",
+    path: "M850 316 V444",
     x: 850,
-    y: 202,
+    y: 382,
   },
   {
     from: "agents",
     to: "tools",
     kind: "execution",
     label: ["requests", "calls to"],
-    path: "M620 316 H728",
+    path: "M620 496 H728",
     x: 675,
-    y: 285,
+    y: 465,
+  },
+  {
+    from: "tools",
+    to: "agents",
+    kind: "execution",
+    label: ["return results to"],
+    suffix: "via harness",
+    path: "M728 530 H620",
+    x: 675,
+    y: 559,
   },
   {
     from: "instructions",
     to: "agents",
     kind: "guidance",
     label: ["orient"],
-    path: "M500 496 V428",
-    compactPath: "M500 496 V368",
+    path: "M500 676 V608",
+    compactPath: "M500 676 V548",
     x: 500,
-    y: 450,
-    compactY: 420,
+    y: 630,
+    compactY: 600,
   },
   {
     from: "context-md",
     to: "agents",
     kind: "guidance",
-    label: ["inform", "when read"],
-    path: "M750 496 L602 428",
-    compactPath: "M750 496 L602 368",
+    label: ["inform"],
+    suffix: "when read",
+    path: "M750 676 L602 608",
+    compactPath: "M750 676 L602 548",
     x: 682,
-    y: 446,
-    compactY: 416,
+    y: 626,
+    compactY: 596,
   },
   {
     from: "skills",
     to: "agents",
     kind: "guidance",
     label: ["guide"],
-    path: "M250 496 L398 428",
-    compactPath: "M250 496 L398 368",
+    path: "M250 676 L398 608",
+    compactPath: "M250 676 L398 548",
     x: 318,
-    y: 450,
-    compactY: 420,
+    y: 630,
+    compactY: 600,
   },
 ];
 
@@ -245,8 +280,8 @@ export function AgenticMap({
         data-related={related.some(({ from, to }) => from === node.id || to === node.id)}
         style={
           {
-            "--node-left": `${3 + (index % 3) * 35}%`,
-            "--node-top": `${((36 + Math.floor(index / 3) * 230) / 680) * 100}%`,
+            "--node-left": `${node.id === "model" ? 38 : 3 + ((index - 1) % 3) * 35}%`,
+            "--node-top": `${((node.id === "model" ? 36 : 216 + Math.floor((index - 1) / 3) * 230) / 860) * 100}%`,
           } as CSSProperties
         }
       >
@@ -321,10 +356,10 @@ export function AgenticMap({
         role="group"
         aria-label="Coding-agent workspace building blocks"
       >
-        <svg className="agentic-map-lines" viewBox="0 0 1000 680" aria-hidden="true">
+        <svg className="agentic-map-lines" viewBox="0 0 1000 860" aria-hidden="true">
           <path
             className="agentic-map-project-outline"
-            d="M14 452 Q14 440 26 440 H136 Q144 440 150 448 L160 462 Q164 468 172 468 H974 Q986 468 986 480 V608 Q986 620 974 620 H26 Q14 620 14 608 Z"
+            d="M14 632 Q14 620 26 620 H136 Q144 620 150 628 L160 642 Q164 648 172 648 H974 Q986 648 986 660 V788 Q986 800 974 800 H26 Q14 800 14 788 Z"
           />
           <defs>
             {["muted", "accent"].map((tone) => (
@@ -354,20 +389,27 @@ export function AgenticMap({
                 d={detailed ? connection.path : (connection.compactPath ?? connection.path)}
                 markerEnd={`url(#${markerId}-${related.includes(connection) ? "accent" : "muted"})`}
               />
-              <text
-                x={connection.x}
-                y={detailed ? connection.y : (connection.compactY ?? connection.y)}
-              >
-                {connection.label.map((line, index) => (
-                  <tspan key={line} x={connection.x} dy={index === 0 ? 0 : 16}>
-                    {line}
-                  </tspan>
-                ))}
-              </text>
+              {/* Paint the outline separately so adjacent glyphs cannot cover selected text. */}
+              {["outline", "label"].map((layer) => (
+                <text
+                  key={layer}
+                  className={`agentic-map-connection-${layer}`}
+                  x={connection.x}
+                  y={detailed ? connection.y : (connection.compactY ?? connection.y)}
+                >
+                  {[...connection.label, ...(connection.suffix ? [connection.suffix] : [])].map(
+                    (line, index) => (
+                      <tspan key={line} x={connection.x} dy={index === 0 ? 0 : 16}>
+                        {line}
+                      </tspan>
+                    ),
+                  )}
+                </text>
+              ))}
             </g>
           ))}
         </svg>
-        {nodeElements.slice(0, 6)}
+        {nodeElements.slice(0, 7)}
         <div className="agentic-map-project" role="group" aria-labelledby={`${markerId}-project`}>
           <div className="agentic-map-project-heading">
             <span className="agentic-map-project-title" id={`${markerId}-project`}>
@@ -376,12 +418,12 @@ export function AgenticMap({
             </span>
             <span className="agentic-map-project-caption">Owned by this project</span>
           </div>
-          {nodeElements.slice(6)}
+          {nodeElements.slice(7)}
         </div>
       </div>
       <div className="agentic-map-legend">
         {[
-          ["execution", "Execution"],
+          ["execution", "Execution / feedback"],
           ["capability", "Capability connection / exposure"],
           ["guidance", "Guidance / context"],
           ["delivery", "Compatible component delivery"],
@@ -437,14 +479,13 @@ export function AgenticMap({
           </div>
         </div>
         <ul className="agentic-map-relations" aria-label={`${detailLabel} connections`}>
-          {related.map(({ from, to, label }) => (
+          {related.map(({ from, to, label, suffix }) => (
             <li key={`${from}-${to}`}>
               <span>{nodes.find((node) => node.id === from)!.label}</span>{" "}
               <ArrowRightIcon aria-hidden="true" />
               <span>
-                {from === "context-md" ? "inform" : label.join(" ")}{" "}
-                <strong>{nodes.find((node) => node.id === to)!.label}</strong>
-                {from === "context-md" && " when read"}
+                {label.join(" ")} <strong>{nodes.find((node) => node.id === to)!.label}</strong>
+                {suffix && ` ${suffix}`}
               </span>
             </li>
           ))}

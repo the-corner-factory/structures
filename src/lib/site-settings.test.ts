@@ -206,6 +206,7 @@ describe("site settings validation", () => {
         edges: [],
       },
       agentic: {
+        model: { name: "Team model", readme: "# Model\nUse tool results as feedback." },
         harness: {
           name: "Team harness",
           readme: "# Workspace",

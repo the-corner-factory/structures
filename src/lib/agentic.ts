@@ -1,6 +1,7 @@
 import {
   BookOpenIcon,
   BotIcon,
+  BrainCircuitIcon,
   FileTextIcon,
   LayersIcon,
   LightbulbIcon,
@@ -62,6 +63,11 @@ export const AGENTIC_RELATIONSHIPS: Record<
     description:
       "Define event handlers executed by the harness. Hosts with prompt-based hooks allow embedded instructions. Calling a tool, contacting an MCP server, or launching an agent is execution, not containment.",
   },
+  model: {
+    includes: [],
+    description:
+      "Receives context from the harness and produces text or tool requests. The harness executes permitted calls and supplies their results in subsequent model calls; the model does not execute tools itself.",
+  },
 };
 
 export const AGENTIC_ELEMENTS = [
@@ -84,7 +90,8 @@ Runs a coding agent in a local project workspace.
 - Load the task, project instructions, and relevant context.
 - Send the conversation and available tools to the model.
 - Execute permitted tool calls and return their results to the model.
-- Continue until the task is complete, blocked, or reaches a configured limit.
+- Feed tool results and errors into the next model call so the agent can assess progress.
+- Continue until the task is complete, needs input, or reaches a configured limit.
 
 ## Runtime choices
 
@@ -146,7 +153,7 @@ Document the supported host version, required configuration, and changes in each
     description:
       "Create specialized agents for focused development tasks. Control their instructions, tools, and behavior.",
     distinction:
-      "An agent decides what to do next. A skill supplies a procedure, and a tool performs an individual operation.",
+      "An agent pursues a goal using a model to decide what to do next. The harness supplies context, executes permitted tool calls, and returns results for the next step. A skill supplies a procedure, and a tool performs an individual operation.",
     source: "https://code.claude.com/docs/en/sub-agents",
     sourceLabel: "Specialized agent definitions",
     readme: `# Code review agent
@@ -304,7 +311,7 @@ Use the host's permission controls to restrict actions. Written guidance alone i
     description:
       "Review the tools available to the active agent. Enable or disable configurable tool groups.",
     distinction:
-      "A tool defines an operation with inputs and a result. The agent chooses when to call it; the harness executes it, subject to permissions.",
+      "A tool defines an operation with inputs and a result. The agent chooses when to call it; the harness executes it, subject to permissions, and feeds the result or error back into the agent's context for the next model call.",
     source: "https://modelcontextprotocol.io/docs/learn/server-concepts",
     sourceLabel: "Callable tools and their schemas",
     readme: `# Search project docs tool
@@ -373,6 +380,41 @@ Document the event, matcher, working directory, and timeout. Use the host's docu
 ## Verification
 
 Make one valid edit and one intentionally invalid edit in a disposable workspace. Confirm that the hook runs and exposes the failure.
+`,
+  },
+  {
+    id: "model",
+    name: "Model",
+    kind: "Reasoning",
+    icon: BrainCircuitIcon,
+    description: "Produces text and tool requests from the context supplied by the harness.",
+    distinction:
+      "The model supplies reasoning and generates responses. The agent is the goal-directed system using it; the harness manages the loop, context, permissions, and tool execution. Tool results inform later model calls rather than automatically training the model.",
+    source: "https://www.anthropic.com/research/building-effective-agents",
+    sourceLabel: "Models, tools, and the agent feedback loop",
+    readme: `# Model and feedback loop
+
+Use a language model to choose the next step toward a coding task.
+
+## One iteration
+
+1. The harness sends the task, applicable instructions, conversation, and available tool definitions to the model.
+2. The model generates text or requests a tool call.
+3. The harness checks permissions and executes permitted calls through native tools or MCP servers.
+4. Tool results and errors return to the agent through the harness and become context for the next model call.
+5. The model uses this feedback to continue, revise its approach, ask for input, or finish.
+
+## Example
+
+A test tool reports a failing assertion. The next model call receives the failure, requests a focused code edit, and then requests another test run. Passing tests provide evidence for the agent's completion report.
+
+## Boundaries
+
+The model proposes tool calls; it does not execute them or grant permissions. Feedback changes the context for subsequent calls; it does not automatically update the model's trained weights.
+
+## Stopping
+
+Stop when the task is complete, human input is needed, or a configured time, cost, or iteration limit is reached. Tool errors are feedback to handle or report, not proof that the task succeeded.
 `,
   },
 ];

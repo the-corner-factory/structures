@@ -39,6 +39,14 @@
   box-sizing: border-box;
 }
 
+::selection {
+  background-color: color-mix(in srgb, var(--accent) 30%, var(--background));
+  color: var(--foreground);
+  fill: var(--foreground);
+  stroke: transparent;
+  text-shadow: none;
+}
+
 html,
 body,
 #root {
@@ -2794,7 +2802,7 @@ input:focus-visible {
 
 .agentic-map {
   position: relative;
-  aspect-ratio: 1000 / 680;
+  aspect-ratio: 1000 / 860;
   background-image: radial-gradient(var(--border-subtle) 1px, transparent 1px);
   background-size: 20px 20px;
 }
@@ -2815,7 +2823,7 @@ input:focus-visible {
 
 .agentic-map-project-heading {
   position: absolute;
-  top: calc(100% * 448 / 680);
+  top: calc(100% * 628 / 860);
   left: 3%;
   right: 3%;
   display: flex;
@@ -2875,13 +2883,17 @@ input:focus-visible {
 
 .agentic-map-connection text {
   fill: currentColor;
-  stroke: var(--surface-raised);
-  stroke-width: 16px;
-  stroke-linejoin: round;
-  paint-order: stroke;
   font-size: 12px;
   font-weight: 550;
   text-anchor: middle;
+}
+
+.agentic-map-connection-outline {
+  stroke: var(--surface-raised);
+  stroke-width: 16px;
+  stroke-linejoin: round;
+  pointer-events: none;
+  user-select: none;
 }
 
 .agentic-map-node {
@@ -2891,7 +2903,7 @@ input:focus-visible {
   top: var(--node-top);
   display: flex;
   width: 24%;
-  height: calc(100% * 100 / 680);
+  height: calc(100% * 100 / 860);
   flex-direction: column;
   justify-content: center;
   gap: 6px;
@@ -2948,12 +2960,12 @@ input:focus-visible {
 @media (min-width: 901px) {
   .agentic-map-node:has(.agentic-map-files, .agentic-scoped-badge) {
     height: auto;
-    min-height: calc(100% * 100 / 680);
+    min-height: calc(100% * 100 / 860);
   }
 
   .agentic-map[data-detailed="true"] .agentic-map-node[data-node="agents"] {
     /* Keep the Agent's lower edge aligned with its incoming arrows. */
-    min-height: calc(100% * 160 / 680);
+    min-height: calc(100% * 160 / 860);
   }
 
   .agentic-map .agentic-scoped-templates {
@@ -3175,7 +3187,8 @@ input:focus-visible {
     padding: 14px;
   }
 
-  .agentic-map-node:last-child {
+  .agentic-map-node:last-child,
+  .agentic-map-node[data-node="model"] {
     grid-column: 1 / -1;
   }
 
