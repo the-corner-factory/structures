@@ -22,8 +22,16 @@ The framework requires its router and root route alongside the build configurati
 ## Complete tree
 
 ```text
+├── AGENTS.md
+├── GLOSSARY.md
+├── PRODUCT.md
+├── DESIGN.md
 ├── README.md
 ├── .agents/
+│   ├── example.md
+│   ├── configs/
+│   │   └── .structures/
+│   │       └── config.json
 │   └── skills/
 ├── .github/
 │   └── workflows/

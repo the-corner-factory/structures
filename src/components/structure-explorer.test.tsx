@@ -217,3 +217,52 @@ it("shows the unfiltered tree for an invalid filter in a direct link", async () 
   expect(screen.getByRole<HTMLInputElement>("searchbox").value).toBe("");
   expect(screen.getByRole("treeitem", { name: "README.md" })).toBeTruthy();
 });
+
+it.each(["folders", "issues"] as const)(
+  "orders %s entries consistently for display, keyboard navigation, and search",
+  async (kind) => {
+    const structures: FolderSettings["structures"] = [
+      { name: "zeta.md", type: "file" },
+      { name: "beta", type: "folder" },
+      {
+        name: "Alpha",
+        type: "folder",
+        children: [
+          { name: "zeta.ts", type: "file" },
+          { name: "nested", type: "folder" },
+          { name: "Alpha.ts", type: "file" },
+        ],
+      },
+      { name: "AGENTS.md", type: "file" },
+      { name: ".agents", type: "folder" },
+    ];
+    const original = structuredClone(structures);
+    const response = Response.json({ ...settings, structures });
+    vi.spyOn(response, "json").mockResolvedValue({ ...settings, structures });
+    vi.mocked(fetch).mockResolvedValue(response);
+    await renderExplorer(kind, "/" + kind + "/test");
+    const expected =
+      kind === "folders"
+        ? [".agents", "Alpha", "nested", "Alpha.ts", "zeta.ts", "beta", "AGENTS.md", "zeta.md"]
+        : ["zeta.md", "beta", "Alpha", "zeta.ts", "nested", "Alpha.ts", "AGENTS.md", ".agents"];
+    const entries = () => screen.getAllByRole("treeitem");
+    expect(entries().map((entry) => entry.getAttribute("aria-label"))).toEqual(expected);
+
+    const alpha = screen.getByRole("treeitem", { name: "Alpha" });
+    act(() => alpha.focus());
+    fireEvent.keyDown(alpha, { key: "ArrowRight" });
+    expect(document.activeElement?.getAttribute("aria-label")).toBe(
+      kind === "folders" ? "nested" : "zeta.ts",
+    );
+    fireEvent.keyDown(document.activeElement!, { key: "ArrowDown" });
+    expect(document.activeElement?.getAttribute("aria-label")).toBe(
+      kind === "folders" ? "Alpha.ts" : "nested",
+    );
+
+    await changeQuery("a");
+    expect(entries().map((entry) => entry.getAttribute("aria-label"))).toEqual(
+      expected.filter((name) => name !== "nested"),
+    );
+    expect(structures).toEqual(original);
+  },
+);

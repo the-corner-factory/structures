@@ -81,8 +81,8 @@ Built-in libraries live under `public/assets/<library>/`:
 - `settings.json` describes the recursive explorer tree.
 - `md/<lowercase entry id>.md` contains the documentation displayed for an entry.
 
-The [TanStack Start / React catalog](public/assets/tanstack-react/settings.json) documents 36 folders
-and 96 files, covering routing, UI, data, server code, tests, and deployment. Read the
+The [TanStack Start / React catalog](public/assets/tanstack-react/settings.json) documents 40 folders
+and 102 files, covering routing, UI, data, server code, tests, and deployment. Read the
 [complete structure and overview](public/assets/tanstack-react/md/readme.md.md) or open
 `/folders/tanstack-react` in the application. Each entry has its own Markdown guide.
 

@@ -5,6 +5,22 @@
   },
   "structures": [
     {
+      "name": "AGENTS.md",
+      "type": "file"
+    },
+    {
+      "name": "GLOSSARY.md",
+      "type": "file"
+    },
+    {
+      "name": "PRODUCT.md",
+      "type": "file"
+    },
+    {
+      "name": "DESIGN.md",
+      "type": "file"
+    },
+    {
       "name": "README.md",
       "type": "file"
     },
@@ -12,6 +28,11 @@
       "name": ".agents",
       "type": "folder",
       "children": [
+        {
+          "id": "agents-example",
+          "name": "example.md",
+          "type": "file"
+        },
         {
           "id": "agents-configs",
           "name": "configs",

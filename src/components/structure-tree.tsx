@@ -7,6 +7,16 @@ import type { ExplorerKind, FolderStructure } from "#/lib/structures.ts";
 import { flattenStructures, nodeId } from "./structures/structure-data";
 import { StructureTree as SharedTree } from "./structures/structure-tree";
 
+function sortFolders(items: FolderStructure[]): FolderStructure[] {
+  return [...items]
+    .sort(
+      (a, b) =>
+        Number(a.type === "file") - Number(b.type === "file") ||
+        a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
+    )
+    .map((item) => (item.children ? { ...item, children: sortFolders(item.children) } : item));
+}
+
 export function StructureTree({
   items,
   kind,
@@ -23,13 +33,17 @@ export function StructureTree({
   forceExpand?: boolean;
 }) {
   const manifest = useMemo(() => createMaterialIconManifest(manifestConfig), [manifestConfig]);
+  const orderedItems = useMemo(
+    () => (kind === "folders" ? sortFolders(items) : items),
+    [items, kind],
+  );
   const selectedId = flattenStructures(items).find(
     (node) => nodeId(node).toLowerCase() === selectedElement?.toLowerCase(),
   );
   return (
     <SharedTree
       className="structure-tree"
-      items={items}
+      items={orderedItems}
       selectedId={selectedId ? nodeId(selectedId) : undefined}
       onSelect={(node) => onSelect(nodeId(node))}
       forceExpand={forceExpand}

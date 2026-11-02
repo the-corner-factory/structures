@@ -195,7 +195,9 @@ query results, and the header/boundary expose loading, reset, and retry controls
    `fetchSettings` validates the wrapper and calls the shared tree parser before rendering. Profile
    sections reuse the provider data without a second catalog request.
 4. Search filters the tree while retaining ancestors of matching descendants. The website tree
-   adapts the shared accessible tree with Material icons or issue colors.
+   adapts the shared accessible tree with Material icons or issue colors. Folder views sort siblings
+   alphabetically, ignoring case, with folders and containers before files at every depth. Issue
+   views preserve the supplied order.
 5. Selecting a node navigates to its stable ID, preserving settings/source and the filter.
    `MarkdownViewer` is lazy-loaded. Profile documentation resolves inline by lowercased ID; missing
    content shows an unavailable state. Catalog documentation fetches after hydration with key
