@@ -5,6 +5,10 @@ Use this workflow for source-file naming requests, including `audit modules [pat
 and declaration files together with their tests and companion templates/styles. A module here
 is a source file, not specifically an Angular NgModule. Content assets use [Assets](rename-assets.md).
 
+For audits, run `check-structure.mjs`; for renames governed by saved rules, run
+`fix-structure.mjs`. Follow [CLI usage and boundaries](cli.md). Both accept a project root and
+optional directory scope. Report their findings and coverage warnings directly.
+
 ## Establish and retain the rules
 
 Read [the template contract](template.md), repository instructions, framework configuration,
@@ -23,8 +27,9 @@ rules and document narrower exceptions beside their folder. Record:
 - Framework-required names, generated/vendor exclusions, and intentional exceptions.
 
 Use the existing profile format; `naming` describes commit conventions, not module policy.
-A rule is documentation for the agent, not an executable glob, regex, or lint configuration.
-Examples illustrate an adopted rule; they are not mandatory files to scaffold.
+Encode deterministic requirements in a fenced `structures-rules` block using [the CLI schema](cli.md#executable-rules).
+Keep rationale and ownership decisions in prose. The executable block is authoritative for repeated
+checks; examples are not mandatory files. Preserve its blocks on template refreshes.
 
 For `set module naming rules`, save the requested conventions without renaming files. For
 `rename modules`, retain existing rules and save newly established scoped conventions before
@@ -38,13 +43,13 @@ requests one or repository evidence establishes it. Ask only for unresolved poli
 
 Audits and previews are read-only, including when the template is absent. Report the source of each
 rule, proposed old/new paths, and ambiguities; recommend initialization when rules are not saved.
-Folder audits and fixes also consult these saved naming and grouping rules, including for files
-omitted from the curated tree. A fix applies policy; changing policy needs a rule-update request.
+Folder audits and fixes run the same checker over these rules, including files omitted from the
+curated tree. Prose-only rules are reported as coverage gaps. A fix applies policy; changing policy needs a rule-update request.
 
 ## Rename and verify
 
-Use [Folders: map, apply and verify](folders.md#map-necessary-corrections) for collision checks,
-working-tree preservation, path mapping, reference updates, and validation. A module-only naming
+Use the fix CLI for deterministic mappings. For unsupported migrations, use
+[Folders: map necessary corrections](folders.md#map-necessary-corrections) within the requested scope. A module-only naming
 request keeps directory placement unless a requested or saved grouping rule requires a move.
 
 Account for static and dynamic imports, re-exports and barrels, aliases, package exports,
@@ -57,8 +62,8 @@ and published import paths are contracts: preserve them or resolve the migration
 
 Check for stale references and verify destination contents and imports. Run the project's relevant
 type checks, existing tests, and build checks. Report the saved rule location, completed path mapping,
-exceptions, and validation results. A successful template check validates structure and documentation;
-it does not prove source files comply. No commit, release, or publication is implied.
+exceptions, and validation results. The template validator checks rule syntax; the structure checker checks files against those rules.
+Neither infers architectural responsibilities from prose. No commit, release, or publication is implied.
 
 ## Examples with established rules
 

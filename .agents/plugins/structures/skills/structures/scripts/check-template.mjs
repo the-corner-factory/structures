@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 import { checkDocumentation } from "./check-documentation.mjs";
+import { readRules } from "./structure-rules.mjs";
 
 export function checkTemplate(profile) {
   const count = checkDocumentation(profile);
@@ -25,6 +26,7 @@ export function checkTemplate(profile) {
     }
   }
   visit(roots[0].children ?? [], "");
+  readRules(profile);
   return count;
 }
 

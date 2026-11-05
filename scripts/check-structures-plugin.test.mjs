@@ -1,20 +1,25 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import {
   cpSync,
   existsSync,
   mkdtempSync,
+  mkdirSync,
   readdirSync,
   readFileSync,
+  renameSync,
   rmSync,
   symlinkSync,
+  writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve, sep } from "node:path";
 import { test } from "node:test";
 
 import { checkDocumentation } from "../.agents/plugins/structures/skills/structures/scripts/check-documentation.mjs";
+import { checkStructure } from "../.agents/plugins/structures/skills/structures/scripts/check-structure.mjs";
 import { checkTemplate } from "../.agents/plugins/structures/skills/structures/scripts/check-template.mjs";
+import { fixStructure } from "../.agents/plugins/structures/skills/structures/scripts/fix-structure.mjs";
 
 const pluginRoot = new URL("../.agents/plugins/structures/", import.meta.url);
 const skillRoot = new URL("skills/structures/", pluginRoot);
@@ -163,4 +168,422 @@ test("the detached skill runs without the application or installed dependencies"
   const missingInput = spawnSync(process.execPath, [checker], { cwd: directory, encoding: "utf8" });
   assert.equal(missingInput.status, 1);
   assert.match(missingInput.stderr, /Usage:/);
+});
+
+function projectFixture(t, policy, files = {}, { typescript = false, git = false } = {}) {
+  const root = mkdtempSync(join(tmpdir(), "structures project "));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const config = join(root, ".agents/configs/.structures/config.json");
+  const profile = {
+    version: 1,
+    folders: {
+      libraryName: "Test",
+      structures: [{ id: "root", name: "Test", type: "container", children: [] }],
+      documentation: {
+        root: `# Project\n\n\`\`\`structures-rules\n${JSON.stringify(policy)}\n\`\`\`\n`,
+      },
+    },
+  };
+  for (const [path, content] of Object.entries({
+    ".agents/configs/.structures/config.json": JSON.stringify(profile),
+    ...files,
+  })) {
+    mkdirSync(dirname(join(root, path)), { recursive: true });
+    writeFileSync(join(root, path), content);
+  }
+  if (typescript) {
+    mkdirSync(join(root, "node_modules"), { recursive: true });
+    symlinkSync(resolve("node_modules/typescript"), join(root, "node_modules/typescript"), "dir");
+    writeFileSync(
+      join(root, "tsconfig.json"),
+      JSON.stringify({
+        compilerOptions: {
+          module: "ESNext",
+          moduleResolution: "Bundler",
+          allowImportingTsExtensions: true,
+          noEmit: true,
+          paths: { "@/*": ["./src/*"] },
+        },
+        include: ["src/**/*.ts"],
+      }),
+    );
+  }
+  if (git) execFileSync("git", ["init", "-q", root]);
+  return { root, config, profile };
+}
+
+const casing = { id: "kebab", match: "src/**/*.ts", case: "kebab-case" };
+const storeRename = {
+  id: "store",
+  match: "src/**/*-store.ts",
+  rename: {
+    pattern: "src/(.*)-store\\.ts",
+    replacement: "src/stores/$1.store.ts",
+  },
+};
+
+test("checks actual filenames, folder names, required paths and locations without writes", (t) => {
+  const { root, config } = projectFixture(
+    t,
+    {
+      required: ["README.md"],
+      rules: [
+        casing,
+        { id: "folders", kind: "folder", match: "src/*", case: "kebab-case" },
+        { id: "stores", match: "src/**/*.store.ts", path: "src/stores/.*\\.store\\.ts" },
+        { id: "tests", match: "src/**/*.test.ts", name: "[a-z-]+\\.test\\.ts" },
+      ],
+    },
+    {
+      "src/UserCard.ts": "",
+      "src/MyFeature/file.ts": "",
+      "src/cart.store.ts": "",
+      "other.txt": "",
+    },
+  );
+  const original = readFileSync(config, "utf8");
+  const result = checkStructure(root);
+  assert.ok(result.findings.some((finding) => finding.destination === "src/user-card.ts"));
+  assert.ok(result.findings.some((finding) => finding.destination === "src/my-feature"));
+  assert.ok(result.findings.some((finding) => finding.code === "path"));
+  assert.ok(result.findings.some((finding) => finding.code === "required"));
+  assert.equal(readFileSync(config, "utf8"), original);
+  assert.ok(existsSync(join(root, "src/UserCard.ts")));
+  assert.equal(checkStructure(root, "other.txt").findings.length, 0);
+});
+
+test("rules are folder-scoped, exclusions apply and curated missing entries remain optional", (t) => {
+  const { root, config, profile } = projectFixture(
+    t,
+    {},
+    {
+      "src/GoodFile.ts": "",
+      "src/generated/BadFile.ts": "",
+      "src/SpecialRoute.ts": "",
+      "OtherFile.ts": "",
+    },
+  );
+  profile.folders.structures[0].children = [
+    { id: "src", name: "src", type: "folder" },
+    { id: "example", name: "example.txt", type: "file" },
+  ];
+  profile.folders.documentation.example = "Optional curated example.";
+  profile.folders.documentation.src =
+    '```structures-rules\n{"ignore":["generated"],"rules":[{"id":"names","match":"**/*.ts","exclude":["SpecialRoute.ts"],"case":"kebab-case"}]}\n```';
+  writeFileSync(config, JSON.stringify(profile));
+  assert.deepEqual(
+    checkStructure(root).findings.map((finding) => finding.path),
+    ["src/GoodFile.ts"],
+  );
+});
+
+test("rejects invalid and misspelled rules, malformed fences and escaping rename paths", (t) => {
+  for (const policy of [
+    { rulez: [] },
+    { rules: [{ ...casing, casing: "camel" }] },
+    { rules: [{ ...casing, name: "[" }] },
+    { required: ["../secret"] },
+    { rules: [casing, casing] },
+    { rules: [{ id: "empty", match: "**" }] },
+  ]) {
+    const { profile } = projectFixture(t, policy);
+    assert.throws(() => checkTemplate(profile));
+  }
+  const { root, profile } = projectFixture(
+    t,
+    {
+      rules: [
+        {
+          ...storeRename,
+          rename: {
+            pattern: ".*",
+            replacement: "../escape.ts",
+          },
+        },
+      ],
+    },
+    { "src/cart-store.ts": "" },
+  );
+  assert.throws(() => checkStructure(root), /project-relative/);
+  profile.folders.documentation.root = "```structures-rules\n{}";
+  assert.throws(() => checkTemplate(profile), /Malformed/);
+});
+
+test("Git inventory respects ignores, includes untracked files and accepts required empty folders", (t) => {
+  const { root } = projectFixture(
+    t,
+    { required: ["empty"], rules: [casing] },
+    {
+      ".gitignore": "src/generated/\n",
+      "src/generated/BadFile.ts": "",
+      "src/UntrackedFile.ts": "",
+    },
+    { git: true },
+  );
+  mkdirSync(join(root, "empty"));
+  assert.deepEqual(
+    checkStructure(root).findings.map((finding) => finding.path),
+    ["src/UntrackedFile.ts"],
+  );
+});
+
+test("check and fix CLIs share findings, exit codes, legacy config and detached execution", (t) => {
+  const { root, config } = projectFixture(
+    t,
+    { rules: [{ id: "names", match: "*.txt", case: "kebab-case" }] },
+    { "ReadMe.txt": "preserve" },
+  );
+  const detached = join(root, "installed skill");
+  cpSync(skillRoot, detached, { recursive: true });
+  const run = (command, ...args) =>
+    spawnSync(
+      process.execPath,
+      [join(detached, `scripts/${command}-structure.mjs`), "--root", root, "--json", ...args],
+      { encoding: "utf8" },
+    );
+  const audit = run("check");
+  assert.equal(audit.status, 1, audit.stderr);
+  assert.equal(JSON.parse(audit.stdout).findings[0].destination, "read-me.txt");
+  const fixed = run("fix");
+  assert.equal(fixed.status, 0, fixed.stderr);
+  assert.deepEqual(JSON.parse(fixed.stdout).applied, [{ from: "ReadMe.txt", to: "read-me.txt" }]);
+  assert.equal(readFileSync(join(root, "read-me.txt"), "utf8"), "preserve");
+  assert.equal(run("check").status, 0);
+  assert.deepEqual(JSON.parse(run("fix").stdout).applied, []);
+  mkdirSync(join(root, ".structures"));
+  cpSync(config, join(root, ".structures/config.json"));
+  rmSync(config);
+  assert.equal(JSON.parse(run("check").stdout).config, ".structures/config.json");
+  assert.equal(run("check", "--unknown").status, 2);
+});
+
+test("fix uses TypeScript for relative imports, aliases, JS specifiers and moved-file imports", (t) => {
+  const { root, config } = projectFixture(
+    t,
+    { rules: [storeRename] },
+    {
+      "src/cart-store.ts": 'import { value } from "./value.js";\nexport const cart = value;\n',
+      "src/value.ts": "export const value = 1;\n",
+      "src/main.ts":
+        'import { cart } from "@/cart-store";\nexport { cart as other } from "./cart-store.js";\nconsole.log(cart);\n',
+    },
+    { typescript: true },
+  );
+  const originalConfig = readFileSync(config, "utf8");
+  const result = fixStructure(root);
+  assert.equal(result.findings.length, 0);
+  assert.deepEqual(result.applied, [{ from: "src/cart-store.ts", to: "src/stores/cart.store.ts" }]);
+  assert.match(readFileSync(join(root, "src/main.ts"), "utf8"), /@\/stores\/cart\.store/);
+  assert.match(readFileSync(join(root, "src/main.ts"), "utf8"), /\.\/stores\/cart\.store\.js/);
+  assert.match(readFileSync(join(root, "src/stores/cart.store.ts"), "utf8"), /\.\.\/value\.js/);
+  assert.equal(readFileSync(config, "utf8"), originalConfig);
+  assert.equal(existsSync(join(root, "src/cart-store.ts")), false);
+});
+
+test("fix refuses collisions and conflicting mappings before changing files", (t) => {
+  const { root } = projectFixture(
+    t,
+    { rules: [casing] },
+    { "src/UserCard.ts": "one", "src/user-card.ts": "two" },
+  );
+  assert.throws(() => fixStructure(root), /already exists/);
+  assert.equal(readFileSync(join(root, "src/UserCard.ts"), "utf8"), "one");
+  const other = projectFixture(
+    t,
+    {
+      rules: [
+        casing,
+        {
+          id: "other",
+          match: "src/UserCard.ts",
+          rename: { pattern: "src/UserCard.ts", replacement: "src/card.ts" },
+        },
+      ],
+    },
+    { "src/UserCard.ts": "" },
+  );
+  assert.throws(() => fixStructure(other.root), /Conflicting fixes/);
+});
+
+test("fix blocks unmanaged references and computed imports without writes", (t) => {
+  for (const extra of [
+    { "README.md": 'See "src/cart-store.ts".' },
+    { "src/loader.ts": 'const name = "cart"; import(name);' },
+    { "src/loader.ts": 'const items = import.meta.glob("./*.ts");' },
+    { "package.json": '{"exports":"./src/cart-store.ts"}' },
+  ]) {
+    const { root } = projectFixture(
+      t,
+      { rules: [storeRename] },
+      { "src/cart-store.ts": "export const cart = 1;", ...extra },
+      { typescript: true },
+    );
+    assert.throws(() => fixStructure(root), /Unmanaged reference|Computed module|Glob-based/);
+    assert.ok(existsSync(join(root, "src/cart-store.ts")));
+    assert.equal(existsSync(join(root, "src/stores")), false);
+  }
+});
+
+test("fix rolls back earlier moves and import edits when a later move is blocked", (t) => {
+  const main = 'export { a } from "./a-store"; export { z } from "./z-store";';
+  const { root } = projectFixture(
+    t,
+    { rules: [storeRename] },
+    {
+      "src/a-store.ts": "export const a = 1;",
+      "src/z-store.ts": "export const z = 2;",
+      "src/main.ts": main,
+      "README.md": "src/z-store.ts",
+    },
+    { typescript: true },
+  );
+  assert.throws(() => fixStructure(root), /Unmanaged reference/);
+  assert.equal(readFileSync(join(root, "src/main.ts"), "utf8"), main);
+  assert.ok(existsSync(join(root, "src/a-store.ts")));
+  assert.ok(existsSync(join(root, "src/z-store.ts")));
+  assert.equal(existsSync(join(root, "src/stores")), false);
+});
+
+test("fix preserves Git staging and unrelated edits", (t) => {
+  const { root } = projectFixture(
+    t,
+    { rules: [storeRename] },
+    {
+      "src/cart-store.ts": "export const cart = 1;",
+      "src/main.ts": 'export { cart } from "./cart-store";',
+      "unrelated.txt": "local work",
+    },
+    { typescript: true, git: true },
+  );
+  execFileSync("git", ["-C", root, "add", "src/main.ts"]);
+  const index = readFileSync(join(root, ".git/index"));
+  assert.throws(() => fixStructure(root), /staged file/);
+  assert.deepEqual(readFileSync(join(root, ".git/index")), index);
+  assert.equal(readFileSync(join(root, "unrelated.txt"), "utf8"), "local work");
+  assert.ok(existsSync(join(root, "src/cart-store.ts")));
+});
+
+test("fix refuses symlink destinations, scope escapes and directories with ignored contents", (t) => {
+  const { root } = projectFixture(
+    t,
+    { rules: [storeRename] },
+    { "src/cart-store.ts": "export {};" },
+    { git: true },
+  );
+  const external = mkdtempSync(join(tmpdir(), "structures outside "));
+  t.after(() => rmSync(external, { recursive: true, force: true }));
+  symlinkSync(external, join(root, "src/stores"), "dir");
+  assert.throws(() => fixStructure(root), /Symlink path/);
+  assert.deepEqual(readdirSync(external), []);
+  rmSync(join(root, "src/stores"));
+  assert.throws(() => fixStructure(root, "src/cart-store.ts"), /leaves --scope/);
+  const directory = projectFixture(
+    t,
+    { rules: [{ id: "folders", match: "OldFolder", kind: "folder", case: "kebab-case" }] },
+    { ".gitignore": "*.secret", "OldFolder/visible.txt": "", "OldFolder/private.secret": "keep" },
+    { git: true },
+  );
+  assert.throws(() => fixStructure(directory.root), /ignored/);
+  assert.ok(existsSync(join(directory.root, "OldFolder/private.secret")));
+});
+
+test("read-only constraints stay unresolved and fixes do not invent files or policy", (t) => {
+  const { root, config } = projectFixture(
+    t,
+    { required: ["missing.ts"], rules: [{ id: "name", match: "*.txt", name: "specific\\.txt" }] },
+    { "other.txt": "keep" },
+  );
+  const original = readFileSync(config);
+  const result = fixStructure(root);
+  assert.equal(result.findings.length, 2);
+  assert.deepEqual(result.applied, []);
+  assert.deepEqual(readFileSync(config), original);
+  assert.equal(existsSync(join(root, "missing.ts")), false);
+});
+
+test("fix renames a folder and its source/companion files while retaining import validity", (t) => {
+  const { root } = projectFixture(
+    t,
+    {
+      rules: [
+        {
+          id: "folder",
+          kind: "folder",
+          match: "src/OldFeature",
+          rename: {
+            pattern: "src/OldFeature",
+            replacement: "src/features/new-feature",
+          },
+        },
+      ],
+    },
+    {
+      "src/OldFeature/view.ts": "export const view = 1;",
+      "src/OldFeature/view.test.ts": 'import { view } from "./view"; void view;',
+      "src/OldFeature/view.css": "body { color: red; }",
+      "src/main.ts": 'export { view } from "./OldFeature/view.js";',
+    },
+    { typescript: true },
+  );
+  const result = fixStructure(root);
+  assert.equal(result.findings.length, 0);
+  assert.ok(existsSync(join(root, "src/features/new-feature/view.css")));
+  assert.match(readFileSync(join(root, "src/main.ts"), "utf8"), /features\/new-feature\/view\.js/);
+  const checked = spawnSync(
+    process.execPath,
+    [resolve("node_modules/typescript/bin/tsc"), "-p", root],
+    { encoding: "utf8" },
+  );
+  assert.equal(checked.status, 0, checked.stdout + checked.stderr);
+});
+
+test("fix supports case-only renames and refuses source moves without a compiler", (t) => {
+  const { root } = projectFixture(
+    t,
+    { rules: [{ id: "case", match: "*.txt", case: "kebab-case" }] },
+    { "FOO.txt": "keep" },
+  );
+  assert.equal(fixStructure(root).findings.length, 0);
+  assert.ok(readdirSync(root).includes("foo.txt"));
+  const asset = projectFixture(
+    t,
+    { rules: [{ id: "names", match: "*.PNG", case: "kebab-case" }] },
+    { "MyImage.PNG": "keep" },
+  );
+  assert.equal(fixStructure(asset.root).findings.length, 0);
+  assert.ok(existsSync(join(asset.root, "my-image.PNG")));
+  const source = projectFixture(t, { rules: [casing] }, { "src/UserCard.ts": "export {};" });
+  assert.throws(() => fixStructure(source.root), /TypeScript installed/);
+  assert.ok(existsSync(join(source.root, "src/UserCard.ts")));
+});
+
+test("fix preserves staged paths when explicitly targeting a nested Git package", (t) => {
+  const parent = projectFixture(t, {}, {}, { git: true });
+  const child = projectFixture(
+    t,
+    { rules: [{ id: "names", match: "*.txt", case: "kebab-case" }] },
+    { "UserFile.txt": "keep" },
+  );
+  const nested = join(parent.root, "packages/child");
+  cpSync(child.root, nested, { recursive: true });
+  execFileSync("git", ["-C", parent.root, "add", "packages/child/UserFile.txt"]);
+  assert.throws(() => fixStructure(nested), /Staged path/);
+  assert.ok(existsSync(join(nested, "UserFile.txt")));
+});
+
+test("Git checks use disk casing and preserve staging after a case-only filesystem rename", (t) => {
+  const { root } = projectFixture(
+    t,
+    { rules: [{ id: "names", match: "*.txt", case: "kebab-case" }] },
+    { "FOOBar.txt": "keep" },
+    { git: true },
+  );
+  execFileSync("git", ["-C", root, "add", "FOOBar.txt"]);
+  renameSync(join(root, "FOOBar.txt"), join(root, "temporary.txt"));
+  renameSync(join(root, "temporary.txt"), join(root, "FooBar.txt"));
+  assert.deepEqual(
+    checkStructure(root).findings.map((finding) => finding.path),
+    ["FooBar.txt"],
+  );
+  assert.throws(() => fixStructure(root), /Staged path/);
 });

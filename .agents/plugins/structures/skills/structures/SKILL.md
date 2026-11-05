@@ -25,6 +25,10 @@ of the target project's location.
 | `rename assets [path]`                                                     | Rename content files consistently and update references.                                             | [Assets](references/rename-assets.md)   |
 | `document project`, `generate profile`, `publish architecture as a Gist`   | Generate a website export and overview; publish only when requested.                                 | [Documentation](references/document.md) |
 
+For folder and module audits, call [the check CLI](references/cli.md). For corrections, call the
+separate fix CLI; it reuses the checker. Use executable findings directly instead of reinterpreting
+saved naming rules. Load the rule schema only when configuring rules or resolving coverage gaps.
+
 ## Routing
 
 - With no request, or for `help`, show the available actions. Recommend `init` when the project
@@ -55,7 +59,8 @@ documentation read [the template contract](references/template.md). A website/Gi
 is a derived export or an explicitly selected import source, never a second source of folder policy. Existing templates remain authoritative
 until the user requests a template update; a folder fix must not rewrite the template to accept drift.
 
-Module rules live in the template’s inline documentation; see [Modules](references/rename-modules.md).
+Executable module rules live in fenced `structures-rules` blocks in the template’s inline
+documentation; see [Modules](references/rename-modules.md). Prose retains architectural rationale.
 Commit and content-asset-renaming requests do not require a template or create one as a side effect.
 Preserve the scope and write permissions of each request. Bare invocation, help, audits, and
 commit-title requests leave project files and Git state unchanged.

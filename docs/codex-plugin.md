@@ -78,8 +78,8 @@ Validate a template with the bundled, dependency-free checker:
 node <skill-directory>/scripts/check-template.mjs <project-root>/.agents/configs/.structures/config.json
 ```
 
-It checks folder structure, literal path segments, case-insensitive path collisions, IDs, and
-documentation coverage. The website's `parseSiteSettings` owns validation of optional profile
+It checks folder structure, literal path segments, case-insensitive path collisions, IDs,
+documentation coverage, and executable rule syntax. The website's `parseSiteSettings` owns validation of optional profile
 sections. The plugin tests also run the repository template and bundled example through that parser.
 
 `document project` uses the saved template and reports differences from the checkout. It writes
@@ -98,9 +98,26 @@ contracts. `audit modules` and previews report the proposed mapping without writ
 Rules are saved under **Module naming rules** in the relevant folder's inline documentation in
 `.agents/configs/.structures/config.json`. Folder audits/fixes consult them, and template updates preserve local
 rules and exceptions. `set module naming rules` updates this policy without moving source files.
-The existing `naming` profile section continues to describe commit messages. This is agent guidance;
-the template validator does not lint TypeScript filenames, and installing the skill does not make
-it run automatically during implementation.
+The existing `naming` profile section continues to describe commit messages. Put deterministic
+rules in fenced `structures-rules` JSON blocks in that documentation. The check and fix commands
+execute those rules; prose-only architectural decisions remain outside their coverage.
+
+```sh
+pnpm structure:check
+pnpm structure:fix --scope src/lib
+```
+
+For other projects, invoke the installed skill's `scripts/check-structure.mjs` or
+`scripts/fix-structure.mjs` with `--root <project-root>`. Both support `--json` for agents and CI.
+Check is read-only; fix reuses it, applies concrete mappings, and checks again. Exit codes are 0 for
+no remaining violations, 1 for violations, and 2 for errors or blocked fixes.
+
+See the [executable rule contract](../.agents/plugins/structures/skills/structures/references/cli.md)
+for filename casing, regex checks, folder placement, required paths, exceptions, and rename captures.
+Source fixes use the target project's installed TypeScript and root tsconfig to update imports.
+Unsupported references, staged files affected by the move, collisions, and symlinks block fixes.
+A failed run rolls back completed edits and moves; crash recovery is not provided. Run project
+checks after a fix. Installation alone does not run either command automatically.
 
 For example, request `/structures set module naming rules: store modules in src/shared use
 <name>.store.ts` and then `/structures rename modules src/shared`. With that adopted convention,
@@ -148,7 +165,7 @@ The portable [Agent Plugins](https://agent-plugins.org/plugin-authors/manifest) 
 `plugin.json` holds identity and version; hosts discover `skills/structures/` by convention.
 Codex presentation metadata stays in `extensions.com.openai.interface`. The workflow has no
 application imports, MCP servers, hooks, added dependencies, or dependency on Codex tool names.
-The checkers require Node.js 24.15+ (24.x) or 26+. Reuse this one skill and its references rather
+The CLIs require Node.js 24.15+ (24.x) or 26+. Reuse this one skill and its references rather
 than distributing separate copies of each workflow.
 
 Once the files are committed and pushed, install using the repository marketplace:
@@ -189,7 +206,7 @@ pnpm format:check
 
 The [plugin CI workflow](../.github/workflows/plugins.yml) runs both test commands on pull requests,
 main pushes, and version tags. Tests verify the single discoverable entrypoint, packaged resource
-links, template validation, detached checker execution, and website compatibility. They do not
+links, template validation, detached CLI execution, reference updates, rollback, staging preservation, and website compatibility. They do not
 prove host command discovery or the quality of every agent-driven reorganization.
 
 For a read-only local marketplace discovery check:

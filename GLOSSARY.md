@@ -61,7 +61,12 @@ standalone architecture, commit, and asset-renaming skills are now workflows of 
 The folder workflow supports read-only audits and corrections that update affected references.
 The module workflow audits and renames TypeScript files and their companions, retaining scoped
 naming and grouping rules in the template’s inline documentation. Folder audits consult those
-rules, and source refreshes preserve them; they are agent guidance, not an automatic linter.
+rules through `check-structure.mjs`; `fix-structure.mjs` reuses the checker and its destination
+mappings. Executable `structures-rules` JSON blocks in that documentation define scoped filename,
+folder, placement, and required-path checks. Prose-only responsibilities remain outside CLI
+coverage. Source fixes use the target project's TypeScript language service for imports and refuse
+unsupported references, collisions, and affected staged files. Failures roll back completed moves
+and edits. Both scripts run independently of the application, and refreshes preserve their rules.
 
 [`.agents/configs/.structures/config.json`](.agents/configs/.structures/config.json) is this project's
 maintained folder template. `.agents/configs/` groups project-specific configuration for different

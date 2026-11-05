@@ -42,6 +42,10 @@ reports findings without edits. Commit titles follow the repository's rules, and
 use `settings.json` for the website and Gists. Install the plugin through the repository's Git URL;
 the guide covers `$structures` invocation and reuse in other Agent Skills hosts.
 
+For executable filename and folder rules, use `pnpm structure:check` or `pnpm structure:fix` in
+this checkout. The fix CLI reuses the checker and updates supported TypeScript references. Both
+accept `--json` for agents and CI; see the guide for using them in another project.
+
 ## Development
 
 Requirements: Node.js 24.15+ (24.x) or 26+, and pnpm 11.23+.

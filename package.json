@@ -28,7 +28,9 @@
     "release:dry-run": "commit-and-tag-version --dry-run",
     "registry:build": "shadcn build --output .registry-build",
     "registry:check": "node scripts/check-registry.mjs",
-    "registry:test": "node scripts/test-registry.mjs"
+    "registry:test": "node scripts/test-registry.mjs",
+    "structure:check": "node .agents/plugins/structures/skills/structures/scripts/check-structure.mjs",
+    "structure:fix": "node .agents/plugins/structures/skills/structures/scripts/fix-structure.mjs"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "1.7.7",
