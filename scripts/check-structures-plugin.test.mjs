@@ -220,6 +220,416 @@ const storeRename = {
   },
 };
 
+const ownership = {
+  id: "service-ownership",
+  match: "src/**/*.service.ts",
+  ownership: { core: "src/core", shared: "src/shared", owners: ["src/features/*"] },
+};
+
+test("ownership supports a common shared root and nested child owners", (t) => {
+  const { root } = projectFixture(
+    t,
+    {
+      rules: [
+        {
+          ...ownership,
+          ownership: {
+            core: "src/lib",
+            shared: "src/lib",
+            owners: ["src/lib/auth", "src/features/*"],
+          },
+        },
+      ],
+    },
+    {
+      "src/lib/token.service.ts": "export const token = new Map();",
+      "src/lib/auth/session.ts":
+        'import { token } from "../token.service"; export function session() { return token.size; }',
+      "src/lib/global.service.ts": "export const global = new Map();",
+      "src/features/shop/page.ts":
+        'import { global } from "../../lib/global.service"; global.clear();',
+      "src/features/admin/page.ts":
+        'import { global } from "../../lib/global.service"; global.clear();',
+      "src/lib/auth/shared.service.ts": "export function shared() { return 1; }",
+      "src/features/shop/shared.ts":
+        'import { shared } from "../../lib/auth/shared.service"; shared();',
+      "src/features/admin/shared.ts":
+        'import { shared } from "../../lib/auth/shared.service"; shared();',
+    },
+    { typescript: true },
+  );
+  const findings = checkStructure(root).findings;
+  assert.equal(
+    findings.find((finding) => finding.path === "src/lib/token.service.ts").destination,
+    "src/lib/auth/token.service.ts",
+  );
+  assert.equal(
+    findings.find((finding) => finding.path === "src/lib/auth/shared.service.ts").destination,
+    "src/lib/shared.service.ts",
+  );
+  assert.ok(!findings.some((finding) => finding.path === "src/lib/global.service.ts"));
+  assert.deepEqual(fixStructure(root).findings, []);
+});
+
+test("ownership finds feature-local construction through aliases and barrels and fixes companions", (t) => {
+  const { root, config } = projectFixture(
+    t,
+    { rules: [ownership] },
+    {
+      "src/core/cart.service.ts": "export class Cart {}",
+      "src/core/cart.service.test.ts": 'import { Cart } from "./cart.service"; new Cart();',
+      "src/shared/index.ts": 'export { Cart as Basket } from "../core/cart.service";',
+      "src/features/shop/page.ts":
+        'import { Basket } from "@/shared"; export function page() { return new Basket(); }',
+      "src/features/admin/page.ts":
+        'import { Cart } from "../../core/cart.service"; export const unused = 1;',
+    },
+    { typescript: true },
+  );
+  const original = readFileSync(config, "utf8");
+  const report = checkStructure(root);
+  assert.equal(report.findings[0].destination, "src/features/shop/cart.service.ts");
+  assert.deepEqual(report.findings[0].evidence.consumers, ["src/features/shop/page.ts"]);
+  assert.equal(report.findings[0].evidence.instantiations[0].kind, "local-construction");
+  const fixed = fixStructure(root);
+  assert.deepEqual(fixed.findings, []);
+  assert.equal(fixed.applied.length, 2);
+  assert.ok(existsSync(join(root, "src/features/shop/cart.service.test.ts")));
+  assert.match(
+    readFileSync(join(root, "src/shared/index.ts"), "utf8"),
+    /features\/shop\/cart.service/,
+  );
+  assert.equal(readFileSync(config, "utf8"), original);
+  assert.deepEqual(fixStructure(root).applied, []);
+  const checked = spawnSync(
+    process.execPath,
+    [resolve("node_modules/typescript/bin/tsc"), "-p", root],
+    { encoding: "utf8" },
+  );
+  assert.equal(checked.status, 0, checked.stdout + checked.stderr);
+});
+
+test("ownership keeps local singletons local and promotes application instances to core", (t) => {
+  for (const crossFeature of [false, true]) {
+    const { root } = projectFixture(
+      t,
+      { rules: [ownership] },
+      {
+        "src/shared/session.service.ts": "export const session = new Map();",
+        "src/features/shop/page.ts":
+          'import { session } from "../../shared/session.service"; session.get("user");',
+        ...(crossFeature
+          ? {
+              "src/features/admin/page.ts":
+                'import { session } from "../../shared/session.service"; session.get("user");',
+            }
+          : {}),
+      },
+      { typescript: true },
+    );
+    assert.equal(
+      checkStructure(root).findings[0].destination,
+      crossFeature ? "src/core/session.service.ts" : "src/features/shop/session.service.ts",
+    );
+    assert.deepEqual(fixStructure(root).findings, []);
+  }
+});
+
+test("ownership separates shared constructors from singleton instances", (t) => {
+  const { root } = projectFixture(
+    t,
+    { rules: [ownership] },
+    {
+      "src/core/cart.service.ts": "export class Cart {}",
+      "src/features/shop/page.ts":
+        'import { Cart } from "../../core/cart.service"; export function page() { return new Cart(); }',
+      "src/features/admin/page.ts":
+        'import { Cart } from "../../core/cart.service"; export function page() { return new Cart(); }',
+    },
+    { typescript: true },
+  );
+  assert.equal(checkStructure(root).findings[0].destination, "src/shared/cart.service.ts");
+  assert.deepEqual(fixStructure(root).findings, []);
+});
+
+test("ownership follows dependencies through shared helpers and excludes test consumers", (t) => {
+  const { root } = projectFixture(
+    t,
+    { rules: [ownership] },
+    {
+      "src/core/cart.service.ts": "export const cart = new Map();",
+      "src/shared/helper.ts":
+        'import { cart } from "../core/cart.service"; export function read() { return cart.size; }',
+      "src/features/shop/page.ts": 'import { read } from "../../shared/helper"; read();',
+      "src/features/admin/page.test.ts":
+        'import { cart } from "../../core/cart.service"; cart.clear();',
+    },
+    { typescript: true },
+  );
+  assert.equal(checkStructure(root).findings[0].destination, "src/features/shop/cart.service.ts");
+});
+
+test("ownership distinguishes Angular root providers from feature-local providers", (t) => {
+  for (const provided of [false, true]) {
+    const { root } = projectFixture(
+      t,
+      { rules: [ownership] },
+      {
+        "src/core/cart.service.ts": `import { Injectable as Service } from "@angular/core"; @Service(${provided ? '{ providedIn: "root" }' : ""}) export class Cart {}`,
+        "src/features/shop/page.ts":
+          'import { Cart } from "../../core/cart.service"; export const providers = [Cart];',
+      },
+      { typescript: true },
+    );
+    const finding = checkStructure(root).findings[0];
+    if (provided) {
+      assert.equal(finding.code, "ownership-review");
+      assert.equal(finding.destination, undefined);
+      assert.match(finding.message, /provider lifetime/);
+      assert.deepEqual(fixStructure(root).applied, []);
+    } else assert.equal(finding.destination, "src/features/shop/cart.service.ts");
+  }
+  const { root } = projectFixture(
+    t,
+    { rules: [ownership] },
+    {
+      "src/shared/session.service.ts":
+        'import * as ng from "@angular/core"; @ng.Injectable({ providedIn: "root" }) export class Session {}',
+      "src/features/shop/page.ts":
+        'import { Session } from "../../shared/session.service"; export const token = Session;',
+      "src/features/admin/page.ts":
+        'import { Session } from "../../shared/session.service"; export const token = Session;',
+    },
+    { typescript: true },
+  );
+  assert.equal(checkStructure(root).findings[0].destination, "src/core/session.service.ts");
+});
+
+test("ownership reports uncertain coverage and lifetimes without auto-moving", (t) => {
+  const cases = [
+    { "src/loader.ts": 'const module = "./core/cart.service"; import(module);' },
+    { "src/loader.ts": 'import "./core/cart.service";' },
+    { "src/loader.ts": 'import { missing } from "./missing"; missing();' },
+    { "src/core/cart.service.html": "<p>companion</p>" },
+  ];
+  for (const extra of cases) {
+    const { root } = projectFixture(
+      t,
+      { rules: [ownership] },
+      {
+        "src/core/cart.service.ts": "export class Cart {}",
+        "src/features/shop/page.ts": 'import { Cart } from "../../core/cart.service"; new Cart();',
+        ...extra,
+      },
+      { typescript: true },
+    );
+    assert.equal(checkStructure(root).findings[0].code, "ownership-review");
+    assert.deepEqual(fixStructure(root).applied, []);
+  }
+  const unused = projectFixture(
+    t,
+    { rules: [ownership] },
+    {
+      "src/core/unused.service.ts": "export class Unused {}",
+    },
+    { typescript: true },
+  );
+  assert.match(checkStructure(unused.root).findings[0].message, /No production consumers/);
+});
+
+test("ownership validates configuration and requires a complete TypeScript project", (t) => {
+  for (const invalid of [
+    { core: "../escape", shared: "shared", owners: ["features/*"] },
+    { core: "core", shared: "core/sub", owners: ["features/*"] },
+    { core: "core", shared: "shared", owners: [] },
+    { core: "core", shared: "shared", owners: ["features/*"], guessed: true },
+  ]) {
+    const { root } = projectFixture(t, { rules: [{ ...ownership, ownership: invalid }] }, {});
+    assert.throws(() => checkStructure(root));
+  }
+  const absent = projectFixture(t, { rules: [ownership] }, {});
+  assert.throws(() => checkStructure(absent.root), /TypeScript installed/);
+  const partial = projectFixture(
+    t,
+    { rules: [ownership] },
+    {
+      "src/core/cart.service.ts": "export class Cart {}",
+      "src/features/shop/page.ts": 'import { Cart } from "../../core/cart.service"; new Cart();',
+      "src/outside.js": "export {};",
+    },
+    { typescript: true },
+  );
+  const report = checkStructure(partial.root);
+  assert.match(report.warnings[0], /outside tsconfig/);
+  assert.equal(report.findings[0].destination, undefined);
+});
+
+test("ownership composes filename fixes and analyzes consumers outside --scope", (t) => {
+  const { root } = projectFixture(
+    t,
+    { rules: [casing, ownership] },
+    {
+      "src/core/Cart.service.ts": "export class Cart {}",
+      "src/features/shop/page.ts":
+        'import * as services from "../../core/Cart.service"; export const cart = new services.Cart();',
+      "src/features/admin/page.ts":
+        'import type { Cart } from "../../core/Cart.service"; export type Model = Cart;',
+    },
+    { typescript: true },
+  );
+  const scoped = checkStructure(root, "src/core");
+  assert.ok(scoped.findings.every((finding) => finding.path === "src/core/Cart.service.ts"));
+  assert.equal(
+    scoped.findings.find((finding) => finding.code === "ownership-review").destination,
+    undefined,
+  );
+  assert.deepEqual(scoped.findings.find((finding) => finding.evidence).evidence.consumers, [
+    "src/features/admin/page.ts",
+    "src/features/shop/page.ts",
+  ]);
+
+  const local = projectFixture(
+    t,
+    { rules: [casing, ownership] },
+    {
+      "src/core/Cart.service.ts": "export class Cart {}",
+      "src/features/shop/page.ts":
+        'import { Cart } from "../../core/Cart.service"; export function page() { return new Cart(); }',
+    },
+    { typescript: true },
+  );
+  assert.deepEqual(fixStructure(local.root).applied, [
+    { from: "src/core/Cart.service.ts", to: "src/features/shop/cart.service.ts" },
+  ]);
+  assert.deepEqual(checkStructure(local.root).findings, []);
+});
+
+test("independent module-level constructions share a definition without becoming a singleton", (t) => {
+  const { root } = projectFixture(
+    t,
+    { rules: [ownership] },
+    {
+      "src/core/cart.service.ts": "export class Cart {}",
+      "src/features/shop/page.ts":
+        'import { Cart } from "../../core/cart.service"; export const cart = new Cart();',
+      "src/features/admin/page.ts":
+        'import { Cart } from "../../core/cart.service"; export const cart = new Cart();',
+    },
+    { typescript: true },
+  );
+  assert.equal(checkStructure(root).findings[0].destination, "src/shared/cart.service.ts");
+  assert.deepEqual(fixStructure(root).findings, []);
+});
+
+test("ownership recognizes module objects, factory results, and static class instances", (t) => {
+  for (const source of [
+    "export const state = ({ count: 0 } as const);",
+    "function createState() { return new Map(); } export const state = createState();",
+    "export class state { static current = new Map(); }",
+  ]) {
+    const { root } = projectFixture(
+      t,
+      { rules: [ownership] },
+      {
+        "src/shared/state.service.ts": source,
+        "src/features/shop/page.ts":
+          'import { state } from "../../shared/state.service"; console.log(state);',
+        "src/features/admin/page.ts":
+          'import { state } from "../../shared/state.service"; console.log(state);',
+      },
+      { typescript: true },
+    );
+    assert.equal(checkStructure(root).findings[0].destination, "src/core/state.service.ts");
+  }
+});
+
+test("ownership refuses mixed lifetimes and computed provider metadata", (t) => {
+  for (const service of [
+    "export class Cart {}",
+    "export class Cart {} export const cart = new Cart();",
+    'import { Injectable } from "@angular/core"; const options = { providedIn: "root" }; @Injectable({ ...options }) export class Cart {}',
+  ]) {
+    const { root } = projectFixture(
+      t,
+      { rules: [ownership] },
+      {
+        "src/shared/cart.service.ts": service,
+        "src/features/shop/page.ts":
+          'import { Cart } from "../../shared/cart.service"; export const token = Cart;',
+        "src/features/admin/page.ts":
+          'import { Cart } from "../../shared/cart.service"; export const token = Cart;',
+      },
+      { typescript: true },
+    );
+    assert.equal(checkStructure(root).findings[0].code, "ownership-review");
+    assert.deepEqual(fixStructure(root).applied, []);
+  }
+});
+
+test("a child consumer does not hide construction in application infrastructure", (t) => {
+  const { root } = projectFixture(
+    t,
+    { rules: [ownership] },
+    {
+      "src/core/cart.service.ts": "export class Cart {}",
+      "src/core/bootstrap.ts":
+        'import { Cart } from "./cart.service"; export const cart = new Cart();',
+      "src/features/shop/page.ts":
+        'import { cart } from "../../core/bootstrap"; console.log(cart);',
+    },
+    { typescript: true },
+  );
+  const finding = checkStructure(root).findings[0];
+  assert.equal(finding.code, "ownership-review");
+  assert.match(finding.message, /outside src\/features\/shop/);
+  assert.deepEqual(fixStructure(root).applied, []);
+});
+
+test("the Angular catalog ownership rule works from a detached CLI", (t) => {
+  const { root, config, profile } = projectFixture(
+    t,
+    {},
+    {
+      "src/app/core/cart.service.ts": "export class Cart {}",
+      "src/app/pages/shop/page.ts":
+        'import { Cart } from "../../core/cart.service"; export const cart = new Cart();',
+      "tooling/build.mjs": "export {};",
+    },
+    { typescript: true },
+  );
+  profile.folders.structures[0].children = [
+    {
+      id: "src",
+      name: "src",
+      type: "folder",
+      children: [{ id: "app", name: "app", type: "folder" }],
+    },
+  ];
+  profile.folders.documentation.src = "# src";
+  profile.folders.documentation.app = readFileSync(
+    new URL("../public/assets/angular/md/app.md", import.meta.url),
+    "utf8",
+  );
+  writeFileSync(config, JSON.stringify(profile));
+  const detached = join(root, "installed skill");
+  cpSync(skillRoot, detached, { recursive: true });
+  const run = (command) =>
+    spawnSync(
+      process.execPath,
+      [join(detached, `scripts/${command}-structure.mjs`), "--root", root, "--json"],
+      { encoding: "utf8" },
+    );
+  const audit = run("check");
+  assert.equal(audit.status, 1, audit.stderr);
+  assert.equal(
+    JSON.parse(audit.stdout).findings[0].destination,
+    "src/app/pages/shop/cart.service.ts",
+  );
+  const fixed = run("fix");
+  assert.equal(fixed.status, 0, fixed.stderr);
+  assert.equal(JSON.parse(fixed.stdout).applied.length, 1);
+});
+
 test("checks actual filenames, folder names, required paths and locations without writes", (t) => {
   const { root, config } = projectFixture(
     t,

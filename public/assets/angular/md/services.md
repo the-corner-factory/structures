@@ -1,6 +1,6 @@
 # services
 
-Singleton services for business logic, API calls, and data management.
+Application-wide services for business logic, API calls, and data management. Their instances are owned by the application and used across features.
 
 ## Example
 
@@ -9,4 +9,4 @@ Singleton services for business logic, API calls, and data management.
 
 ## Usage
 
-Services are usually provided in root and injected where needed.
+Provide application-wide instances in root. If a service is instantiated and used solely in one child folder, move its definition and registration to that owner instead. Reusable definitions with independent consumer-owned instances belong in `shared/services/`.

@@ -64,7 +64,7 @@ export function readRules(profile) {
     for (const path of policy.required ?? []) relativePath(path);
     const ids = new Set();
     for (const rule of policy.rules ?? []) {
-      keys(rule, ["id", "match", "kind", "exclude", "case", "name", "path", "rename"]);
+      keys(rule, ["id", "match", "kind", "exclude", "case", "name", "path", "rename", "ownership"]);
       assert.ok(typeof rule.id === "string" && rule.id.trim(), "Rules need an id.");
       assert.ok(!ids.has(rule.id), `Duplicate rule id: ${rule.id}`);
       ids.add(rule.id);
@@ -86,8 +86,25 @@ export function readRules(profile) {
           "rename.replacement must be a string.",
         );
       }
+      if (rule.ownership !== undefined) {
+        keys(rule.ownership, ["core", "shared", "owners"]);
+        assert.ok(!rule.kind || rule.kind === "file", "Ownership rules apply to source files.");
+        const { core, shared, owners } = rule.ownership;
+        relativePath(core);
+        relativePath(shared);
+        assert.ok(
+          !core.startsWith(`${shared}/`) && !shared.startsWith(`${core}/`),
+          "Core and shared ownership paths must be equal or separate directories.",
+        );
+        assert.ok(Array.isArray(owners) && owners.length, "Ownership needs child-folder globs.");
+        for (const owner of owners) glob(owner);
+        assert.ok(
+          !rule.rename && !rule.case,
+          "Keep ownership and filename mappings in separate rules.",
+        );
+      }
       assert.ok(
-        ["case", "name", "path", "rename"].some((field) => rule[field] !== undefined),
+        ["case", "name", "path", "rename", "ownership"].some((field) => rule[field] !== undefined),
         `Rule ${rule.id} needs a constraint.`,
       );
     }

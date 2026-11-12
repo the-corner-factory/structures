@@ -82,6 +82,72 @@ Existing curated tree paths are checked for type and casing. Missing examples re
 unlisted paths remain allowed. The CLI does not infer moves from similar names. Encode required
 placement with `path` and a deterministic `rename` when its destination is known.
 
+## Ownership and instance lifetime
+
+Application-wide instances and infrastructure belong in `core`. Code instantiated and used
+exclusively by a child folder belongs with that child, including a local singleton. Reusable
+definitions with independent consumer-owned instances and stateless helpers belong in `shared`.
+Instance count alone does not determine ownership. Preserve request-scoped lifetimes on servers.
+
+Enable analysis in the common parent's documentation, adapting paths to the adopted template:
+
+````markdown
+```structures-rules
+{
+  "rules": [
+    {
+      "id": "service-ownership",
+      "match": "**/*.{service,store}.ts",
+      "ownership": {
+        "core": "core",
+        "shared": "shared",
+        "owners": ["pages/*", "features/*"]
+      }
+    }
+  ]
+}
+```
+````
+
+`ownership.core` and `ownership.shared` are literal directories relative to this documentation
+scope. They can name the same directory when a project groups both lifetimes together, or separate
+directories; neither can be nested inside the other. `owners` contains globs matching actual child
+directories. Owners may be nested within core/shared, but cannot equal or contain those roots.
+The deepest configured boundary containing every consumer owns a local module.
+Otherwise an instance belongs to core and a reusable definition to shared. Select candidate
+modules with `match` and `exclude`; exclude framework entry points and public APIs whose external
+consumers are unknown. Existing templates without `ownership` keep their existing checks.
+Keep filename transformations in separate rules.
+
+Analysis requires the target project's installed TypeScript and root `tsconfig.json`. It follows
+used symbols through aliases, namespace access, and re-export barrels, including type references,
+and traces consumers through core/shared helpers to child owners. Unused imports and test/spec
+consumers do not decide production ownership. Production source beneath the common core/shared
+parent and configured child folders must be covered by tsconfig; other sources are analyzed when
+in the project.
+`--scope` filters findings, not consumer analysis.
+
+Lifetime evidence includes module-level or static class initializers using `new`, a factory
+call, object or array literals, local `new` expressions, and Angular
+`@Injectable({ providedIn: 'root' | 'platform' })`,
+including import aliases. A static construction site is evidence, not proof of runtime instance
+count. Custom containers, framework discovery, external consumers, and runtime code generation
+may require an architectural review. The CLI moves whole files, not individual exports.
+
+Findings include `evidence.consumers` and `evidence.instantiations` (path, line, kind). A clear
+`ownership` finding supplies a `destination` at the owning boundary, retaining the basename;
+test/spec companions move beside it. Existing subfolders inside the correct owner are retained.
+The fixer uses the same TypeScript rename and rollback path as naming fixes, then checks again.
+Filename-only mappings compose with ownership moves; conflicting directory mappings block fixes.
+
+`ownership-review` has no executable destination. Its optional `suggestedDestination` is for
+review; the fixer leaves it unresolved. This covers feature-only root providers, mixed or unknown
+lifetimes, no resolved production consumers, companion resources, and incomplete source coverage.
+Provider registrations and lifetimes stay unchanged; resolve them in a scoped code migration.
+Dynamic module loading, unresolved local imports, sources outside tsconfig, and unsupported
+framework source produce warnings and withhold automatic ownership moves. Missing TypeScript,
+invalid configuration, and project references stop analysis with exit code 2.
+
 ## Fix boundaries
 
 Git inventory includes tracked and untracked nonignored files. Outside Git, traversal excludes

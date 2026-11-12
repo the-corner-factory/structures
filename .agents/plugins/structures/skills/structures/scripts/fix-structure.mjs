@@ -10,11 +10,11 @@ import {
   rmdirSync,
   writeFileSync,
 } from "node:fs";
-import { createRequire } from "node:module";
 import { dirname, join, posix, relative, resolve, sep } from "node:path";
 
 import { checkStructure, cliOptions, inventory, printReport } from "./check-structure.mjs";
 import { relativePath } from "./structure-rules.mjs";
+import { typescriptProject } from "./typescript-project.mjs";
 
 const sourceExtension = /\.(?:[cm]?[jt]sx?)$/;
 const inside = (path, parent) => path === parent || path.startsWith(`${parent}/`);
@@ -46,32 +46,7 @@ function renameEdits(root, from, to, files) {
   const importSpans = new Map();
   let service;
   if (affected.some(([path]) => sourceExtension.test(path))) {
-    let ts;
-    try {
-      ts = createRequire(join(root, "package.json"))("typescript");
-    } catch {
-      throw new Error("Source renames need TypeScript installed in the target project.");
-    }
-    const configFile = ts.findConfigFile(root, ts.sys.fileExists);
-    assert.ok(
-      configFile && dirname(configFile) === root,
-      "Source renames need a tsconfig.json at the project root.",
-    );
-    const loaded = ts.readConfigFile(configFile, ts.sys.readFile);
-    assert.ok(!loaded.error, "Cannot read tsconfig.json.");
-    const parsed = ts.parseJsonConfigFileContent(loaded.config, ts.sys, root);
-    assert.ok(
-      !parsed.errors.length,
-      ts.formatDiagnosticsWithColorAndContext(parsed.errors, {
-        getCurrentDirectory: () => root,
-        getCanonicalFileName: (name) => name,
-        getNewLine: () => "\n",
-      }),
-    );
-    assert.ok(
-      !parsed.projectReferences?.length,
-      "Project references need a project-aware migration; no files changed.",
-    );
+    const { ts, parsed } = typescriptProject(root);
     const host = {
       ...ts.sys,
       useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,

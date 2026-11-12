@@ -41,6 +41,11 @@ section retains its commit-message semantics. Encode deterministic requirements 
 `structures-rules` blocks using [the CLI schema](cli.md#executable-rules). Setup and explicit updates capture evidenced module
 conventions; source refreshes preserve local rules and exceptions. Audits read them without writes.
 
+Encode adopted core/shared paths and child-owner globs with
+[ownership rules](cli.md#ownership-and-instance-lifetime). Feature-only instances belong to their
+child owner; application-wide instances belong in core. One construction site does not establish
+application-wide lifetime. Preserve framework and public API exceptions.
+
 ## Create or update
 
 For explicit initialization or update requests, start with [source selection](setup.md).

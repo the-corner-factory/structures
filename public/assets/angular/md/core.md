@@ -1,15 +1,17 @@
 # core
 
-Implements cross-cutting concerns and application-wide logic. Contains services, guards, interceptors, models, and utilities that are used throughout the app.
+Owns application-wide infrastructure and instances created once for the application and used across its features. Placement follows ownership and lifetime, not the number of times a class happens to be constructed.
+
+Code instantiated and used exclusively by one child folder belongs in that folder, including a feature-local singleton. Reusable code instantiated independently by several features belongs in `shared/`.
 
 - `guards/`: Route guards for access control.
 - `interceptors/`: HTTP interceptors for request/response handling.
-- `models/`: TypeScript models, enums, and interfaces.
+- `models/`: Models, enums, and interfaces owned by core infrastructure.
 - `services/`: Singleton services for business logic and API calls.
-- `utils/`: Utility functions and helpers.
+- `utils/`: Helpers owned by core infrastructure; general reusable helpers belong in `shared/`.
 
 ## Services
-**Every** services in this folder should be provided in root to ensure singleton behavior across the app. 
+Provide application-wide Angular services in root. A service used only by one feature should be declared and provided at that feature's boundary; moving its file alone does not change its injector lifetime.
 
 ```typescript
 @Injectable({

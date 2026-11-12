@@ -63,13 +63,19 @@ The module workflow audits and renames TypeScript files and their companions, re
 naming and grouping rules in the template’s inline documentation. Folder audits consult those
 rules through `check-structure.mjs`; `fix-structure.mjs` reuses the checker and its destination
 mappings. Executable `structures-rules` JSON blocks in that documentation define scoped filename,
-folder, placement, and required-path checks. Prose-only responsibilities remain outside CLI
-coverage. Source fixes use the target project's TypeScript language service for imports and refuse
+folder, placement, and required-path checks. Opt-in ownership rules trace TypeScript symbol
+consumers and visible construction/provider lifetimes to distinguish feature-local modules,
+application-wide instances, and shared definitions. Ambiguous lifetimes and incomplete coverage
+remain review findings; the fixer never changes provider registration. Prose-only responsibilities
+remain outside CLI coverage. Source fixes use the target project's TypeScript language service for imports and refuse
 unsupported references, collisions, and affected staged files. Failures roll back completed moves
 and edits. Both scripts run independently of the application, and refreshes preserve their rules.
 
 [`.structures/config.json`](.structures/config.json) is this project's
-maintained folder template. `.structures/` lives at the repository root. Workflow
+maintained folder template. It enables ownership checks for website data and UI using the existing
+`lib/` and `components/` roots, route directories, and auth/database child boundaries. Portable
+registry files and generated database schemas remain outside relocation candidates; coverage
+warnings keep uncertain findings review-only. `.structures/` lives at the repository root. Workflow
 instructions and bundled resources remain in `.agents/skills/` or `.agents/plugins/`.
 It uses the website profile's version-1 JSON shape with one project-root container, literal file
 and folder names, and inline placement documentation. It is curated: unlisted paths are allowed.

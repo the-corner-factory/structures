@@ -28,7 +28,8 @@ rules and document narrower exceptions beside their folder. Record:
 
 Use the existing profile format; `naming` describes commit conventions, not module policy.
 Encode deterministic requirements in a fenced `structures-rules` block using [the CLI schema](cli.md#executable-rules).
-Keep rationale and ownership decisions in prose. The executable block is authoritative for repeated
+Keep rationale in prose; encode established ownership boundaries with the CLI's `ownership` rule.
+The executable block is authoritative for repeated
 checks; examples are not mandatory files. Preserve its blocks on template refreshes.
 
 For `set module naming rules`, save the requested conventions without renaming files. For

@@ -5,6 +5,7 @@ import { join, matchesGlob, posix, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
 import { checkTemplate } from "./check-template.mjs";
+import { checkOwnership } from "./source-ownership.mjs";
 import { expression, readRules, relativePath, templateEntries } from "./structure-rules.mjs";
 
 const omitted = new Set([".git", "node_modules"]);
@@ -209,6 +210,26 @@ export function checkStructure(root, scope = "") {
         }
       }
     }
+  }
+  const ownership = checkOwnership(root, entries, policies, ignored);
+  findings.push(...ownership.findings.filter((finding) => within(finding.path, scope)));
+  warnings.push(...ownership.warnings);
+  for (const placement of findings.filter(
+    (finding) => finding.code.startsWith("ownership") && finding.destination,
+  )) {
+    const renames = findings.filter(
+      (finding) =>
+        finding.path === placement.path &&
+        !finding.code.startsWith("ownership") &&
+        finding.destination &&
+        posix.dirname(finding.destination) === posix.dirname(finding.path),
+    );
+    if (new Set(renames.map((finding) => finding.destination)).size !== 1) continue;
+    placement.destination = posix.join(
+      posix.dirname(placement.destination),
+      posix.basename(renames[0].destination),
+    );
+    for (const rename of renames) rename.destination = placement.destination;
   }
   const proseOnlyScopes = template
     .filter(

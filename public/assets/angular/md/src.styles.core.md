@@ -1,21 +1,5 @@
-# core
+# core styles
 
-Implements cross-cutting concerns and application-wide logic. Contains services, guards, interceptors, models, and utilities that are used throughout the app.
+Application-wide style foundations: animations, colors, resets, and typography. Import these once from the application's style entry point.
 
-- `guards/`: Route guards for access control.
-- `interceptors/`: HTTP interceptors for request/response handling.
-- `models/`: TypeScript models, enums, and interfaces.
-- `services/`: Singleton services for business logic and API calls.
-- `utils/`: Utility functions and helpers.
-
-## Services
-**Every** services in this folder should be provided in root to ensure singleton behavior across the app. 
-
-```typescript
-@Injectable({
-  providedIn: 'root',
-})
-export class SingletonService {
-  // Service logic here
-}
-```
+Styles used only by one component or feature belong with that owner. This CSS folder does not define service or dependency-injection lifetimes; those rules belong to `src/app/core/`.

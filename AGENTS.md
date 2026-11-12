@@ -146,7 +146,11 @@ The `test:e2e` script exists, but there is currently no app Playwright configura
   commits, asset and TypeScript module renaming, and architecture documentation. Module naming and
   companion-grouping rules live in the relevant folder’s inline template documentation, with executable
   `structures-rules` JSON blocks for deterministic checks. `pnpm structure:check` is read-only;
-  `pnpm structure:fix` reuses that check, applies supported mappings, and checks again. Source moves
+  `pnpm structure:fix` reuses that check, applies supported mappings, and checks again. Explicit
+  `ownership` rules trace TypeScript consumers and construction/provider evidence:
+  application-wide instances belong in core, child-only instances with their child, and reusable
+  definitions in shared. Ambiguous lifetimes remain review findings; fixes preserve provider registration.
+  See the plugin's `references/cli.md` for configuration and coverage limits. Source moves
   use the target project's TypeScript rename API; unsupported references and affected staged files
   block the fix. Template refreshes preserve local rules and their executable blocks. Setup selects a local file/project,
   Gist, or repository and saves a local snapshot; external templates refresh only on request.

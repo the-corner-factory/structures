@@ -98,7 +98,16 @@ Rules are saved under **Module naming rules** in the relevant folder's inline do
 rules and exceptions. `set module naming rules` updates this policy without moving source files.
 The existing `naming` profile section continues to describe commit messages. Put deterministic
 rules in fenced `structures-rules` JSON blocks in that documentation. The check and fix commands
-execute those rules; prose-only architectural decisions remain outside their coverage.
+execute those rules. An `ownership` rule also traces TypeScript consumers and visible instantiation
+sites against declared core/shared folders and child boundaries. Feature-only instances belong
+with their child owner; application-wide instances belong in core, and reusable definitions with
+independent instances belong in shared. Instance count alone does not determine placement.
+
+See [ownership configuration and limits](../.agents/plugins/structures/skills/structures/references/cli.md#ownership-and-instance-lifetime)
+to enable analysis in a template. Clear findings can move modules and companion tests with import
+updates. Provider-lifetime changes, ambiguous ownership, and incomplete coverage remain explicit
+review findings without automatic moves. Existing templates keep their configured checks;
+prose-only architectural decisions remain outside CLI coverage.
 
 ```sh
 pnpm structure:check
