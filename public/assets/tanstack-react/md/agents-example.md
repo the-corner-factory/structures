@@ -12,7 +12,7 @@ project. Rename this example to describe its topic, such as `frontend.md` or `va
 
 - Keep each guide focused on one topic and link to existing sources instead of duplicating them.
 - Add a pointer in the root `AGENTS.md` that states when the agent should read this guide.
-- Store structured skill settings under `.agents/configs/<skill>/` when the skill defines that path.
+- Use each skill’s declared configuration path, such as root `.structures/config.json` for Structures.
 - Keep repeatable workflows and their supporting resources under `.agents/skills/`.
 - Check the host's discovery rules. An arbitrary Markdown file is read only when referenced or
   explicitly loaded; its presence does not configure an agent automatically.

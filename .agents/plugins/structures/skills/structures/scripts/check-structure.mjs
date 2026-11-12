@@ -106,8 +106,10 @@ function kebab(name, kind) {
 
 export function checkStructure(root, scope = "") {
   if (scope) relativePath(scope);
-  const preferred = ".agents/configs/.structures/config.json";
-  const config = existsSync(join(root, preferred)) ? preferred : ".structures/config.json";
+  const preferred = ".structures/config.json";
+  const config = existsSync(join(root, preferred))
+    ? preferred
+    : ".agents/configs/.structures/config.json";
   assert.ok(
     existsSync(join(root, config)),
     `No folder template found. Initialize ${preferred} first.`,

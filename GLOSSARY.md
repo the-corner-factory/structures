@@ -47,7 +47,7 @@ root shadcn registry. It is source copied into consumer projects, not a hosted s
 | `packages/gitgraph-*`                       | Vendored Gitgraph workspace packages with TypeScript source and tracked compiled output. |
 | `registry.json`, `docs/registry.md`         | Registry distribution manifest and consumer contract.                                    |
 | `scripts/`                                  | Static prerendering, registry validation/consumer checks, and graph debugging.           |
-| `.agents/configs/`                          | Project-specific configuration for different skills, each in its own directory.          |
+| `.structures/`                              | Maintained project folder template and optional derived website/Gist exports.            |
 | `.agents/plugins/structures/`               | Unified Structures skill for templates, folder corrections, commits, assets, and docs.   |
 | `.agents/plugins/marketplace.json`          | Repository marketplace exposing the Structures plugin for installation.                  |
 | `.github/workflows/`                        | Release-tag verification/deployment, registry consumer CI, and plugin validation.        |
@@ -68,9 +68,8 @@ coverage. Source fixes use the target project's TypeScript language service for 
 unsupported references, collisions, and affected staged files. Failures roll back completed moves
 and edits. Both scripts run independently of the application, and refreshes preserve their rules.
 
-[`.agents/configs/.structures/config.json`](.agents/configs/.structures/config.json) is this project's
-maintained folder template. `.agents/configs/` groups project-specific configuration for different
-skills; Structures owns `.structures/`, alongside other skills' configuration directories. Workflow
+[`.structures/config.json`](.structures/config.json) is this project's
+maintained folder template. `.structures/` lives at the repository root. Workflow
 instructions and bundled resources remain in `.agents/skills/` or `.agents/plugins/`.
 It uses the website profile's version-1 JSON shape with one project-root container, literal file
 and folder names, and inline placement documentation. It is curated: unlisted paths are allowed.

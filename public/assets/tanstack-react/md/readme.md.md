@@ -29,10 +29,9 @@ The framework requires its router and root route alongside the build configurati
 ├── README.md
 ├── .agents/
 │   ├── example.md
-│   ├── configs/
-│   │   └── .structures/
-│   │       └── config.json
 │   └── skills/
+├── .structures/
+│   └── config.json
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml

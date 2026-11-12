@@ -1,6 +1,6 @@
 # config.json
 
-**Path:** `.agents/configs/.structures/config.json`\
+**Path:** `.structures/config.json`\
 **Role:** Maintained folder and module-naming template
 
 ## Purpose

@@ -141,10 +141,10 @@ describe("catalog identity compatibility", () => {
       const paths = new Map(structurePaths(settings.structures));
 
       expect(paths.get("skills.md")).toBe(".agents/skills");
+      expect(paths.has("agents-configs.md")).toBe(false);
       for (const [filename, path] of [
-        ["agents-configs.md", ".agents/configs"],
-        [".structures.md", ".agents/configs/.structures"],
-        ["config.json.md", ".agents/configs/.structures/config.json"],
+        [".structures.md", ".structures"],
+        ["config.json.md", ".structures/config.json"],
       ]) {
         expect(paths.get(filename)).toBe(path);
         expect(await readFile(new URL(`md/${filename}`, assetDirectory), "utf8")).toContain(

@@ -150,10 +150,9 @@ The `test:e2e` script exists, but there is currently no app Playwright configura
   use the target project's TypeScript rename API; unsupported references and affected staged files
   block the fix. Template refreshes preserve local rules and their executable blocks. Setup selects a local file/project,
   Gist, or repository and saves a local snapshot; external templates refresh only on request.
-  Project-specific configuration for different skills lives under `.agents/configs/`, with a separate
-  directory per skill. The maintained project folder template is
-  `.agents/configs/.structures/config.json`; `settings.json` is a derived website/Gist export. Folder fixes must
-  preserve the template, and audits and commit-title requests must remain read-only.
+  The maintained project folder template is `.structures/config.json` at the repository root;
+  `settings.json` is a derived website/Gist export. Folder fixes must preserve the template,
+  and audits and commit-title requests must remain read-only.
   Keep the template and bundled profile example compatible with `parseSiteSettings`. When changing the plugin,
   run `node --test scripts/check-structures-plugin.test.mjs` and
   `pnpm test src/lib/site-settings.test.ts`; see `docs/codex-plugin.md` for Git URL installation.
