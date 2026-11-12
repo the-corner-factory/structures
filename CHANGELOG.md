@@ -2,6 +2,42 @@
 
 All notable changes to this project are documented here.
 
+## [1.10.3](https://github.com/the-corner-inc/structures/compare/v1.10.2...v1.10.3) (2026-11-12)
+
+### Features
+
+- **Folder checks:** Run `pnpm structure:check` to report layout and TypeScript naming issues.
+  Run `pnpm structure:fix` to apply supported moves and update references, then check again.
+- **Ownership rules:** Opt in to checks that trace how TypeScript modules are used and instantiated.
+  The fixer moves modules when ownership is clear. Ambiguous cases stay in the report, and fixes
+  preserve provider registration.
+
+### Bug Fixes
+
+- The ownership audit follows literal lazy imports and recognizes existing CSS imports. Computed
+  imports and missing files still need review. The Issues page keeps its private components beside
+  its routes.
+
+### Configuration migration
+
+- **Structures plugin 0.6.2** uses `.structures/config.json` at the project root. If your config is
+  at `.agents/configs/.structures/config.json`, move it to the root location and update scripts
+  or links that reference the old path. The plugin can still read the old path when the root file
+  is absent and migrates it before a requested configuration write. If both files exist, it uses
+  the root file and keeps the old one. Existing website and Gist exports can stay where they are.
+
+### Documentation
+
+- Angular, Go, and TanStack / React examples show the root `.structures/` folder. The Angular guide
+  also explains where to put application-wide instances, feature-owned services, and reusable code.
+
+### Verification
+
+- Passed lint and type checking, 293 application tests, and 44 plugin and release tests.
+- Passed the repository's ownership audit with zero violations.
+- Built the production server and prerendered 316 static routes.
+- Passed registry validation and clean Vite, Next.js, and TanStack consumer checks.
+
 ## [1.10.2](https://github.com/the-corner-inc/structures/compare/v1.10.1...v1.10.2) (2026-11-02)
 
 ### Features
