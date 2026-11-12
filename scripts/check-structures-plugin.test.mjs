@@ -369,6 +369,53 @@ test("ownership follows dependencies through shared helpers and excludes test co
   assert.equal(checkStructure(root).findings[0].destination, "src/features/shop/cart.service.ts");
 });
 
+test("ownership follows literal lazy imports and accepts existing stylesheets", (t) => {
+  const { root } = projectFixture(
+    t,
+    { rules: [ownership] },
+    {
+      "package.json": JSON.stringify({ imports: { "#/*": "./src/*" } }),
+      "src/theme.css": "body {}",
+      "src/core/cart.service.ts": "export const cart = new Map();",
+      "src/features/shop/page.ts":
+        'import "../../theme.css"; import url from "#/theme.css?url"; export const load = () => import("../../core/cart.service").then(({ cart }) => [cart, url]);',
+    },
+    { typescript: true },
+  );
+  const result = checkStructure(root);
+  assert.deepEqual(result.warnings, []);
+  assert.equal(result.findings[0].destination, "src/features/shop/cart.service.ts");
+  assert.deepEqual(fixStructure(root).findings, []);
+  assert.match(
+    readFileSync(join(root, "src/features/shop/page.ts"), "utf8"),
+    /import\("\.\/cart\.service"\)/,
+  );
+});
+
+test("ownership preserves shared placement and reviews moves with relative stylesheets", (t) => {
+  const { root } = projectFixture(
+    t,
+    { rules: [{ ...ownership, ownership: { ...ownership.ownership, core: "src/shared" } }] },
+    {
+      "src/theme.css": "body {}",
+      "src/shared/common.service.ts": "export const state = new Map(); export function read() {}",
+      "src/shared/cart.service.ts": 'import "../theme.css"; export const cart = new Map();',
+      "src/features/shop/page.ts":
+        'import { state } from "../../shared/common.service"; import { cart } from "../../shared/cart.service"; console.log(state, cart);',
+      "src/features/admin/page.ts":
+        'import { state } from "../../shared/common.service"; console.log(state);',
+    },
+    { typescript: true },
+  );
+  const { findings, warnings } = checkStructure(root);
+  assert.deepEqual(warnings, []);
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].path, "src/shared/cart.service.ts");
+  assert.equal(findings[0].code, "ownership-review");
+  assert.match(findings[0].message, /relative stylesheet/);
+  assert.deepEqual(fixStructure(root).applied, []);
+});
+
 test("ownership distinguishes Angular root providers from feature-local providers", (t) => {
   for (const provided of [false, true]) {
     const { root } = projectFixture(
@@ -408,7 +455,9 @@ test("ownership distinguishes Angular root providers from feature-local provider
 test("ownership reports uncertain coverage and lifetimes without auto-moving", (t) => {
   const cases = [
     { "src/loader.ts": 'const module = "./core/cart.service"; import(module);' },
+    { "src/loader.ts": 'import("./missing");' },
     { "src/loader.ts": 'import "./core/cart.service";' },
+    { "src/loader.ts": 'import "./missing.css";' },
     { "src/loader.ts": 'import { missing } from "./missing"; missing();' },
     { "src/core/cart.service.html": "<p>companion</p>" },
   ];

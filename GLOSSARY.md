@@ -72,11 +72,13 @@ unsupported references, collisions, and affected staged files. Failures roll bac
 and edits. Both scripts run independently of the application, and refreshes preserve their rules.
 
 [`.structures/config.json`](.structures/config.json) is this project's
-maintained folder template. It enables ownership checks for website data and UI using the existing
-`lib/` and `components/` roots, route directories, and auth/database child boundaries. Portable
-registry files and generated database schemas remain outside relocation candidates; coverage
-warnings keep uncertain findings review-only. `.structures/` lives at the repository root. Workflow
-instructions and bundled resources remain in `.agents/skills/` or `.agents/plugins/`.
+maintained folder template. It checks website data and UI against the existing `lib/` and
+`components/` roots and route directories. Auth and database modules stay within their subsystems,
+and the portable registry and alternate branch layout stay outside relocation candidates. Coverage
+warnings keep uncertain findings review-only. The Issues route keeps its private components in
+`src/routes/issues/` with a `-` prefix so TanStack Router skips them. `.structures/` lives at the
+repository root. Workflow instructions and bundled resources remain in `.agents/skills/` or
+`.agents/plugins/`.
 It uses the website profile's version-1 JSON shape with one project-root container, literal file
 and folder names, and inline placement documentation. It is curated: unlisted paths are allowed.
 Folder fixes read it without rewriting policy to match drift; `init` or an explicit template update

@@ -22,13 +22,13 @@ import {
   validateSiteSearch,
 } from "#/lib/router-search.ts";
 import { parseSiteSettings } from "#/lib/site-settings.ts";
+import { IssueCards } from "#/routes/issues/-issue-cards.tsx";
 
 import example from "../../public/settings.example.json";
 import { AgenticPage } from "./agentic-page";
 import { AppShell } from "./app-shell";
 import { BranchFlowPage } from "./branch-flow-page";
 import { HomeTopics } from "./home-topics";
-import { IssueCards } from "./issue-cards";
 import { NamingStandard } from "./naming-standard";
 import { SiteSettingsProvider } from "./site-settings-provider";
 import { StructureBoard } from "./structure-board";

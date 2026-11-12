@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import { matchesGlob, posix, relative, sep } from "node:path";
 
 import { typescriptProject } from "./typescript-project.mjs";
@@ -52,6 +53,12 @@ export function checkOwnership(root, entries, policies, ignored) {
   const injectables = new Set();
   const classes = new Set();
   const blockers = new Set();
+  const relativeStylesheets = new Set();
+  function addConsumer(target, path) {
+    if (target === path) return;
+    if (!consumers.has(target)) consumers.set(target, new Set());
+    consumers.get(target).add(path);
+  }
   const addInstance = (target, path, node, kind) => {
     const line = node.getSourceFile().getLineAndCharacterOfPosition(node.getStart()).line + 1;
     if (!instances.has(target)) instances.set(target, []);
@@ -125,25 +132,41 @@ export function checkOwnership(root, entries, policies, ignored) {
           expression.name.text === "Injectable")
       );
     }
+    function resolveModule(specifier) {
+      const isRelative = specifier.startsWith(".");
+      if ((isRelative || specifier.startsWith("#")) && /\.css(?:\?url)?$/.test(specifier)) {
+        try {
+          const stylesheet = createRequire(source.fileName).resolve(
+            specifier.replace(/\?url$/, ""),
+          );
+          if (stylesheet.endsWith(".css")) {
+            if (isRelative) relativeStylesheets.add(path);
+            return;
+          }
+        } catch {
+          // Let TypeScript resolve the import or report it as missing below.
+        }
+      }
+      const resolved = ts.resolveModuleName(
+        specifier,
+        source.fileName,
+        parsed.options,
+        ts.sys,
+      ).resolvedModule;
+      if (
+        !resolved &&
+        (isRelative ||
+          specifier.startsWith("#") ||
+          Object.keys(parsed.options.paths ?? {}).some((alias) => matchesGlob(specifier, alias)))
+      )
+        blockers.add(`Unresolved local import in ${path}: ${specifier}`);
+      return resolved;
+    }
     function visit(node) {
       if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
         const specifier = node.moduleSpecifier;
         if (specifier && ts.isStringLiteralLike(specifier)) {
-          const resolved = ts.resolveModuleName(
-            specifier.text,
-            source.fileName,
-            parsed.options,
-            ts.sys,
-          ).resolvedModule;
-          if (
-            !resolved &&
-            (specifier.text.startsWith(".") ||
-              specifier.text.startsWith("#") ||
-              Object.keys(parsed.options.paths ?? {}).some((alias) =>
-                matchesGlob(specifier.text, alias),
-              ))
-          )
-            blockers.add(`Unresolved local import in ${path}: ${specifier.text}`);
+          const resolved = resolveModule(specifier.text);
           if (
             ts.isImportDeclaration(node) &&
             !node.importClause &&
@@ -158,7 +181,17 @@ export function checkOwnership(root, entries, policies, ignored) {
         blockers.add(`Import assignment needs ownership review: ${path}`);
       if (ts.isCallExpression(node)) {
         const name = node.expression.getText(source);
-        if (["import", "require", "import.meta.glob", "require.context"].includes(name))
+        if (
+          name === "import" &&
+          node.arguments.length === 1 &&
+          ts.isStringLiteralLike(node.arguments[0])
+        ) {
+          const resolved = resolveModule(node.arguments[0].text);
+          if (resolved) {
+            const target = localPath(resolved.resolvedFileName);
+            if (sources.has(target)) addConsumer(target, path);
+          }
+        } else if (["import", "require", "import.meta.glob", "require.context"].includes(name))
           blockers.add(`Dynamic module discovery needs ownership review: ${path}`);
       }
       if (ts.isClassDeclaration(node)) {
@@ -211,11 +244,7 @@ export function checkOwnership(root, entries, policies, ignored) {
         }
       }
       if (ts.isIdentifier(node)) {
-        for (const target of targets(node)) {
-          if (target === path) continue;
-          if (!consumers.has(target)) consumers.set(target, new Set());
-          consumers.get(target).add(path);
-        }
+        for (const target of targets(node)) addConsumer(target, path);
       }
       ts.forEachChild(node, visit);
     }
@@ -278,6 +307,7 @@ export function checkOwnership(root, entries, policies, ignored) {
         (moduleInstances.length === 1 &&
           !construction.some((item) => item.kind === "local-construction"));
       const target = ownership ?? (singleton ? core : shared);
+      const needsMove = !inside(path, target) || (!ownership && ownerOf(path) !== undefined);
       const evidence = { consumers: uses, instantiations: construction };
       const stem = path.replace(sourceFile, "");
       const companions = [...entries.keys()].filter(
@@ -316,7 +346,12 @@ export function checkOwnership(root, entries, policies, ignored) {
       )
         reason =
           "Both module-level and local construction exist; split or review their lifetimes before moving this module.";
-      else if (!ownership && singleton && checker.getExportsOfModule(moduleSymbol).length > 1)
+      else if (
+        needsMove &&
+        !ownership &&
+        singleton &&
+        checker.getExportsOfModule(moduleSymbol).length > 1
+      )
         reason =
           "This module mixes exports with an instance lifetime; review or split their ownership before moving it.";
       else if (
@@ -328,6 +363,8 @@ export function checkOwnership(root, entries, policies, ignored) {
       )
         reason =
           "Construction is owned by a child folder but consumers cross scopes; review where the instance is created.";
+      else if (needsMove && relativeStylesheets.has(path))
+        reason = "A relative stylesheet import needs a framework-aware move with its owner.";
       else if (
         !inside(path, target) &&
         companions.some((file) => ignored(file) || entries.get(file) !== "file")
@@ -350,10 +387,7 @@ export function checkOwnership(root, entries, policies, ignored) {
           evidence,
           ...(!inside(path, target) ? { suggestedDestination: destination } : {}),
         });
-      } else if (
-        !inside(path, target) ||
-        ((target === core || target === shared) && ownerOf(path))
-      ) {
+      } else if (needsMove) {
         findings.push({
           code: "ownership",
           path,

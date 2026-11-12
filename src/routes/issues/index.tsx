@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { IssueCards } from "#/components/issue-cards.tsx";
 import { validateIssueSearch } from "#/lib/router-search.ts";
 import { pageHead } from "#/lib/seo.ts";
+
+import { IssueCards } from "./-issue-cards";
 
 export const Route = createFileRoute("/issues/")({
   validateSearch: validateIssueSearch,

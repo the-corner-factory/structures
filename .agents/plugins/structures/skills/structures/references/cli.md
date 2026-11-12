@@ -144,9 +144,12 @@ Filename-only mappings compose with ownership moves; conflicting directory mappi
 review; the fixer leaves it unresolved. This covers feature-only root providers, mixed or unknown
 lifetimes, no resolved production consumers, companion resources, and incomplete source coverage.
 Provider registrations and lifetimes stay unchanged; resolve them in a scoped code migration.
-Dynamic module loading, unresolved local imports, sources outside tsconfig, and unsupported
-framework source produce warnings and withhold automatic ownership moves. Missing TypeScript,
-invalid configuration, and project references stop analysis with exit code 2.
+Literal `import()` calls count as consumers. Existing CSS files imported by relative paths or
+package import aliases, including `?url` imports, do not affect ownership. Review a proposed
+move if the source file imports a relative stylesheet.
+Computed imports, unresolved local imports, sources outside tsconfig, and unsupported framework
+source produce warnings and withhold automatic ownership moves. Missing TypeScript, invalid
+configuration, and project references stop analysis with exit code 2.
 
 ## Fix boundaries
 

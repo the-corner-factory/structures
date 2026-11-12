@@ -4,8 +4,8 @@ import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
 import type { SiteSettings } from "#/lib/site-settings.ts";
+import { PrioritiesStandard } from "#/routes/issues/-priorities-standard.tsx";
 
-import { PrioritiesStandard } from "./priorities-standard";
 import { StructureBoard } from "./structure-board";
 
 const navigate = vi.hoisted(() => vi.fn());

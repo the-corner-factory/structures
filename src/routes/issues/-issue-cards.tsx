@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { IssueTemplatePreview } from "#/components/issue-template-preview.tsx";
 import { PageTitle } from "#/components/page-title.tsx";
 import { useSiteSettings } from "#/components/site-settings-provider.tsx";
 import { SkillPrompt } from "#/components/skill-prompt.tsx";
@@ -19,6 +18,8 @@ import { ISSUE_TEMPLATES } from "#/lib/issue-templates.ts";
 import type { IssueSearch } from "#/lib/router-search.ts";
 import { defaultSource, nodeId } from "#/lib/structures.ts";
 import { useStructureMarkdown } from "#/lib/use-structure-settings.ts";
+
+import { IssueTemplatePreview } from "./-issue-template-preview";
 
 interface IssueLabel {
   id: string;

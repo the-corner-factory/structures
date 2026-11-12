@@ -7,7 +7,7 @@ import { githubIssueTemplate, ISSUE_TEMPLATES } from "#/lib/issue-templates.ts";
 import type { IssueSearch } from "#/lib/router-search.ts";
 import type { IssueSettings, SiteSettings } from "#/lib/site-settings.ts";
 
-import { IssueCards } from "./issue-cards";
+import { IssueCards } from "./-issue-cards";
 
 const { navigate, fetchMarkdown } = vi.hoisted(() => ({
   navigate: vi.fn(),
@@ -63,7 +63,7 @@ vi.mock("@tanstack/react-query", () => ({
   },
 }));
 
-// readme body per resolved label element id (see labelElementId in issue-cards.tsx)
+// readme body per resolved label element id (see labelElementId in -issue-cards.tsx)
 const readmeByElement: Record<string, string> = {
   P1: "# P1\n\nHigh-priority item.",
   Feat: "# Feature\n\nAdds a new feature.",

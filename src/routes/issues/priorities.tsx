@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { PrioritiesStandard } from "#/components/priorities-standard.tsx";
 import { pageHead } from "#/lib/seo.ts";
+
+import { PrioritiesStandard } from "./-priorities-standard";
 
 export const Route = createFileRoute("/issues/priorities")({
   head: () =>
