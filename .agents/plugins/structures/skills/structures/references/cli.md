@@ -60,18 +60,17 @@ For example, in the `src/` documentation:
 ```
 ````
 
-| Field        | Meaning                                                                                                                     |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| `ignore`     | Globs excluding paths and descendants from checks in this scope.                                                            |
-| `required`   | Literal relative paths that must exist without traversing symlinks.                                                         |
-| `rules[].id` | Unique within the block; identifies diagnostics.                                                                            |
-| `match`      | Node `path.matchesGlob` syntax: `**`, `*`, braces. Dotfiles need explicit dot patterns.                                     |
-| `kind`       | `file` (default) or `folder`.                                                                                               |
-| `exclude`    | Rule-specific glob exceptions.                                                                                              |
-| `case`       | `kebab-case`; computes a rename, retaining the extension and dot suffix separators.                                         |
-| `name`       | Full-match JavaScript Unicode regex for the filename, including extension. Check-only.                                      |
-| `path`       | Full-match regex for the relative path. Check-only.                                                                         |
-| `rename`     | Full-match `pattern` and `replacement` for the relative path; numbered captures such as `$1` support suffixes and grouping. |
+- `ignore`: Globs excluding paths and descendants from checks in this scope.
+- `required`: Literal relative paths that must exist without traversing symlinks.
+- `rules[].id`: Unique within the block; identifies diagnostics.
+- `match`: Node `path.matchesGlob` syntax: `**`, `*`, braces. Dotfiles need explicit dot patterns.
+- `kind`: `file` (default) or `folder`.
+- `exclude`: Rule-specific glob exceptions.
+- `case`: `kebab-case`; computes a rename, retaining the extension and dot suffix separators.
+- `name`: Full-match JavaScript Unicode regex for the filename, including extension. Check-only.
+- `path`: Full-match regex for the relative path. Check-only.
+- `rename`: Full-match `pattern` and `replacement` for the relative path; numbered captures such as
+  `$1` support suffixes and grouping.
 
 Each rule needs a constraint. Regex strings use JSON escaping. Rename outputs must be literal
 relative paths inside the documentation folder. Use patterns that stop matching after correction.

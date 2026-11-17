@@ -2,6 +2,8 @@
 name: structures
 description: Manage project structure through one entrypoint. Use to initialize or update .structures/config.json from local folders, a Gist, or a repository, audit or fix folder organization, document architecture for the Structures website, draft Conventional Commit titles or messages, rename assets, or audit and rename TypeScript modules using saved naming rules.
 license: MIT
+metadata:
+  author: The Corner Factory SA
 ---
 
 # Structures
